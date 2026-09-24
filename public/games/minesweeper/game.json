@@ -1,0 +1,18 @@
+{
+  "id": "minesweeper",
+  "title": { "es": "Buscaminas", "en": "Minesweeper" },
+  "description": {
+    "es": "El clásico con tres dificultades, cronómetro y apertura en cascada animada.",
+    "en": "The classic with three difficulties, a timer and animated cascading reveals."
+  },
+  "categories": ["puzzle", "clasicos", "casual"],
+  "tags": ["minas", "mines", "logica", "logic", "tiempo", "timer"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "input": ["mouse", "touch"],
+  "features": { "online": false, "multiplayer": false, "story": false },
+  "order": 3
+}

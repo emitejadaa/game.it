@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Buscaminas · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <style>
+      :root {
+        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --cell: 32px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        background: var(--gi-bg);
+        color: var(--gi-fg);
+        font: 500 13px/1.3 'JetBrains Mono', ui-monospace, monospace;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        background: none;
+        border: 0;
+        cursor: pointer;
+      }
+
+      /* ---------- barra ---------- */
+      .bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: calc(12px + env(safe-area-inset-top)) 110px 8px;
+      }
+      @media (max-width: 640px) {
+        .bar {
+          padding: calc(54px + env(safe-area-inset-top)) 10px 6px;
+        }
+      }
+      .seg {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        padding: 3px;
+        border: 1px solid var(--gi-line);
+        border-radius: 11px;
+      }
+      .seg::before {
+        content: '';
+        position: absolute;
+        top: 3px;
+        bottom: 3px;
+        left: 3px;
+        width: calc((100% - 6px) / 3);
+        border-radius: 8px;
+        background: var(--gi-accent);
+        transform: translateX(calc(100% * var(--i, 0)));
+        transition: transform 0.45s var(--ease);
+      }
+      :root[data-gi-glow='on'] .seg::before {
+        box-shadow: 0 0 14px -3px var(--gi-accent);
+      }
+      .seg button {
+        position: relative;
+        padding: 6px 12px;
+        border-radius: 8px;
+        color: var(--gi-mute);
+        transition: color 0.2s;
+      }
+      .seg button.on {
+        color: var(--gi-bg);
+      }
+      .stat {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 34px;
+        padding: 0 12px;
+        border: 1px solid var(--gi-line);
+        border-radius: 11px;
+        font-variant-numeric: tabular-nums;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .stat svg {
+        width: 15px;
+        height: 15px;
+        stroke: var(--gi-mute);
+        fill: none;
+        stroke-width: 1.8;
+      }
+      .icon {
+        height: 34px;
+        min-width: 34px;
+        padding: 0 10px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--gi-line);
+        border-radius: 11px;
+        transition:
+          transform 0.4s var(--spring),
+          border-color 0.2s,
+          color 0.2s,
+          background 0.2s;
+      }
+      .icon:hover {
+        border-color: var(--gi-accent);
+        color: var(--gi-accent);
+        transform: translateY(-2px);
+      }
+      .icon:active {
+        transform: scale(0.94);
+      }
+      .icon svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      #flagmode.on {
+        background: var(--gi-magenta);
+        border-color: var(--gi-magenta);
+        color: var(--gi-bg);
+      }
+      #restart:hover svg {
+        transform: rotate(-180deg);
+      }
+      #restart svg {
+        transition: transform 0.6s var(--ease);
+      }
+
+      /* ---------- tablero ---------- */
+      .wrap {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        display: grid;
+        place-items: center;
+        padding: 10px 10px calc(16px + env(safe-area-inset-bottom));
+      }
+      .board {
+        display: grid;
+        gap: 3px;
+        grid-template-columns: repeat(var(--cols), var(--cell));
+        grid-auto-rows: var(--cell);
+        padding: 10px;
+        border: 1px solid var(--gi-line);
+        border-radius: 16px;
+        touch-action: manipulation;
+      }
+      .board.shake {
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+      }
+      @keyframes shake {
+        20%,
+        60% {
+          transform: translateX(-6px);
+        }
+        40%,
+        80% {
+          transform: translateX(6px);
+        }
+      }
+      .c {
+        position: relative;
+        display: grid;
+        place-items: center;
+        border-radius: calc(var(--cell) * 0.22);
+        background: color-mix(in oklab, var(--gi-fg) 9%, transparent);
+        font-weight: 700;
+        font-size: calc(var(--cell) * 0.5);
+        transition:
+          background 0.15s,
+          transform 0.25s var(--spring);
+        animation: cellIn 0.5s var(--ease) both;
+        animation-delay: calc(var(--d, 0) * 1ms);
+      }
+      @keyframes cellIn {
+        from {
+          opacity: 0;
+          transform: scale(0.6);
+        }
+      }
+      @media (hover: hover) {
+        .c:not(.open):hover {
+          background: color-mix(in oklab, var(--gi-accent) 26%, transparent);
+          transform: scale(1.06);
+        }
+      }
+      .c:not(.open):active {
+        transform: scale(0.9);
+      }
+      .c.open {
+        background: color-mix(in oklab, var(--gi-fg) 3%, transparent);
+        animation: reveal 0.35s var(--ease) both;
+        animation-delay: calc(var(--d, 0) * 1ms);
+      }
+      @keyframes reveal {
+        0% {
+          transform: scale(0.55);
+          background: var(--gi-accent);
+        }
+        60% {
+          transform: scale(1.06);
+        }
+      }
+      .c.flag::after {
+        content: '';
+        width: 42%;
+        height: 42%;
+        background: var(--gi-magenta);
+        clip-path: polygon(15% 0, 100% 30%, 15% 60%, 15% 100%, 0 100%, 0 0);
+        animation: flagIn 0.4s var(--spring);
+      }
+      :root[data-gi-glow='on'] .c.flag::after {
+        filter: drop-shadow(0 0 4px var(--gi-magenta));
+      }
+      @keyframes flagIn {
+        from {
+          transform: translateY(-40%) scale(0);
+        }
+      }
+      .c.mine::after {
+        content: '';
+        width: 44%;
+        height: 44%;
+        border-radius: 50%;
+        background: var(--gi-red);
+        box-shadow: 0 0 0 calc(var(--cell) * 0.07) color-mix(in oklab, var(--gi-red) 35%, transparent);
+        animation: boom 0.5s var(--spring) both;
+        animation-delay: calc(var(--d, 0) * 1ms);
+      }
+      .c.mine.hit {
+        background: var(--gi-red);
+      }
+      .c.mine.hit::after {
+        background: var(--gi-bg);
+      }
+      @keyframes boom {
+        from {
+          transform: scale(0);
+        }
+        50% {
+          transform: scale(1.5);
+        }
+      }
+      .c.wrong::before {
+        content: '';
+        position: absolute;
+        inset: 22%;
+        background:
+          linear-gradient(45deg, transparent 45%, var(--gi-red) 45% 55%, transparent 55%),
+          linear-gradient(-45deg, transparent 45%, var(--gi-red) 45% 55%, transparent 55%);
+      }
+      .n1 { color: var(--gi-cyan); }
+      .n2 { color: var(--gi-lime); }
+      .n3 { color: var(--gi-magenta); }
+      .n4 { color: var(--gi-violet); }
+      .n5 { color: var(--gi-amber); }
+      .n6 { color: var(--gi-cyan); }
+      .n7 { color: var(--gi-red); }
+      .n8 { color: var(--gi-fg); }
+      .board.won .c.open {
+        animation: wave 0.9s var(--ease) both;
+        animation-delay: calc(var(--w, 0) * 1ms);
+      }
+      @keyframes wave {
+        40% {
+          transform: scale(1.12);
+          background: color-mix(in oklab, var(--gi-lime) 40%, transparent);
+        }
+      }
+
+      /* ---------- resultado ---------- */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: color-mix(in oklab, var(--gi-bg) 70%, transparent);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s var(--ease), visibility 0s linear 0.4s;
+      }
+      .overlay.on {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.4s var(--ease);
+      }
+      .panel {
+        display: grid;
+        gap: 12px;
+        justify-items: center;
+        text-align: center;
+        padding: 28px 32px;
+        border: 1px solid var(--gi-line);
+        border-radius: 18px;
+        background: var(--gi-bg);
+        min-width: 260px;
+        transform: translateY(14px) scale(0.96);
+        transition: transform 0.5s var(--spring);
+      }
+      .overlay.on .panel {
+        transform: none;
+      }
+      .panel h2 {
+        font-size: 26px;
+        letter-spacing: 0.04em;
+      }
+      .panel.win h2 {
+        color: var(--gi-lime);
+      }
+      .panel.lose h2 {
+        color: var(--gi-red);
+      }
+      .panel dl {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 4px 18px;
+        font-size: 13px;
+      }
+      .panel dt {
+        color: var(--gi-mute);
+        text-align: left;
+      }
+      .panel dd {
+        text-align: right;
+        font-weight: 700;
+      }
+      .panel .new {
+        color: var(--gi-amber);
+        font-size: 11px;
+      }
+      .panel .row {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .btn {
+        height: 40px;
+        padding: 0 18px;
+        border-radius: 11px;
+        border: 1px solid var(--gi-line);
+        transition: transform 0.4s var(--spring), border-color 0.2s, color 0.2s;
+      }
+      .btn.primary {
+        background: var(--gi-accent);
+        border-color: var(--gi-accent);
+        color: var(--gi-bg);
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        border-color: var(--gi-accent);
+      }
+      .hint {
+        font-size: 11px;
+        color: var(--gi-mute);
+        text-align: center;
+        padding-bottom: 4px;
+      }
+      canvas#confetti {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      :root[data-gi-motion='reduced'] * {
+        animation-duration: 1ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 1ms !important;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <div class="seg" id="diff">
+        <button data-d="0" class="on" data-t="easy"></button><button data-d="1" data-t="medium"></button><button data-d="2" data-t="hard"></button>
+      </div>
+      <div class="stat" title="minas">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="6" /><path d="M12 3v4M4 13H2M22 13h-2M6 7 4.5 5.5M18 7l1.5-1.5" /></svg><span id="mines">10</span>
+      </div>
+      <div class="stat" title="tiempo">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2M10 2h4" /></svg><span id="time">0.0</span>
+      </div>
+      <button class="icon" id="flagmode" aria-label="modo bandera">
+        <svg viewBox="0 0 24 24"><path d="M6 21V4M6 4l12 4-12 5" /></svg>
+      </button>
+      <button class="icon" id="restart" aria-label="reiniciar">
+        <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg>
+      </button>
+    </header>
+    <p class="hint" id="hint"></p>
+    <div class="wrap" id="wrap"><div class="board" id="board"></div></div>
+    <div class="overlay" id="overlay"><div class="panel" id="panel"></div></div>
+    <canvas id="confetti"></canvas>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

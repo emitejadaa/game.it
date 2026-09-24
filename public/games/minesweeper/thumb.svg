@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" font-family="JetBrains Mono, monospace" font-weight="700" font-size="22" text-anchor="middle">
+  <rect width="320" height="200" fill="#07070a"/>
+  <g transform="translate(62 22)">
+    <g fill="#1b1b24">
+      <rect x="0" y="0" width="34" height="34" rx="8"/><rect x="40" y="0" width="34" height="34" rx="8"/><rect x="160" y="0" width="34" height="34" rx="8"/>
+      <rect x="120" y="40" width="34" height="34" rx="8"/><rect x="160" y="40" width="34" height="34" rx="8"/>
+      <rect x="0" y="120" width="34" height="34" rx="8"/><rect x="160" y="120" width="34" height="34" rx="8"/><rect x="120" y="120" width="34" height="34" rx="8"/>
+    </g>
+    <g fill="#101016">
+      <rect x="80" y="0" width="34" height="34" rx="8"/><rect x="120" y="0" width="34" height="34" rx="8"/>
+      <rect x="0" y="40" width="34" height="34" rx="8"/><rect x="40" y="40" width="34" height="34" rx="8"/><rect x="80" y="40" width="34" height="34" rx="8"/>
+      <rect x="0" y="80" width="34" height="34" rx="8"/><rect x="40" y="80" width="34" height="34" rx="8"/><rect x="80" y="80" width="34" height="34" rx="8"/><rect x="120" y="80" width="34" height="34" rx="8"/><rect x="160" y="80" width="34" height="34" rx="8"/>
+      <rect x="40" y="120" width="34" height="34" rx="8"/><rect x="80" y="120" width="34" height="34" rx="8"/>
+    </g>
+    <text x="97" y="25" fill="#00f0ff">1</text><text x="137" y="25" fill="#b6ff00">2</text>
+    <text x="57" y="65" fill="#00f0ff">1</text><text x="97" y="65" fill="#ff2bd6">3</text>
+    <text x="137" y="105" fill="#b6ff00">2</text><text x="177" y="105" fill="#00f0ff">1</text>
+    <text x="57" y="145" fill="#00f0ff">1</text>
+    <path d="M131 132 L131 150 M131 132 L145 137 L131 142" stroke="#ff2bd6" stroke-width="3" fill="#ff2bd6" style="filter:drop-shadow(0 0 4px #ff2bd6)"/>
+    <circle cx="177" cy="137" r="8" fill="#ff3b5c" style="filter:drop-shadow(0 0 6px #ff3b5c)"/>
+  </g>
+</svg>

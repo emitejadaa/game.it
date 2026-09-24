@@ -1,0 +1,18 @@
+{
+  "id": "aim",
+  "title": "Aim Trainer 3D",
+  "description": {
+    "es": "Puntería en primera persona con 3 modos de objetivos, rondas configurables y estadísticas.",
+    "en": "First-person aim training with 3 target modes, configurable rounds and stats."
+  },
+  "categories": ["accion"],
+  "tags": ["3d", "fps", "punteria", "aim", "pistola", "gun", "reflejos", "reflex", "tracking", "entrenamiento"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "three.js",
+  "sdk": true,
+  "platforms": ["desktop"],
+  "input": ["mouse"],
+  "features": { "online": false, "multiplayer": false, "story": false, "pointerLock": true },
+  "order": 5
+}

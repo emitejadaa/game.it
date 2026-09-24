@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2f6b"/><stop offset="1" stop-color="#0b0b1a"/></linearGradient></defs>
+  <rect width="320" height="200" fill="url(#bg)"/>
+  <g transform="translate(160 60)">
+    <g id="b">
+    </g>
+  </g>
+  <g stroke="none">
+    <path d="M160 178 L96 146 L160 114 L224 146Z" fill="#6c5ce7"/><path d="M96 146 L96 200 L160 232 L160 178Z" fill="#4b3fb0"/><path d="M224 146 L224 200 L160 232 L160 178Z" fill="#5a4fd0"/>
+    <path d="M160 164 L100 134 L160 104 L220 134Z" fill="#8e7dff"/><path d="M100 134 L100 144 L160 174 L160 164Z" fill="#6f60e0"/><path d="M220 134 L220 144 L160 174 L160 164Z" fill="#7d6ef0"/>
+    <path d="M160 150 L106 123 L160 96 L214 123Z" fill="#b08cff"/><path d="M106 123 L106 133 L160 160 L160 150Z" fill="#8f6ee8"/><path d="M214 123 L214 133 L160 160 L160 150Z" fill="#a07ef5"/>
+    <path d="M160 136 L110 111 L160 86 L210 111Z" fill="#e08cff"/><path d="M110 111 L110 121 L160 146 L160 136Z" fill="#c06ee0"/><path d="M210 111 L210 121 L160 146 L160 136Z" fill="#d07ef0"/>
+    <path d="M200 96 L150 71 L200 46 L250 71Z" fill="#ff8cc6"/><path d="M150 71 L150 81 L200 106 L200 96Z" fill="#e06ea8"/><path d="M250 71 L250 81 L200 106 L200 96Z" fill="#f07eb8"/>
+  </g>
+  <ellipse cx="160" cy="111" rx="62" ry="31" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2"/>
+</svg>

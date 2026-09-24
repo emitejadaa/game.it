@@ -1,0 +1,18 @@
+{
+  "id": "stack",
+  "title": "Stack",
+  "description": {
+    "es": "Apilá bloques en el momento justo. Los perfectos encadenan combos.",
+    "en": "Stack blocks at the right moment. Perfect drops chain combos."
+  },
+  "categories": ["arcade", "casual"],
+  "tags": ["3d", "torre", "tower", "timing", "reflejos", "one tap"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "three.js",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": false, "multiplayer": false, "story": false },
+  "order": 4
+}

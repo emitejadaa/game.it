@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b0b12"/><stop offset="1" stop-color="#15151f"/></linearGradient>
+    <radialGradient id="t" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#9ffaff"/><stop offset=".6" stop-color="#00f0ff"/><stop offset="1" stop-color="#008a99"/></radialGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#f)"/>
+  <g stroke="rgba(255,255,255,.07)" stroke-width="1">
+    <path d="M0 40H320M0 80H320M0 120H320M0 160H320M40 0V200M80 0V200M120 0V200M160 0V200M200 0V200M240 0V200M280 0V200"/>
+  </g>
+  <circle cx="88" cy="62" r="16" fill="url(#t)" style="filter:drop-shadow(0 0 8px #00f0ff)"/>
+  <circle cx="240" cy="50" r="11" fill="url(#t)" opacity=".8"/>
+  <circle cx="165" cy="92" r="20" fill="url(#t)" style="filter:drop-shadow(0 0 10px #00f0ff)"/>
+  <circle cx="165" cy="92" r="26" fill="none" stroke="#00f0ff" stroke-opacity=".5" stroke-width="1.5"/>
+  <g stroke="#fff" stroke-width="2"><path d="M165 80v6M165 98v6M153 92h6M171 92h6"/></g>
+  <g transform="translate(206 128) rotate(-8)">
+    <rect x="0" y="0" width="92" height="22" rx="4" fill="#3a3c48"/>
+    <rect x="6" y="18" width="80" height="14" rx="3" fill="#23242c"/>
+    <rect x="58" y="26" width="22" height="50" rx="4" fill="#23242c" transform="rotate(14 69 26)"/>
+    <rect x="4" y="4" width="84" height="3" fill="#00f0ff"/>
+  </g>
+</svg>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aim Trainer · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+
+    <!-- HUD -->
+    <div class="hud" id="hud" hidden>
+      <div class="hbox"><small data-t="time"></small><b id="h-time">60</b></div>
+      <div class="hbox big"><small data-t="score"></small><b id="h-score">0</b></div>
+      <div class="hbox"><small data-t="acc"></small><b id="h-acc">—</b></div>
+      <div class="hbox"><small data-t="streak"></small><b id="h-streak">0</b></div>
+    </div>
+    <div class="cross" id="cross"><i></i><span class="hit" id="hitmark"></span></div>
+    <div class="count" id="count"></div>
+    <div class="float" id="float"></div>
+
+    <!-- configuración de ronda -->
+    <section class="screen on" id="config">
+      <div class="panel">
+        <header class="phead">
+          <h1>AIM<span>/</span>TRAINER</h1>
+          <p data-t="tagline"></p>
+        </header>
+        <div class="modes" id="modes"></div>
+        <div class="grid2">
+          <div class="field"><label data-t="duration"></label><div class="seg" data-k="duration"><button data-v="30">30s</button><button data-v="60">60s</button><button data-v="90">90s</button><button data-v="120">120s</button></div></div>
+          <div class="field"><label data-t="difficulty"></label><div class="seg" data-k="difficulty"><button data-v="easy" data-t="easy"></button><button data-v="normal" data-t="normal"></button><button data-v="hard" data-t="hard"></button></div></div>
+          <div class="field"><label><span data-t="speed"></span> <output id="o-speed"></output></label><input type="range" data-k="speed" min="0.5" max="2" step="0.1" /></div>
+          <div class="field"><label><span data-t="size"></span> <output id="o-size"></output></label><input type="range" data-k="size" min="0.5" max="1.6" step="0.1" /></div>
+          <div class="field"><label><span data-t="targets"></span> <output id="o-count"></output></label><input type="range" data-k="count" min="1" max="6" step="1" /></div>
+          <div class="field"><label><span data-t="sens"></span> <output id="o-sens"></output></label><input type="range" data-k="sens" min="0.2" max="3" step="0.05" /></div>
+          <div class="field"><label><span data-t="fov"></span> <output id="o-fov"></output></label><input type="range" data-k="fov" min="60" max="110" step="1" /></div>
+          <div class="field"><label data-t="color"></label><div class="swatches" data-k="color" id="sw-color"></div></div>
+          <div class="field"><label data-t="room"></label><div class="seg" data-k="room"><button data-v="auto" data-t="auto"></button><button data-v="dark" data-t="dark"></button><button data-v="light" data-t="light"></button></div></div>
+          <div class="field"><label data-t="crosshair"></label><div class="seg" data-k="cross"><button data-v="dot">•</button><button data-v="plus">+</button><button data-v="ring">◎</button></div></div>
+        </div>
+        <button class="start" id="start"><span data-t="start"></span><small data-t="startHint"></small></button>
+      </div>
+    </section>
+
+    <!-- pausa -->
+    <section class="screen" id="pause">
+      <div class="panel small">
+        <h2 data-t="paused"></h2>
+        <button class="start" data-a="resume"><span data-t="resume"></span></button>
+        <div class="row"><button class="btn" data-a="end" data-t="endRound"></button><button class="btn" data-a="config" data-t="settings"></button></div>
+      </div>
+    </section>
+
+    <!-- resultados -->
+    <section class="screen" id="results">
+      <div class="panel">
+        <header class="phead">
+          <h2 id="r-title"></h2>
+          <p id="r-sub"></p>
+        </header>
+        <div class="stats" id="r-stats"></div>
+        <div class="chart"><label data-t="timeline"></label><div id="r-chart"></div></div>
+        <div class="row">
+          <button class="start" data-a="again"><span data-t="again"></span></button>
+          <button class="btn" data-a="config" data-t="settings"></button>
+        </div>
+      </div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
