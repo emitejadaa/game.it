@@ -7,6 +7,8 @@
     <meta name="theme-color" content="#07070a" />
     <title>game.it</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="google-adsense-account" content="ca-pub-6804681798545706" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6804681798545706" crossorigin="anonymous"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -62,7 +64,10 @@
           <p class="empty" id="all-empty" hidden></p>
           <div class="grid" id="grid-all"></div>
         </section>
-        <footer class="foot"><span data-i18n="menu.footer"></span></footer>
+        <aside class="ad-slot" data-slot="menuBottom" hidden data-i18n-label="ads.label">
+          <div class="ad-head"><span data-i18n="ads.label"></span><button class="ad-close" type="button"><span data-i18n="ads.hide"></span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg></button></div>
+          <div class="ad-body"></div>
+        </aside>
       </main>
 
       <div class="scrim" id="scrim"></div>

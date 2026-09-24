@@ -65,14 +65,6 @@
   padding: 0 0 16px;
 }
 
-.foot {
-  padding-top: 10px;
-  font-size: 11px;
-  color: var(--mute);
-  text-align: center;
-  opacity: 0.8;
-}
-
 /* ============ Tarjeta de juego ============ */
 .card {
   --px: 50%;
@@ -443,4 +435,93 @@
     gap: 14px;
     padding-bottom: 18px;
   }
+}
+
+/* ============ Publicidad (zona muerta al final del menú) ============ */
+.ad-slot {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--line2);
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity var(--t) var(--ease),
+    transform var(--t) var(--ease);
+}
+.ad-slot.on {
+  opacity: 1;
+  transform: none;
+}
+.ad-slot.closing {
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+}
+.ad-head {
+  width: 100%;
+  max-width: 728px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.ad-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px 4px 8px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  transition: color var(--t-fast) var(--ease);
+}
+.ad-close svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.ad-close:hover {
+  color: var(--fg);
+}
+.ad-body {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+/* tamaños estándar exactos por ancho de pantalla (recomendado por AdSense para bloques adaptables) */
+.adsbygoogle-size {
+  width: 320px;
+  height: 100px;
+}
+@media (min-width: 520px) {
+  .adsbygoogle-size {
+    width: 468px;
+    height: 60px;
+  }
+}
+@media (min-width: 800px) {
+  .adsbygoogle-size {
+    width: 728px;
+    height: 90px;
+  }
+}
+.ad-preview {
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--accent);
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  background: var(--accent-soft);
 }

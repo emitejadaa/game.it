@@ -12,6 +12,7 @@ import { render, fitNames, enableSpotlight } from './ui/cards.js';
 import * as search from './ui/search.js';
 import * as prefsPanel from './ui/prefs-panel.js';
 import * as player from './ui/player.js';
+import * as ads from './ui/ads.js';
 
 const app = document.getElementById('app');
 const $ = (id) => document.getElementById(id);
@@ -56,6 +57,7 @@ async function route() {
     await new Promise((r) => setTimeout(r, 2200));
     renderMenu({ animate: false });
     await loader.hide(0);
+    ads.show();
   } else if (g) {
     if (player.game()?.id === g.id) return;
     search.close();
@@ -65,6 +67,7 @@ async function route() {
   } else if (player.isActive()) {
     prefsPanel.close();
     await player.close(() => renderMenu());
+    ads.show();
   }
 }
 
@@ -173,6 +176,7 @@ async function boot() {
     isInGame: player.isActive,
   });
   player.init({ onExit: exitGame });
+  ads.init();
   enableSpotlight(document.body);
   device.onChange(() => {
     renderMenu({ animate: false });
@@ -204,6 +208,7 @@ async function boot() {
       renderMenu();
       app.classList.add('ready');
     });
+    ads.show();
   }
 
   if (import.meta.env.PROD && 'serviceWorker' in navigator) {
