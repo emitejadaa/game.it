@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="320" height="200" fill="#07070a"/>
+  <g fill="none" stroke="#00f0ff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#g)">
+    <path d="M24 20 H296 V180 H24 Z" rx="10"/>
+    <path d="M70 60 H130 M190 60 H250 M70 140 H250 M160 20 V60"/>
+  </g>
+  <g fill="none" stroke="#07070a" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 20 H296 V180 H24 Z"/>
+    <path d="M70 60 H130 M190 60 H250 M70 140 H250 M160 20 V60"/>
+  </g>
+  <g fill="#eaeaf0" opacity=".75">
+    <circle cx="150" cy="100" r="3"/><circle cx="172" cy="100" r="3"/><circle cx="194" cy="100" r="3"/><circle cx="216" cy="100" r="3"/><circle cx="238" cy="100" r="3"/>
+  </g>
+  <circle cx="266" cy="100" r="8" fill="#eaeaf0" filter="url(#g)"/>
+  <path d="M112 100 L140 84 A32 32 0 1 0 140 116 Z" fill="#ffe600" filter="url(#g)"/>
+  <g filter="url(#g)">
+    <path d="M44 124 V100 a16 16 0 0 1 32 0 V124 l-5.3 -6 -5.3 6 -5.3 -6 -5.3 6 -5.3 -6 z" fill="#ff3b5c"/>
+  </g>
+  <g fill="#fff"><ellipse cx="54" cy="100" rx="4.5" ry="5.5"/><ellipse cx="67" cy="100" rx="4.5" ry="5.5"/></g>
+  <g fill="#1c2cff"><circle cx="56" cy="101" r="2.4"/><circle cx="69" cy="101" r="2.4"/></g>
+</svg>

@@ -1,0 +1,18 @@
+{
+  "id": "pacman",
+  "title": "Pac-Man",
+  "description": {
+    "es": "El clásico laberinto: comé todos los puntos y escapá de los fantasmas.",
+    "en": "The classic maze: eat every dot and escape the ghosts."
+  },
+  "categories": ["arcade", "clasicos"],
+  "tags": ["laberinto", "maze", "fantasmas", "ghosts", "retro", "pacman"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": false, "multiplayer": false, "story": false },
+  "order": 1
+}
