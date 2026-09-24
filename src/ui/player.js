@@ -76,7 +76,7 @@ export function init(h) {
 }
 
 /** Abre un juego. Resuelve cuando ya se ve (la pantalla de carga se retiró). */
-export async function launch(g) {
+export async function launch(g, query = '') {
   if (current) teardown();
   current = g;
   creep = 0;
@@ -109,7 +109,7 @@ export async function launch(g) {
     frame.addEventListener('error', () => finish(false), { once: true });
   });
 
-  frame.src = g.entry;
+  frame.src = g.entry + query.replace(/[^\w?=&%-]/g, '');
   stage.appendChild(frame);
   player.classList.add('active');
   player.setAttribute('aria-hidden', 'false');

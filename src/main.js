@@ -44,7 +44,7 @@ function applyLang() {
 let enteredFromMenu = false;
 
 async function route() {
-  const m = location.hash.match(/^#play\/([\w-]+)/);
+  const m = location.hash.match(/^#play\/([\w-]+)(\?[^#]*)?/);
   const g = m && byId(m[1]);
   if (g && !playable(g)) {
     // enlace directo a un juego que no corre en este dispositivo
@@ -61,7 +61,7 @@ async function route() {
     search.close();
     prefsPanel.close();
     track(g.id);
-    await player.launch(g);
+    await player.launch(g, m[2] || '');
   } else if (player.isActive()) {
     prefsPanel.close();
     await player.close(() => renderMenu());

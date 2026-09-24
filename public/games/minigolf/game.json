@@ -1,0 +1,19 @@
+{
+  "id": "minigolf",
+  "title": "Mini Golf",
+  "description": {
+    "es": "Minigolf cartoon con 9 hoyos llenos de obstáculos. Práctica, local por turnos u online con salas.",
+    "en": "Cartoon mini golf with 9 obstacle-packed holes. Practice, local hot-seat or online rooms."
+  },
+  "categories": ["deporte", "online", "multijugador", "casual"],
+  "tags": ["golf", "minigolf", "putt", "fisica", "physics", "salas", "rooms", "amigos", "friends"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 4, "story": false },
+  "order": 2
+}

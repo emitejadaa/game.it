@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Mini Golf · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <canvas id="fx"></canvas>
+
+    <!-- HUD de partida -->
+    <div class="hud" id="hud" hidden>
+      <div class="hole-pill"><b id="hud-hole">1/9</b><span id="hud-name"></span><em id="hud-par"></em></div>
+      <button class="round-btn" id="btn-pause" aria-label="pausa">
+        <svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" /></svg>
+      </button>
+    </div>
+    <div class="players" id="players" hidden></div>
+    <div class="hint" id="hint" hidden></div>
+    <div class="power" id="power" hidden><i></i><span></span></div>
+
+    <!-- carteles de eventos -->
+    <div class="banner" id="banner"><b></b><small></small></div>
+    <div class="intro" id="intro"><small></small><b></b><em></em></div>
+
+    <!-- pantallas -->
+    <div class="screens" id="screens">
+      <section class="screen" data-screen="home">
+        <div class="card home">
+          <h1 class="logo"><span>M</span><span>i</span><span>n</span><span>i</span> <span>G</span><span>o</span><span>l</span><span>f</span></h1>
+          <p class="sub" data-t="tagline"></p>
+          <div class="stack">
+            <button class="big c1" data-go="practice"><b data-t="practice"></b><small data-t="practiceSub"></small></button>
+            <button class="big c2" data-go="local"><b data-t="local"></b><small data-t="localSub"></small></button>
+            <button class="big c3" data-go="online"><b data-t="online"></b><small data-t="onlineSub"></small></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="practice">
+        <div class="card">
+          <button class="back" data-go="home">←</button>
+          <h2 data-t="practice"></h2>
+          <label class="lbl" data-t="course"></label>
+          <div class="seg" data-name="p-holes">
+            <button data-v="3">3</button><button data-v="6">6</button><button data-v="9" class="on">9</button>
+          </div>
+          <button class="cta" id="practice-start" data-t="play"></button>
+          <label class="lbl" data-t="oneHole"></label>
+          <div class="hole-grid" id="hole-grid"></div>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="local">
+        <div class="card">
+          <button class="back" data-go="home">←</button>
+          <h2 data-t="local"></h2>
+          <label class="lbl" data-t="players"></label>
+          <div class="seg" data-name="l-count">
+            <button data-v="2" class="on">2</button><button data-v="3">3</button><button data-v="4">4</button>
+          </div>
+          <div class="names" id="local-names"></div>
+          <label class="lbl" data-t="course"></label>
+          <div class="seg" data-name="l-holes">
+            <button data-v="3">3</button><button data-v="6">6</button><button data-v="9" class="on">9</button>
+          </div>
+          <button class="cta" id="local-start" data-t="play"></button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="online">
+        <div class="card">
+          <button class="back" data-go="home">←</button>
+          <h2 data-t="online"></h2>
+          <label class="lbl" data-t="yourName"></label>
+          <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+          <button class="cta" id="on-create" data-t="createRoom"></button>
+          <div class="or"><span data-t="or"></span></div>
+          <label class="lbl" data-t="roomCode"></label>
+          <div class="join-row">
+            <input class="field code" id="on-code" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCDE" />
+            <button class="cta small" id="on-join" data-t="join"></button>
+          </div>
+          <p class="status" id="on-status"></p>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="lobby">
+        <div class="card">
+          <button class="back" id="lobby-leave">←</button>
+          <h2 data-t="lobby"></h2>
+          <label class="lbl" data-t="shareCode"></label>
+          <div class="code-box">
+            <b id="lobby-code">-----</b>
+            <button class="chip-btn" id="lobby-copy" data-t="copyLink"></button>
+          </div>
+          <label class="lbl"><span data-t="players"></span> <span id="lobby-count"></span></label>
+          <ul class="plist" id="lobby-players"></ul>
+          <div id="lobby-host">
+            <label class="lbl" data-t="course"></label>
+            <div class="seg" data-name="o-holes">
+              <button data-v="3">3</button><button data-v="6">6</button><button data-v="9" class="on">9</button>
+            </div>
+            <button class="cta" id="lobby-start" data-t="start"></button>
+          </div>
+          <p class="status" id="lobby-wait" data-t="waitingHost"></p>
+          <p class="fine" data-t="lobbyRules"></p>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="pause">
+        <div class="card narrow">
+          <h2 data-t="paused"></h2>
+          <div class="stack">
+            <button class="cta" data-action="resume" data-t="resume"></button>
+            <button class="ghost" data-action="card" data-t="scorecard"></button>
+            <button class="ghost" data-action="quit" data-t="quit"></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="card">
+        <div class="card wide">
+          <h2 id="card-title"></h2>
+          <div class="podium" id="podium"></div>
+          <div class="table-wrap"><table class="score" id="score-table"></table></div>
+          <div class="row" id="card-actions"></div>
+        </div>
+      </section>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script type="module" src="./client/main.js"></script>
+  </body>
+</html>
