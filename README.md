@@ -9,7 +9,7 @@ npm run build    # sitio estático en dist/ (se puede subir a Vercel, Netlify, G
 npm run preview  # prueba el build
 ```
 
-Publicado en Vercel: cada push a `main` se despliega solo.
+**Vercel:** importar el repo en [vercel.com/new](https://vercel.com/new) (la configuración ya está en `vercel.json`). Desde ahí, cada push a `main` se despliega solo.
 
 ## Cómo está armado
 
