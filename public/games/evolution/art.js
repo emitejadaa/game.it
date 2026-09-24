@@ -1,0 +1,80 @@
+/**
+ * Arte de Evolución: ilustraciones SVG hechas a mano (sin archivos externos).
+ * - ICONS: una por criatura (viewBox 64×64), estilo orgánico plano con brillo suave.
+ * - HEROES: el organismo central de cada era (viewBox 200×200) con partes animadas por CSS.
+ */
+export const PALETTE = {
+  soup: { a: '#2dd4bf', b: '#a3e635', c: '#0f766e', bg1: '#062a28', bg2: '#0b4a3a', glow: '#5eead4' },
+  ocean: { a: '#38bdf8', b: '#f472b6', c: '#1e40af', bg1: '#061a3a', bg2: '#0c4a6e', glow: '#7dd3fc' },
+  land: { a: '#84cc16', b: '#fb923c', c: '#3f6212', bg1: '#1a2e05', bg2: '#713f12', glow: '#fde68a' },
+  civ: { a: '#a78bfa', b: '#fbbf24', c: '#5b21b6', bg1: '#1e0b3a', bg2: '#4c1d95', glow: '#fcd34d' },
+  space: { a: '#6366f1', b: '#22d3ee', c: '#312e81', bg1: '#030712', bg2: '#1e1b4b', glow: '#a5b4fc' },
+  cosmos: { a: '#e879f9', b: '#818cf8', c: '#701a75', bg1: '#0a0118', bg2: '#3b0764', glow: '#f5d0fe' },
+};
+
+const I = (body) => `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+const shine = (x, y, r = 5) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * 0.6}" fill="#fff" opacity=".55" transform="rotate(-30 ${x} ${y})"/>`;
+
+export const ICONS = {
+  amino: I(`<path d="M16 40 L32 24 L48 40" stroke="#0f766e" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="16" cy="40" r="9" fill="#2dd4bf"/><circle cx="32" cy="24" r="9" fill="#a3e635"/><circle cx="48" cy="40" r="9" fill="#5eead4"/>${shine(13, 36, 3)}${shine(29, 20, 3)}${shine(45, 36, 3)}`),
+  proto: I(`<circle cx="32" cy="32" r="22" fill="#2dd4bf" opacity=".35"/><circle cx="32" cy="32" r="22" fill="none" stroke="#2dd4bf" stroke-width="3"/><circle cx="26" cy="36" r="4" fill="#a3e635"/><circle cx="38" cy="28" r="3" fill="#a3e635"/><circle cx="36" cy="40" r="2.5" fill="#fff" opacity=".7"/>${shine(22, 20, 5)}`),
+  ribo: I(`<path d="M10 44 Q32 30 54 44" stroke="#a3e635" stroke-width="3" fill="none" stroke-dasharray="3 3"/><ellipse cx="32" cy="26" rx="16" ry="12" fill="#2dd4bf"/><ellipse cx="32" cy="42" rx="11" ry="8" fill="#0f766e"/>${shine(26, 21, 4)}`),
+  mito: I(`<ellipse cx="32" cy="32" rx="24" ry="15" fill="#fb7185"/><ellipse cx="32" cy="32" rx="19" ry="10" fill="#fecdd3"/><path d="M15 32 L20 25 L25 39 L30 25 L35 39 L40 25 L45 39 L49 32" stroke="#e11d48" stroke-width="2.5" fill="none" stroke-linejoin="round"/>${shine(20, 22, 4)}`),
+  alga: I(`<path d="M22 58 C14 44 30 36 20 20 M32 58 C28 40 44 32 34 10 M42 58 C50 44 36 36 46 22" stroke="#22c55e" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="20" cy="20" r="4" fill="#bef264"/><circle cx="34" cy="10" r="4" fill="#bef264"/><circle cx="46" cy="22" r="4" fill="#bef264"/>`),
+  jelly: I(`<path d="M12 32 C12 14 52 14 52 32 Z" fill="#f472b6"/><path d="M18 32 q2 12 -2 22 M26 32 q-3 12 2 22 M34 32 q3 12 -2 22 M42 32 q-2 12 2 20" stroke="#f9a8d4" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M12 32 Q32 38 52 32" stroke="#db2777" stroke-width="2" fill="none"/>${shine(24, 20, 5)}`),
+  trilo: I(`<ellipse cx="32" cy="34" rx="18" ry="24" fill="#a16207"/><ellipse cx="32" cy="16" rx="14" ry="8" fill="#ca8a04"/><path d="M16 26 H48 M15 32 H49 M15 38 H49 M17 44 H47 M20 50 H44" stroke="#713f12" stroke-width="2.5"/><path d="M32 12 V56" stroke="#fde68a" stroke-width="3" opacity=".6"/><circle cx="26" cy="16" r="2" fill="#1c1917"/><circle cx="38" cy="16" r="2" fill="#1c1917"/>`),
+  fish: I(`<path d="M8 32 C18 16 42 16 50 32 C42 48 18 48 8 32 Z" fill="#38bdf8"/><path d="M48 32 L60 20 L58 32 L60 44 Z" fill="#0ea5e9"/><path d="M26 22 Q30 32 26 42" stroke="#0369a1" stroke-width="2" fill="none"/><circle cx="18" cy="29" r="3" fill="#0c4a6e"/>${shine(22, 24, 4)}`),
+  frog: I(`<ellipse cx="32" cy="38" rx="22" ry="16" fill="#84cc16"/><circle cx="20" cy="24" r="8" fill="#84cc16"/><circle cx="44" cy="24" r="8" fill="#84cc16"/><circle cx="20" cy="23" r="4" fill="#fff"/><circle cx="44" cy="23" r="4" fill="#fff"/><circle cx="21" cy="24" r="2" fill="#1a2e05"/><circle cx="45" cy="24" r="2" fill="#1a2e05"/><path d="M22 42 Q32 48 42 42" stroke="#3f6212" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="18" cy="38" r="3" fill="#fb923c" opacity=".6"/><circle cx="46" cy="38" r="3" fill="#fb923c" opacity=".6"/>`),
+  lizard: I(`<path d="M8 44 C18 44 20 30 32 30 C44 30 46 22 56 20 C50 28 50 34 42 38 C34 42 30 50 18 50 C12 50 8 48 8 44 Z" fill="#65a30d"/><path d="M42 38 L48 50 M26 44 L22 56 M34 40 L38 52" stroke="#3f6212" stroke-width="3.5" stroke-linecap="round"/><circle cx="50" cy="24" r="2" fill="#1a2e05"/><path d="M20 38 l4 -3 l4 3 l4 -3" stroke="#bef264" stroke-width="2" fill="none"/>`),
+  dino: I(`<path d="M12 46 C12 34 22 30 30 32 C34 20 38 10 46 8 C52 8 54 12 50 14 C44 16 42 24 42 34 C50 36 56 42 58 50 L50 50 C46 44 40 46 38 50 L30 50 L28 46 L20 46 L18 50 L12 50 Z" fill="#fb923c"/><circle cx="48" cy="11" r="1.8" fill="#431407"/><path d="M26 36 q4 -3 8 0 M34 36 q4 -3 8 0" stroke="#fdba74" stroke-width="2" fill="none"/>`),
+  mammal: I(`<circle cx="18" cy="20" r="9" fill="#d6a47a"/><circle cx="46" cy="20" r="9" fill="#d6a47a"/><circle cx="18" cy="20" r="5" fill="#fbcfe8"/><circle cx="46" cy="20" r="5" fill="#fbcfe8"/><ellipse cx="32" cy="36" rx="20" ry="18" fill="#d6a47a"/><circle cx="25" cy="33" r="3" fill="#292524"/><circle cx="39" cy="33" r="3" fill="#292524"/><ellipse cx="32" cy="42" rx="4" ry="3" fill="#f472b6"/>${shine(24, 25, 4)}`),
+  tribe: I(`<path d="M16 54 L48 44 M16 44 L48 54" stroke="#92400e" stroke-width="5" stroke-linecap="round"/><path d="M32 12 C40 24 46 30 42 42 C40 48 24 48 22 42 C18 32 26 26 32 12 Z" fill="#f97316"/><path d="M32 26 C36 32 38 36 36 42 C34 46 30 46 28 42 C26 36 30 32 32 26 Z" fill="#fde047"/>`),
+  village: I(`<path d="M8 34 L32 12 L56 34 Z" fill="#b45309"/><rect x="14" y="32" width="36" height="22" fill="#fcd34d"/><rect x="28" y="40" width="9" height="14" fill="#92400e"/><rect x="18" y="38" width="7" height="7" fill="#fff7ed"/><rect x="40" y="38" width="7" height="7" fill="#fff7ed"/><path d="M8 34 L32 12 L56 34" stroke="#78350f" stroke-width="3" fill="none"/>`),
+  city: I(`<rect x="6" y="28" width="14" height="30" fill="#7c3aed"/><rect x="22" y="12" width="16" height="46" fill="#a78bfa"/><rect x="40" y="22" width="18" height="36" fill="#6d28d9"/>${[16, 24, 32, 40, 48].map((y) => `<rect x="26" y="${y}" width="3" height="4" fill="#fde68a"/><rect x="32" y="${y}" width="3" height="4" fill="#fde68a"/>`).join('')}<rect x="10" y="34" width="3" height="4" fill="#fde68a"/><rect x="45" y="30" width="3" height="4" fill="#fde68a"/><rect x="51" y="40" width="3" height="4" fill="#fde68a"/>`),
+  factory: I(`<path d="M6 58 V34 L18 26 V34 L30 26 V34 L42 26 V58 Z" fill="#8b5cf6"/><rect x="44" y="10" width="10" height="48" fill="#6d28d9"/><circle cx="49" cy="6" r="5" fill="#e9d5ff" opacity=".7"/><circle cx="55" cy="2" r="4" fill="#e9d5ff" opacity=".5"/><rect x="12" y="42" width="6" height="6" fill="#fbbf24"/><rect x="24" y="42" width="6" height="6" fill="#fbbf24"/><rect x="36" y="42" width="6" height="6" fill="#fbbf24"/>`),
+  sat: I(`<rect x="4" y="26" width="18" height="12" fill="#22d3ee"/><rect x="42" y="26" width="18" height="12" fill="#22d3ee"/><path d="M4 32 H60" stroke="#0e7490" stroke-width="1.5"/><rect x="24" y="22" width="16" height="20" rx="3" fill="#c7d2fe"/><path d="M32 22 V12" stroke="#c7d2fe" stroke-width="2"/><circle cx="32" cy="10" r="3" fill="#6366f1"/>${shine(28, 27, 3)}`),
+  moon: I(`<circle cx="32" cy="40" r="22" fill="#9ca3af"/><circle cx="22" cy="48" r="4" fill="#6b7280"/><circle cx="42" cy="50" r="3" fill="#6b7280"/><path d="M18 30 A14 14 0 0 1 46 30 Z" fill="#22d3ee" opacity=".55"/><path d="M18 30 A14 14 0 0 1 46 30" stroke="#a5f3fc" stroke-width="2" fill="none"/><rect x="28" y="22" width="6" height="8" fill="#fde68a"/>`),
+  station: I(`<ellipse cx="32" cy="32" rx="26" ry="10" fill="none" stroke="#a5b4fc" stroke-width="5"/><circle cx="32" cy="32" r="9" fill="#6366f1"/><path d="M32 6 V58" stroke="#c7d2fe" stroke-width="3"/><rect x="26" y="4" width="12" height="6" fill="#22d3ee"/><rect x="26" y="54" width="12" height="6" fill="#22d3ee"/>${shine(29, 29, 3)}`),
+  dyson: I(`<circle cx="32" cy="32" r="12" fill="#fde047"/><circle cx="32" cy="32" r="18" fill="#fde047" opacity=".25"/><circle cx="32" cy="32" r="24" fill="none" stroke="#6366f1" stroke-width="5" stroke-dasharray="9 5"/><circle cx="32" cy="32" r="24" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity=".7"/>`),
+  ark: I(`<path d="M32 4 C44 14 46 32 42 48 H22 C18 32 20 14 32 4 Z" fill="#e0e7ff"/><circle cx="32" cy="24" r="6" fill="#818cf8"/><path d="M22 40 L12 52 L22 50 Z M42 40 L52 52 L42 50 Z" fill="#e879f9"/><path d="M26 48 Q32 62 38 48 Z" fill="#f0abfc"/>${shine(29, 21, 2.5)}`),
+  galaxy: I(`<g transform="rotate(-20 32 32)"><path d="M32 32 C32 20 48 18 52 28 C56 40 40 52 28 48 C14 44 10 26 22 16 C30 10 44 10 50 16" stroke="#e879f9" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M32 32 C32 44 16 46 12 36 C8 24 24 12 36 16" stroke="#818cf8" stroke-width="4" fill="none" stroke-linecap="round"/></g><circle cx="32" cy="32" r="5" fill="#fff"/>`),
+  cluster: I(`${[[18, 22, 8, '#e879f9'], [42, 18, 6, '#818cf8'], [46, 40, 9, '#c084fc'], [22, 44, 6, '#f0abfc'], [32, 32, 5, '#fff']].map(([x, y, r, c]) => `<circle cx="${x}" cy="${y}" r="${r * 1.8}" fill="${c}" opacity=".2"/><circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`).join('')}`),
+  baby: I(`<circle cx="32" cy="32" r="24" fill="#3b0764"/><circle cx="32" cy="32" r="24" fill="none" stroke="#f5d0fe" stroke-width="2" opacity=".8"/><circle cx="24" cy="26" r="2" fill="#fff"/><circle cx="38" cy="36" r="1.5" fill="#fff"/><circle cx="30" cy="40" r="1" fill="#fff"/><path d="M40 20 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 Z" fill="#fde047"/>${shine(22, 18, 5)}`),
+};
+
+/** Organismo central de cada era (con clases animadas: .wob, .sway, .spin, .pulse, .bob). */
+export const HEROES = [
+  // 0 · célula
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="h0" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ccfbf1"/><stop offset=".5" stop-color="#2dd4bf" stop-opacity=".75"/><stop offset="1" stop-color="#0f766e" stop-opacity=".9"/></radialGradient></defs>
+  <g class="wob"><path d="M100 22 C150 20 180 58 178 100 C176 148 142 180 98 178 C52 176 22 146 24 100 C26 54 56 24 100 22 Z" fill="url(#h0)" stroke="#5eead4" stroke-width="4"/></g>
+  <g class="pulse"><circle cx="92" cy="96" r="30" fill="#0f766e" opacity=".8"/><circle cx="92" cy="96" r="14" fill="#a3e635"/></g>
+  <g class="bob"><ellipse cx="140" cy="126" rx="14" ry="8" fill="#fb7185"/><ellipse cx="60" cy="140" rx="10" ry="6" fill="#fb7185" transform="rotate(30 60 140)"/><circle cx="136" cy="70" r="7" fill="#bef264"/><circle cx="66" cy="62" r="5" fill="#bef264"/></g>
+  <ellipse cx="70" cy="52" rx="20" ry="10" fill="#fff" opacity=".35" transform="rotate(-30 70 52)"/></svg>`,
+  // 1 · medusa
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="h1" cx=".45" cy=".3" r=".8"><stop offset="0" stop-color="#fce7f3"/><stop offset=".45" stop-color="#f472b6"/><stop offset="1" stop-color="#9d174d"/></radialGradient></defs>
+  <g class="sway">${[60, 80, 100, 120, 140].map((x, i) => `<path d="M${x} 104 C${x - 10} 130 ${x + 12} 150 ${x - 4} 188" stroke="${i % 2 ? '#f9a8d4' : '#7dd3fc'}" stroke-width="6" fill="none" stroke-linecap="round" opacity=".85"/>`).join('')}</g>
+  <g class="pulse"><path d="M30 104 C30 40 170 40 170 104 C150 116 50 116 30 104 Z" fill="url(#h1)" stroke="#fbcfe8" stroke-width="4"/>
+  <circle cx="82" cy="84" r="7" fill="#fff"/><circle cx="118" cy="84" r="7" fill="#fff"/><circle cx="84" cy="86" r="3.5" fill="#500724"/><circle cx="120" cy="86" r="3.5" fill="#500724"/><path d="M92 98 Q100 104 108 98" stroke="#500724" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="72" cy="62" rx="18" ry="8" fill="#fff" opacity=".4" transform="rotate(-25 72 62)"/></g></svg>`,
+  // 2 · dinosaurio
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="h2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bef264"/><stop offset="1" stop-color="#4d7c0f"/></linearGradient></defs>
+  <g class="bob"><path d="M28 150 C20 120 50 104 78 108 C84 70 96 40 124 30 C148 22 170 34 168 52 C166 64 150 66 140 62 C132 78 128 100 132 120 C156 124 178 140 186 170 L160 170 C152 156 140 152 132 162 L126 176 L100 176 L98 162 L70 162 L66 176 L40 176 L40 160 C34 158 30 156 28 150 Z" fill="url(#h2)" stroke="#365314" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M84 110 l8 -12 l8 12 l8 -12 l8 12" stroke="#fb923c" stroke-width="5" fill="none" stroke-linejoin="round"/>
+  <circle cx="150" cy="44" r="8" fill="#fff"/><circle cx="152" cy="45" r="4" fill="#1a2e05"/><path d="M150 58 Q158 60 164 56" stroke="#1a2e05" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="138" cy="54" r="5" fill="#fb923c" opacity=".6"/></g></svg>`,
+  // 3 · cerebro (civilización)
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="h3" cx=".45" cy=".35" r=".75"><stop offset="0" stop-color="#f5d0fe"/><stop offset=".55" stop-color="#c084fc"/><stop offset="1" stop-color="#6b21a8"/></radialGradient></defs>
+  <g class="spin-slow" opacity=".7"><circle cx="100" cy="100" r="92" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 10"/></g>
+  <g class="pulse"><path d="M100 36 C130 24 170 44 168 80 C184 100 172 138 146 144 C136 168 104 170 100 156 C96 170 64 168 54 144 C28 138 16 100 32 80 C30 44 70 24 100 36 Z" fill="url(#h3)" stroke="#e9d5ff" stroke-width="4"/>
+  <path d="M100 38 V156 M58 70 C76 66 80 82 68 92 C60 100 72 116 86 108 M142 70 C124 66 120 82 132 92 C140 100 128 116 114 108 M56 124 C70 118 80 132 92 126 M144 124 C130 118 120 132 108 126" stroke="#7e22ce" stroke-width="4" fill="none" stroke-linecap="round"/>
+  ${[[60, 50], [150, 58], [170, 110], [36, 116], [100, 176]].map(([x, y], i) => `<circle class="spark s${i}" cx="${x}" cy="${y}" r="5" fill="#fcd34d"/>`).join('')}</g></svg>`,
+  // 4 · planeta con anillo de satélites
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="h4" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#a5f3fc"/><stop offset=".4" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e1b4b"/></radialGradient></defs>
+  <g class="pulse"><circle cx="100" cy="100" r="66" fill="url(#h4)"/><path d="M60 80 C76 70 90 86 84 100 C78 116 96 124 104 112 M118 60 C132 62 140 74 132 86 M120 132 C132 128 146 136 140 146" stroke="#4ade80" stroke-width="10" fill="none" stroke-linecap="round" opacity=".85"/>
+  <circle cx="100" cy="100" r="66" fill="none" stroke="#c7d2fe" stroke-width="3"/></g>
+  <g class="spin"><ellipse cx="100" cy="100" rx="94" ry="30" fill="none" stroke="#22d3ee" stroke-width="3" opacity=".7" transform="rotate(-18 100 100)"/><g transform="rotate(-18 100 100)"><rect x="186" y="94" width="14" height="10" fill="#e0e7ff"/><rect x="2" y="96" width="12" height="8" fill="#e0e7ff"/></g></g></svg>`,
+  // 5 · galaxia espiral
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="h5" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#f5d0fe"/><stop offset="1" stop-color="#701a75" stop-opacity="0"/></radialGradient></defs>
+  <g class="spin"><path d="M100 100 C100 60 150 50 166 80 C182 116 140 160 96 150 C44 140 32 80 70 50 C96 30 146 30 168 56" stroke="#e879f9" stroke-width="12" fill="none" stroke-linecap="round" opacity=".85"/><path d="M100 100 C100 140 50 150 34 120 C18 84 60 40 104 50 C156 60 168 120 130 150 C104 170 54 170 32 144" stroke="#818cf8" stroke-width="12" fill="none" stroke-linecap="round" opacity=".85"/>
+  ${Array.from({ length: 22 }, (_, i) => { const a = i * 2.4; const r = 20 + (i * 37) % 70; return `<circle cx="${100 + Math.cos(a) * r}" cy="${100 + Math.sin(a) * r}" r="${1.5 + (i % 3)}" fill="#fff" opacity=".8"/>`; }).join('')}</g>
+  <circle class="pulse" cx="100" cy="100" r="44" fill="url(#h5)"/></svg>`,
+];
