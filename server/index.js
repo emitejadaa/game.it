@@ -133,6 +133,7 @@ function roomView(room) {
     game: room.game,
     host: room.host,
     state: room.state,
+    settings: room.settings,
     now: Date.now(),
     players: [...room.players.values()].map((p) => ({ id: p.id, name: p.name, color: p.color, connected: p.connected })),
     ...(mod.view ? mod.view(room) : {}),

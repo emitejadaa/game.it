@@ -1,0 +1,19 @@
+{
+  "id": "drift",
+  "title": "Drift Neon",
+  "description": {
+    "es": "Derrapes de neón en una ciudad synthwave: contrarreloj con fantasma, desafío de drift, 2 jugadores y carreras online.",
+    "en": "Neon drifting in a synthwave city: time trial with ghost, drift challenge, 2 players and online races."
+  },
+  "categories": ["carreras", "online", "multijugador", "arcade"],
+  "tags": ["autos", "cars", "drift", "derrape", "neon", "synthwave", "racing", "carrera"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "landscape",
+  "input": ["keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 4, "localPlayers": 2, "story": false },
+  "order": 9
+}

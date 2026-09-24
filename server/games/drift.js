@@ -1,7 +1,7 @@
 import { raceGame } from './_race.js';
 
-// tiempo mínimo por vuelta de cada pista (ms): si alguien reporta menos, es trampa
-const MIN_LAP = [14000, 16000, 18000];
+// tiempo mínimo físicamente posible por vuelta (largo de la pista / velocidad máxima con nitro), en ms
+const MIN_LAP = [5000, 6000, 8000];
 
 export default raceGame({
   defaults: { track: 0, laps: 3 },

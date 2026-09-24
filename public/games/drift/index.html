@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Drift Neon · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <style>
+      /* Estética: synthwave nocturno, neón rosa/cian, líneas de luz */
+      :root { --pink: #ff2bd6; --cyan: #00f0ff; --ink: #f4ecff; --bg: #0a0614; --card: rgba(16, 8, 34, 0.86); --muted: #a08cc8; --ease: cubic-bezier(0.22, 1, 0.36, 1); --spring: cubic-bezier(0.34, 1.56, 0.64, 1); }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+      body { background: var(--bg); color: var(--ink); font: 700 16px/1.25 'Rajdhani', system-ui, sans-serif; }
+      button, input { font: inherit; color: inherit; background: none; border: 0; }
+      button { cursor: pointer; }
+      [hidden] { display: none !important; }
+      canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+      .orb { font-family: 'Orbitron', sans-serif; }
+
+      /* HUD */
+      .hud { position: fixed; inset: 0; pointer-events: none; }
+      .top { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+      @media (max-width: 640px) { .top { top: calc(52px + env(safe-area-inset-top)); } }
+      .box { padding: 5px 12px; border: 1px solid rgba(255, 43, 214, 0.45); border-radius: 10px; background: rgba(10, 6, 20, 0.6); text-align: center; min-width: 74px; box-shadow: 0 0 16px -6px var(--pink); }
+      .box small { display: block; font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+      .box b { font-family: 'Orbitron', sans-serif; font-size: 17px; font-variant-numeric: tabular-nums; }
+      .box.c { border-color: rgba(0, 240, 255, 0.45); box-shadow: 0 0 16px -6px var(--cyan); }
+      .split { position: absolute; top: calc(66px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); font-family: 'Orbitron'; font-size: 13px; opacity: 0; }
+      @media (max-width: 640px) { .split { top: calc(108px + env(safe-area-inset-top)); } }
+      .split.show { animation: fade 2.2s var(--ease); }
+      .split.good { color: #b6ff00; }
+      .split.bad { color: #ff3b5c; }
+      @keyframes fade { 0% { opacity: 0; transform: translate(-50%, 6px); } 15%, 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+      .speed { position: absolute; right: calc(16px + env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); width: 132px; height: 132px; }
+      .speed svg { width: 100%; height: 100%; overflow: visible; }
+      .speed b { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; font-family: 'Orbitron'; font-size: 30px; line-height: 1; }
+      .speed b small { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); font-family: 'Rajdhani'; }
+      body.touch .speed { right: 50%; transform: translateX(50%); bottom: calc(10px + env(safe-area-inset-bottom)); width: 96px; height: 96px; }
+      body.touch .speed b { font-size: 22px; }
+      .drift { position: absolute; top: 28%; left: 50%; transform: translateX(-50%); text-align: center; font-family: 'Orbitron'; opacity: 0; transition: opacity 0.25s; }
+      .drift.on { opacity: 1; }
+      .drift b { display: block; font-size: 34px; color: var(--pink); text-shadow: 0 0 18px var(--pink); }
+      .drift span { font-size: 14px; color: var(--cyan); letter-spacing: 0.2em; }
+      .pop { position: absolute; top: 34%; left: 50%; transform: translateX(-50%); font-family: 'Orbitron'; font-size: 22px; opacity: 0; white-space: nowrap; }
+      .pop.show { animation: popup 1.2s var(--ease); }
+      .pop.lost { color: #ff3b5c; }
+      .pop.bank { color: #b6ff00; }
+      @keyframes popup { 0% { opacity: 0; transform: translate(-50%, 10px) scale(0.8); } 20% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -24px); } }
+      .nitro { position: absolute; left: calc(16px + env(safe-area-inset-left)); bottom: calc(22px + env(safe-area-inset-bottom)); width: 150px; }
+      body.touch .nitro { left: 50%; transform: translateX(-50%); bottom: calc(112px + env(safe-area-inset-bottom)); width: 120px; }
+      .nitro small { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); }
+      .nitro div { height: 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+      .nitro i { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--pink)); transform-origin: left; box-shadow: 0 0 10px var(--cyan); }
+      .lights { position: fixed; top: 34%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 14px; padding: 14px 18px; border-radius: 16px; background: rgba(10, 6, 20, 0.7); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+      .lights.on { opacity: 1; }
+      .lights i { width: 38px; height: 38px; border-radius: 50%; background: #2a1a3a; transition: background 0.1s, box-shadow 0.1s; }
+      .lights i.r { background: #ff3b5c; box-shadow: 0 0 24px #ff3b5c; }
+      .lights i.g { background: #b6ff00; box-shadow: 0 0 24px #b6ff00; }
+      .minimap { position: absolute; left: calc(14px + env(safe-area-inset-left)); top: calc(62px + env(safe-area-inset-top)); width: 150px; height: 110px; border-radius: 12px; background: rgba(10, 6, 20, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); }
+      @media (max-width: 640px) { .minimap { top: calc(110px + env(safe-area-inset-top)); width: 110px; height: 84px; } }
+      .board { position: absolute; right: calc(14px + env(safe-area-inset-right)); top: calc(62px + env(safe-area-inset-top)); display: grid; gap: 4px; font-size: 14px; }
+      @media (max-width: 640px) { .board { top: calc(110px + env(safe-area-inset-top)); } }
+      .board div { display: flex; gap: 6px; align-items: center; padding: 2px 10px; border-radius: 8px; background: rgba(10, 6, 20, 0.55); }
+      .board i { width: 9px; height: 9px; border-radius: 50%; }
+      .board .me { outline: 1px solid var(--cyan); }
+
+      /* controles táctiles */
+      .pad { position: fixed; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 10px; pointer-events: auto; }
+      .pad.l { left: calc(12px + env(safe-area-inset-left)); }
+      .pad.r { right: calc(12px + env(safe-area-inset-right)); align-items: flex-end; }
+      .pad button { width: 76px; height: 76px; border-radius: 22px; border: 1.5px solid rgba(0, 240, 255, 0.5); background: rgba(10, 6, 20, 0.45); display: grid; place-items: center; font-family: 'Orbitron'; font-size: 12px; letter-spacing: 0.08em; touch-action: none; transition: background 0.1s, transform 0.1s; }
+      .pad button svg { width: 28px; height: 28px; stroke: var(--cyan); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+      .pad button.on { background: rgba(0, 240, 255, 0.25); transform: scale(0.94); }
+      .pad .drift-btn { border-color: rgba(255, 43, 214, 0.6); color: var(--pink); width: 86px; height: 86px; }
+      .pad .drift-btn.on { background: rgba(255, 43, 214, 0.3); }
+      .pad .small { width: 60px; height: 60px; font-size: 10px; }
+
+      /* pantallas */
+      .screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 58px 14px 18px; overflow-y: auto; background: radial-gradient(ellipse at 50% 100%, rgba(255, 43, 214, 0.25), transparent 60%), rgba(10, 6, 20, 0.55); opacity: 0; visibility: hidden; transition: opacity 0.4s var(--ease), visibility 0s linear 0.4s; }
+      .screen.on { opacity: 1; visibility: visible; transition: opacity 0.4s var(--ease); }
+      .card { width: min(460px, 100%); padding: 24px 22px; border-radius: 22px; background: var(--card); border: 1px solid rgba(255, 43, 214, 0.35); box-shadow: 0 0 60px -20px var(--pink); display: grid; gap: 12px; transform: translateY(16px); transition: transform 0.55s var(--spring); backdrop-filter: blur(8px); }
+      .screen.on .card { transform: none; }
+      .logo { text-align: center; font-family: 'Orbitron'; font-weight: 900; font-size: clamp(38px, 10vw, 58px); line-height: 0.95; letter-spacing: 0.04em; font-style: italic; }
+      .logo span { display: block; color: var(--pink); text-shadow: 0 0 20px var(--pink), 0 0 50px var(--pink); }
+      .logo em { display: block; font-style: italic; color: var(--cyan); text-shadow: 0 0 20px var(--cyan); }
+      .sub { text-align: center; color: var(--muted); }
+      .mode { display: grid; text-align: left; padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(0, 240, 255, 0.3); transition: transform 0.35s var(--spring), border-color 0.2s, box-shadow 0.2s; }
+      .mode b { font-family: 'Orbitron'; font-size: 16px; letter-spacing: 0.06em; }
+      .mode small { color: var(--muted); font-size: 14px; }
+      .mode:hover, .mode:focus-visible { transform: translateX(4px) skewX(-4deg); border-color: var(--cyan); box-shadow: 0 0 22px -8px var(--cyan); outline: none; }
+      .lbl { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+      .seg { display: flex; gap: 6px; }
+      .seg button { flex: 1; padding: 8px 4px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.12); font-size: 15px; transition: all 0.25s var(--ease); }
+      .seg button.on { border-color: var(--pink); background: rgba(255, 43, 214, 0.18); box-shadow: 0 0 16px -6px var(--pink); }
+      .go { height: 54px; border-radius: 14px; font-family: 'Orbitron'; font-weight: 900; font-size: 18px; letter-spacing: 0.12em; background: linear-gradient(90deg, var(--pink), #8a2bff); box-shadow: 0 0 30px -8px var(--pink); transition: transform 0.35s var(--spring); }
+      .go:hover { transform: translateY(-2px) scale(1.02); }
+      .go:active { transform: scale(0.97); }
+      .go.alt { background: transparent; border: 1px solid var(--cyan); box-shadow: 0 0 20px -10px var(--cyan); }
+      .link { color: var(--muted); }
+      .field { height: 48px; border-radius: 12px; padding: 0 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); font-size: 18px; outline: none; -webkit-user-select: text; user-select: text; }
+      .field:focus { border-color: var(--cyan); }
+      .field.code { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; font-family: 'Orbitron'; }
+      .row { display: flex; gap: 8px; }
+      .row > .field { flex: 1; min-width: 0; }
+      .status { min-height: 1.3em; color: #ff6b8b; text-align: center; font-size: 15px; }
+      .code { text-align: center; font-family: 'Orbitron'; font-size: 42px; letter-spacing: 0.16em; color: var(--cyan); text-shadow: 0 0 18px var(--cyan); }
+      .plist { list-style: none; display: grid; gap: 6px; }
+      .plist li { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); }
+      .plist i { width: 12px; height: 12px; border-radius: 50%; }
+      .plist small { margin-left: auto; color: var(--muted); }
+      .keys { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.5; }
+      .keys kbd { font-family: 'Orbitron'; font-size: 10px; padding: 1px 5px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 4px; }
+      .res { list-style: none; display: grid; gap: 6px; }
+      .res li { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); animation: rowIn 0.5s var(--spring) both; }
+      .res li:nth-child(2) { animation-delay: 0.1s; } .res li:nth-child(3) { animation-delay: 0.2s; } .res li:nth-child(4) { animation-delay: 0.3s; }
+      @keyframes rowIn { from { opacity: 0; transform: translateX(-16px); } }
+      .res b { font-family: 'Orbitron'; }
+      .res span small { display: block; color: var(--muted); font-size: 12px; }
+      .big { text-align: center; font-family: 'Orbitron'; font-weight: 900; font-size: 44px; color: var(--cyan); text-shadow: 0 0 20px var(--cyan); }
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+      .stats div { padding: 8px 4px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); }
+      .stats b { display: block; font-family: 'Orbitron'; font-size: 16px; }
+      .stats small { color: var(--muted); font-size: 12px; }
+      .quit { position: fixed; right: 14px; top: calc(12px + env(safe-area-inset-top)); z-index: 3; padding: 6px 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(10, 6, 20, 0.5); font-size: 13px; color: var(--muted); }
+      @media (max-width: 640px) { .quit { top: auto; bottom: calc(100px + env(safe-area-inset-bottom)); right: 50%; transform: translateX(50%); } }
+      :root[data-gi-motion='reduced'] * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div class="hud" id="hud" hidden>
+      <div class="top">
+        <div class="box"><small data-t="lap"></small><b id="h-lap">1/3</b></div>
+        <div class="box c"><small data-t="time"></small><b id="h-time">0:00.0</b></div>
+        <div class="box" id="h-pos-box"><small data-t="pos"></small><b id="h-pos">1°</b></div>
+        <div class="box c" id="h-score-box" hidden><small data-t="driftPts"></small><b id="h-score">0</b></div>
+      </div>
+      <div class="split" id="split"></div>
+      <canvas class="minimap" id="mini"></canvas>
+      <div class="board" id="board"></div>
+      <div class="drift" id="drift"><b id="drift-pts">0</b><span id="drift-mult">DRIFT ×1</span></div>
+      <div class="pop" id="pop"></div>
+      <div class="nitro"><small>NITRO</small><div><i id="nitro"></i></div></div>
+      <div class="speed">
+        <svg viewBox="0 0 100 100"><path d="M18 78 A40 40 0 1 1 82 78" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="6" stroke-linecap="round" /><path id="gauge" d="M18 78 A40 40 0 1 1 82 78" fill="none" stroke="url(#gg)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" /><defs><linearGradient id="gg"><stop offset="0" stop-color="#00f0ff" /><stop offset="1" stop-color="#ff2bd6" /></linearGradient></defs></svg>
+        <b><span id="h-speed">0</span><small>KM/H</small></b>
+      </div>
+    </div>
+    <div class="lights" id="lights"><i></i><i></i><i></i></div>
+    <div class="pad l" id="pad-l" hidden>
+      <button data-k="left"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></button>
+      <button data-k="right"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg></button>
+    </div>
+    <div class="pad r" id="pad-r" hidden>
+      <button class="small" data-k="brake" data-t="brakeBtn"></button>
+      <button class="small" data-k="boost">NITRO</button>
+      <button class="drift-btn" data-k="hand">DRIFT</button>
+    </div>
+    <button class="quit" id="quit" hidden data-t="quit"></button>
+
+    <section class="screen on" id="s-home">
+      <div class="card">
+        <div class="logo"><span>DRIFT</span><em>NEON</em></div>
+        <p class="sub" data-t="tagline"></p>
+        <button class="mode" data-mode="trial"><b data-t="trial"></b><small data-t="trialSub"></small></button>
+        <button class="mode" data-mode="drift"><b data-t="driftMode"></b><small data-t="driftSub"></small></button>
+        <button class="mode" data-mode="local" id="mode-local"><b data-t="local"></b><small data-t="localSub"></small></button>
+        <button class="mode" data-mode="online"><b data-t="online"></b><small data-t="onlineSub"></small></button>
+        <p class="keys" id="keys-hint"></p>
+      </div>
+    </section>
+
+    <section class="screen" id="s-setup">
+      <div class="card">
+        <h2 class="orb" id="setup-title" style="text-align: center"></h2>
+        <span class="lbl" data-t="track"></span>
+        <div class="seg" id="track-seg"></div>
+        <canvas id="track-preview" style="width: 100%; height: 150px"></canvas>
+        <span class="lbl" id="laps-lbl" data-t="laps"></span>
+        <div class="seg" id="laps-seg"><button data-v="1">1</button><button data-v="3" class="on">3</button><button data-v="5">5</button></div>
+        <button class="go" id="setup-go" data-t="race"></button>
+        <button class="link" data-back data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-online">
+      <div class="card">
+        <h2 class="orb" style="text-align: center" data-t="online"></h2>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+        <button class="go" id="on-create" data-t="create"></button>
+        <div class="row"><input class="field code" id="on-code" maxlength="5" autocomplete="off" placeholder="ABCDE" /><button class="go alt" style="padding: 0 16px; font-size: 14px" id="on-join" data-t="join"></button></div>
+        <p class="status" id="on-status"></p>
+        <button class="link" data-back data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-lobby">
+      <div class="card">
+        <span class="lbl" style="text-align: center" data-t="shareCode"></span>
+        <div class="code" id="lobby-code">-----</div>
+        <button class="go alt" id="lobby-share" data-t="copyLink"></button>
+        <ul class="plist" id="lobby-players"></ul>
+        <div id="lobby-host">
+          <span class="lbl" data-t="track"></span>
+          <div class="seg" id="lobby-track"></div>
+          <span class="lbl" data-t="laps"></span>
+          <div class="seg" id="lobby-laps"><button data-v="1">1</button><button data-v="3">3</button><button data-v="5">5</button></div>
+        </div>
+        <p class="sub" id="lobby-info"></p>
+        <button class="go" id="lobby-start" data-t="start"></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="link" id="lobby-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-results">
+      <div class="card">
+        <h2 class="orb" style="text-align: center" id="res-title"></h2>
+        <div class="big" id="res-big"></div>
+        <div class="stats" id="res-stats"></div>
+        <ul class="res" id="res-list"></ul>
+        <button class="go" id="res-again" data-t="again"></button>
+        <button class="link" id="res-menu" data-t="menu"></button>
+      </div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
