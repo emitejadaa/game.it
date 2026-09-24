@@ -1,0 +1,18 @@
+{
+  "id": "evolution",
+  "title": { "es": "Evolución", "en": "Evolution" },
+  "description": {
+    "es": "De una gota de sopa primordial a crear universos. Clicker evolutivo con rumbos, extinciones y un árbol de mutaciones.",
+    "en": "From a drop of primordial soup to birthing universes. Evolutionary clicker with paths, extinctions and a mutation tree."
+  },
+  "categories": ["idle", "estrategia", "casual"],
+  "tags": ["clicker", "incremental", "evolución", "evolution", "idle", "prestigio", "cookie clicker", "universo"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": false, "multiplayer": false, "story": false },
+  "order": 10
+}

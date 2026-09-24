@@ -10,6 +10,7 @@ export const CATEGORIES = [
   'deporte',
   'carreras',
   'estrategia',
+  'idle',
   'historia',
   'online',
   'multijugador',

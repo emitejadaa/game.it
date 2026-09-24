@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Evolución · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <canvas id="bg"></canvas>
+
+    <div class="layout">
+      <!-- panel izquierdo: linaje -->
+      <aside class="panel side" id="side">
+        <div class="era-card">
+          <small data-t="era"></small>
+          <h2 id="era-name"></h2>
+          <div class="evo">
+            <div class="bar"><i id="evo-bar"></i></div>
+            <button class="evo-btn" id="evo-btn"><span data-t="evolve"></span><small id="evo-cost"></small></button>
+          </div>
+        </div>
+        <div class="paths" id="paths"></div>
+        <div class="ability" id="ability" hidden><button id="ability-btn"></button></div>
+        <div class="buffs" id="buffs"></div>
+        <div class="mini-stats" id="mini-stats"></div>
+        <div class="prestige-card" id="prestige-card">
+          <small data-t="dna"></small>
+          <b id="adn">0</b>
+          <p id="adn-bonus"></p>
+          <button class="ext-btn" id="ext-btn"><span data-t="extinct"></span><small id="ext-gain"></small></button>
+        </div>
+      </aside>
+
+      <!-- centro: el organismo -->
+      <main class="center" id="center">
+        <div class="counter">
+          <b id="energy">0</b>
+          <span><em id="eps">0</em> <span data-t="perSec"></span></span>
+        </div>
+        <div class="hero-wrap">
+          <div class="ring"></div>
+          <button class="hero" id="hero" aria-label="organismo"></button>
+        </div>
+        <p class="click-val" id="click-val"></p>
+        <button class="evo-float" id="evo-float" hidden><span data-t="evolve"></span></button>
+        <div class="floaters" id="floaters"></div>
+      </main>
+
+      <!-- panel derecho: tienda -->
+      <section class="panel shop" id="shop">
+        <nav class="tabs" id="tabs">
+          <button data-tab="gens" class="on" data-t="tabGens"></button>
+          <button data-tab="ups" data-t="tabUps"></button>
+          <button data-tab="tree" data-t="tabTree"></button>
+          <button data-tab="ach" data-t="tabAch"></button>
+          <button data-tab="more" data-t="tabMore"></button>
+          <button data-tab="side" class="only-mobile" data-t="tabLine"></button>
+        </nav>
+        <div class="tab-body">
+          <div class="tab on" data-tab="gens">
+            <div class="amounts" id="amounts"><button data-n="1" class="on">×1</button><button data-n="10">×10</button><button data-n="100">×100</button><button data-n="max">MAX</button></div>
+            <div class="gens" id="gens"></div>
+          </div>
+          <div class="tab" data-tab="ups"><div class="ups" id="ups"></div><p class="empty" id="ups-empty" data-t="noUps"></p></div>
+          <div class="tab" data-tab="tree"><div class="tree-head"><b id="tree-adn"></b><small data-t="treeHint"></small></div><div class="tree" id="tree"></div></div>
+          <div class="tab" data-tab="ach"><p class="ach-head" id="ach-head"></p><div class="achs" id="achs"></div></div>
+          <div class="tab" data-tab="more">
+            <div class="stats-list" id="stats"></div>
+            <h4 data-t="saveTitle"></h4>
+            <p class="note" data-t="saveNote"></p>
+            <div class="row"><button class="btn" id="export" data-t="export"></button><button class="btn" id="import" data-t="import"></button></div>
+            <textarea id="save-box" rows="3" spellcheck="false" hidden></textarea>
+            <button class="btn danger" id="wipe" data-t="wipe"></button>
+          </div>
+          <div class="tab" data-tab="side" id="side-mobile"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- elección de rumbo -->
+    <div class="modal" id="evo-modal">
+      <div class="modal-card">
+        <small data-t="evolveTo"></small>
+        <h2 id="evo-title"></h2>
+        <p class="note" id="evo-sub"></p>
+        <div class="choices" id="choices"></div>
+        <button class="btn" id="evo-confirm" data-t="confirm" hidden></button>
+        <button class="link" id="evo-cancel" data-t="cancel"></button>
+      </div>
+    </div>
+    <!-- extinción -->
+    <div class="modal" id="ext-modal">
+      <div class="modal-card">
+        <h2 data-t="extinctTitle"></h2>
+        <p class="note" id="ext-text"></p>
+        <button class="btn danger" id="ext-confirm" data-t="extinctGo"></button>
+        <button class="link" id="ext-cancel" data-t="cancel"></button>
+      </div>
+    </div>
+    <div class="flash" id="flash"><small></small><b></b></div>
+    <div class="toasts" id="toasts"></div>
+    <div class="tip" id="tip"></div>
+    <script type="module" src="./ui.js"></script>
+  </body>
+</html>
