@@ -9,7 +9,11 @@ npm run build    # sitio estático en dist/ (se puede subir a Vercel, Netlify, G
 npm run preview  # prueba el build
 ```
 
-**Vercel:** importar el repo en [vercel.com/new](https://vercel.com/new) (la configuración ya está en `vercel.json`). Desde ahí, cada push a `main` se despliega solo.
+**Publicado en Render** (cada push a `main` se despliega solo):
+- Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
+- Servidor online (salas del minigolf): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+  Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
+- En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que el minigolf usa automáticamente.
 
 ## Cómo está armado
 
