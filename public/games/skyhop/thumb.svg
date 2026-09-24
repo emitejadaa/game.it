@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d2b64"/><stop offset=".45" stop-color="#ff9a8b"/><stop offset="1" stop-color="#9fd8ff"/></linearGradient>
+    <radialGradient id="b" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".2" stop-color="#ff7aa8"/><stop offset="1" stop-color="#d9557f"/></radialGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#sky)"/>
+  <g fill="#fff"><circle cx="40" cy="20" r="1.5"/><circle cx="260" cy="14" r="1.2"/><circle cx="200" cy="34" r="1"/><circle cx="90" cy="40" r="1.2"/><circle cx="290" cy="46" r="1.5"/></g>
+  <g fill="#fff" opacity=".9"><ellipse cx="60" cy="150" rx="40" ry="12"/><circle cx="48" cy="144" r="14"/><circle cx="68" cy="140" r="16"/><ellipse cx="270" cy="120" rx="34" ry="10"/><circle cx="262" cy="114" r="12"/></g>
+  <g>
+    <rect x="198" y="178" width="80" height="12" rx="6" fill="#e9dcc0"/><rect x="198" y="178" width="80" height="7" rx="5" fill="#8bd46e"/>
+    <rect x="90" y="126" width="70" height="12" rx="6" fill="#f2c9a0"/><rect x="90" y="126" width="70" height="7" rx="5" fill="#ffd166"/>
+    <rect x="170" y="74" width="66" height="12" rx="6" fill="#5d6fc4"/><rect x="170" y="74" width="66" height="7" rx="5" fill="#8aa0ff"/>
+    <path d="M198 74 l-5 -10 l5 0 l-5 -10" stroke="#7a7699" stroke-width="2.5" fill="none"/><rect x="189" y="50" width="14" height="4" rx="2" fill="#ff6b8b"/>
+  </g>
+  <g transform="translate(140 92)">
+    <ellipse cx="0" cy="0" rx="15" ry="21" fill="url(#b)"/>
+    <ellipse cx="-3" cy="-6" rx="4" ry="5" fill="#fff"/><ellipse cx="8" cy="-6" rx="4" ry="5" fill="#fff"/>
+    <circle cx="-2" cy="-7" r="2.2" fill="#2d2a4a"/><circle cx="9" cy="-7" r="2.2" fill="#2d2a4a"/>
+    <ellipse cx="-6" cy="1" rx="3" ry="1.8" fill="rgba(255,120,150,.6)"/><ellipse cx="12" cy="1" rx="3" ry="1.8" fill="rgba(255,120,150,.6)"/>
+  </g>
+  <g stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8"><path d="M132 124 l-4 8M140 126 v9M148 124 l4 8"/></g>
+</svg>

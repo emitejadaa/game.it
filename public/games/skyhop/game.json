@@ -1,0 +1,19 @@
+{
+  "id": "skyhop",
+  "title": "Sky Hop",
+  "description": {
+    "es": "Saltá hacia un cielo infinito que cambia de día a espacio. Carrera online con el mismo mundo para todos.",
+    "en": "Hop into an endless sky that goes from daytime to outer space. Online race on the same world."
+  },
+  "categories": ["arcade", "casual", "online", "multijugador"],
+  "tags": ["doodle", "saltar", "jump", "infinito", "endless", "plataformas", "cielo"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "portrait",
+  "input": ["keyboard", "touch", "tilt"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 4, "story": false },
+  "order": 8
+}
