@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es" data-theme="dark" data-accent="cyan">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="game.it — juegos web minimalistas, fluidos y livianos." />
+    <meta name="theme-color" content="#07070a" />
+    <title>game.it</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <script>
+      // Aplica tema/acento antes del primer pintado para evitar parpadeos.
+      (function () {
+        var p = {};
+        try { p = JSON.parse(localStorage.getItem('gameit:prefs')) || {}; } catch (e) {}
+        var d = document.documentElement;
+        var sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+        var sysReduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        d.dataset.theme = p.theme === 'light' || p.theme === 'dark' ? p.theme : sysDark ? 'dark' : 'light';
+        d.dataset.accent = p.accent || 'cyan';
+        d.dataset.glow = p.glow === false ? 'off' : 'on';
+        d.dataset.motion = p.reducedMotion === 'on' || (p.reducedMotion !== 'off' && sysReduce) ? 'reduced' : 'full';
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="loader" class="loader show" aria-live="polite">
+      <div class="loader-word" aria-label="game.it"></div>
+      <div class="loader-bar"><i></i></div>
+      <div class="loader-note"></div>
+    </div>
+
+    <div id="app" class="app" hidden>
+      <div class="bg-grid" aria-hidden="true"></div>
+
+      <header class="topbar">
+        <a class="logo" href="#" aria-label="game.it — inicio"><span>game</span><b>.it</b><i class="caret"></i></a>
+        <div class="top-actions">
+          <button class="icon-btn" id="btn-search" data-i18n-title="search.open" aria-controls="search" aria-expanded="false">
+            <svg viewBox="0 0 24 24" class="i-lens"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <kbd>/</kbd>
+          </button>
+          <button class="icon-btn" id="btn-prefs" data-i18n-title="prefs.open" aria-controls="prefs" aria-expanded="false">
+            <svg viewBox="0 0 24 24" class="i-gear"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" /></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="menu" id="menu">
+        <section class="shelf" id="shelf-recent" hidden>
+          <h2 class="shelf-title"><span data-i18n="menu.recent"></span><i></i></h2>
+          <div class="grid" id="grid-recent"></div>
+        </section>
+        <section class="shelf" id="shelf-for-you" hidden>
+          <h2 class="shelf-title"><span data-i18n="menu.forYou"></span><i></i></h2>
+          <div class="grid" id="grid-for-you"></div>
+        </section>
+        <section class="shelf" id="shelf-all">
+          <h2 class="shelf-title"><span data-i18n="menu.all"></span><i></i><small id="count-all"></small></h2>
+          <div class="grid" id="grid-all"></div>
+        </section>
+        <footer class="foot"><span data-i18n="menu.footer"></span></footer>
+      </main>
+
+      <div class="scrim" id="scrim"></div>
+
+      <section class="search" id="search" role="dialog" aria-modal="true" aria-hidden="true" data-i18n-label="search.title">
+        <div class="search-inner">
+          <div class="search-row">
+            <svg viewBox="0 0 24 24" class="i-lens"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <input id="search-input" type="search" autocomplete="off" spellcheck="false" data-i18n-placeholder="search.placeholder" />
+            <button class="text-btn" id="search-close"><span data-i18n="common.close"></span> <kbd>esc</kbd></button>
+          </div>
+          <div class="chips" id="chips" role="tablist"></div>
+          <div class="search-results">
+            <div class="grid" id="grid-search"></div>
+            <p class="empty" id="search-empty" hidden></p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="prefs" id="prefs" role="dialog" aria-hidden="true" data-i18n-label="prefs.title"></aside>
+
+      <section class="player" id="player" aria-hidden="true">
+        <div class="player-bar">
+          <button class="pill-btn" id="btn-exit">
+            <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg><span data-i18n="player.exit"></span>
+          </button>
+          <button class="icon-btn small" id="btn-player-prefs" data-i18n-title="prefs.open">
+            <svg viewBox="0 0 24 24" class="i-gear"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" /></svg>
+          </button>
+        </div>
+        <div class="player-stage" id="player-stage"></div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,160 @@
+const dict = {
+  es: {
+    'common.close': 'Cerrar',
+    'loader.loading': 'cargando',
+    'loader.game': 'cargando {name}',
+    'menu.recent': 'Jugados recientemente',
+    'menu.forYou': 'Para vos',
+    'menu.all': 'Todos los juegos',
+    'menu.soon': 'pronto',
+    'menu.footer': 'Sin cuentas. Tus preferencias se guardan en este dispositivo.',
+    'menu.games': '{n} juegos',
+    'menu.game': '1 juego',
+    'search.open': 'Buscar (/)',
+    'search.title': 'Buscar juegos',
+    'search.placeholder': 'Buscar juegos…',
+    'search.empty': 'Nada por acá todavía.',
+    'search.emptyCat': 'Todavía no hay juegos de {cat}. Pronto.',
+    'player.exit': 'Menú',
+    'player.error': 'No se pudo cargar el juego.',
+    'prefs.open': 'Preferencias',
+    'prefs.title': 'Preferencias',
+    'prefs.appearance': 'Apariencia',
+    'prefs.theme': 'Tema',
+    'prefs.theme.system': 'Sistema',
+    'prefs.theme.dark': 'Oscuro',
+    'prefs.theme.light': 'Claro',
+    'prefs.accent': 'Acento',
+    'prefs.sound': 'Sonido',
+    'prefs.muted': 'Silenciar todo',
+    'prefs.volume': 'General',
+    'prefs.sfx': 'Efectos',
+    'prefs.music': 'Música',
+    'prefs.performance': 'Rendimiento y accesibilidad',
+    'prefs.motion': 'Reducir movimiento',
+    'prefs.motion.system': 'Sistema',
+    'prefs.motion.on': 'Sí',
+    'prefs.motion.off': 'No',
+    'prefs.glow': 'Brillo neón',
+    'prefs.glowHint': 'Apagalo para ganar FPS en equipos lentos',
+    'prefs.fps': 'Mostrar FPS',
+    'prefs.controls': 'Controles',
+    'prefs.keys': 'Teclado',
+    'prefs.keys.both': 'Ambos',
+    'prefs.keys.arrows': 'Flechas',
+    'prefs.keys.wasd': 'WASD',
+    'prefs.touch': 'Controles táctiles',
+    'prefs.touch.auto': 'Auto',
+    'prefs.touch.on': 'Siempre',
+    'prefs.touch.off': 'Nunca',
+    'prefs.lang': 'Idioma',
+    'prefs.reset': 'Restablecer',
+    'prefs.saved': 'Guardado en este dispositivo',
+    'cat.all': 'Todos',
+    'cat.arcade': 'Arcade',
+    'cat.aventura': 'Aventura',
+    'cat.accion': 'Acción',
+    'cat.puzzle': 'Puzzle',
+    'cat.deporte': 'Deporte',
+    'cat.carreras': 'Carreras',
+    'cat.estrategia': 'Estrategia',
+    'cat.historia': 'Historia',
+    'cat.online': 'Online',
+    'cat.multijugador': 'Multijugador',
+    'cat.clasicos': 'Clásicos',
+    'cat.casual': 'Casual',
+  },
+  en: {
+    'common.close': 'Close',
+    'loader.loading': 'loading',
+    'loader.game': 'loading {name}',
+    'menu.recent': 'Recently played',
+    'menu.forYou': 'For you',
+    'menu.all': 'All games',
+    'menu.soon': 'soon',
+    'menu.footer': 'No accounts. Your preferences stay on this device.',
+    'menu.games': '{n} games',
+    'menu.game': '1 game',
+    'search.open': 'Search (/)',
+    'search.title': 'Search games',
+    'search.placeholder': 'Search games…',
+    'search.empty': 'Nothing here yet.',
+    'search.emptyCat': 'No {cat} games yet. Soon.',
+    'player.exit': 'Menu',
+    'player.error': 'The game could not be loaded.',
+    'prefs.open': 'Preferences',
+    'prefs.title': 'Preferences',
+    'prefs.appearance': 'Appearance',
+    'prefs.theme': 'Theme',
+    'prefs.theme.system': 'System',
+    'prefs.theme.dark': 'Dark',
+    'prefs.theme.light': 'Light',
+    'prefs.accent': 'Accent',
+    'prefs.sound': 'Sound',
+    'prefs.muted': 'Mute all',
+    'prefs.volume': 'Master',
+    'prefs.sfx': 'Effects',
+    'prefs.music': 'Music',
+    'prefs.performance': 'Performance & accessibility',
+    'prefs.motion': 'Reduce motion',
+    'prefs.motion.system': 'System',
+    'prefs.motion.on': 'Yes',
+    'prefs.motion.off': 'No',
+    'prefs.glow': 'Neon glow',
+    'prefs.glowHint': 'Turn it off for more FPS on slow devices',
+    'prefs.fps': 'Show FPS',
+    'prefs.controls': 'Controls',
+    'prefs.keys': 'Keyboard',
+    'prefs.keys.both': 'Both',
+    'prefs.keys.arrows': 'Arrows',
+    'prefs.keys.wasd': 'WASD',
+    'prefs.touch': 'Touch controls',
+    'prefs.touch.auto': 'Auto',
+    'prefs.touch.on': 'Always',
+    'prefs.touch.off': 'Never',
+    'prefs.lang': 'Language',
+    'prefs.reset': 'Reset',
+    'prefs.saved': 'Saved on this device',
+    'cat.all': 'All',
+    'cat.arcade': 'Arcade',
+    'cat.aventura': 'Adventure',
+    'cat.accion': 'Action',
+    'cat.puzzle': 'Puzzle',
+    'cat.deporte': 'Sports',
+    'cat.carreras': 'Racing',
+    'cat.estrategia': 'Strategy',
+    'cat.historia': 'Story',
+    'cat.online': 'Online',
+    'cat.multijugador': 'Multiplayer',
+    'cat.clasicos': 'Classics',
+    'cat.casual': 'Casual',
+  },
+};
+
+let lang = 'es';
+
+export const setLang = (l) => {
+  lang = dict[l] ? l : 'es';
+  document.documentElement.lang = lang;
+};
+export const getLang = () => lang;
+
+export function t(key, vars) {
+  let s = dict[lang][key] ?? dict.es[key] ?? key;
+  if (vars) for (const k in vars) s = s.replace(`{${k}}`, vars[k]);
+  return s;
+}
+
+/** Texto localizable de un manifest: string o { es, en }. */
+export const pick = (v) => (v && typeof v === 'object' ? v[lang] ?? v.es ?? Object.values(v)[0] : v ?? '');
+
+/** Rellena los nodos marcados con data-i18n*. */
+export function translateDom(root = document) {
+  root.querySelectorAll('[data-i18n]').forEach((n) => (n.textContent = t(n.dataset.i18n)));
+  root.querySelectorAll('[data-i18n-title]').forEach((n) => {
+    n.title = t(n.dataset.i18nTitle);
+    n.setAttribute('aria-label', n.title);
+  });
+  root.querySelectorAll('[data-i18n-placeholder]').forEach((n) => (n.placeholder = t(n.dataset.i18nPlaceholder)));
+  root.querySelectorAll('[data-i18n-label]').forEach((n) => n.setAttribute('aria-label', t(n.dataset.i18nLabel)));
+}
