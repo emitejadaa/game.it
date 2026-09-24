@@ -2,10 +2,10 @@
 .prefs {
   position: fixed;
   z-index: 70;
-  top: calc(var(--top-h) + 8px);
-  right: var(--gutter);
+  top: calc(var(--top-h) + var(--safe-t) + 8px);
+  right: var(--safe-r);
   width: min(360px, calc(100vw - 32px));
-  max-height: calc(100dvh - var(--top-h) - 24px);
+  max-height: calc(100dvh - var(--top-h) - var(--safe-t) - 24px);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -29,7 +29,8 @@
   transition: transform var(--t) var(--ease), opacity var(--t-fast) var(--ease), visibility 0s;
 }
 .prefs.in-game {
-  top: 54px;
+  top: calc(54px + var(--safe-t));
+  max-height: calc(100dvh - 70px - var(--safe-t));
 }
 @media (max-width: 480px) {
   .prefs {
@@ -37,6 +38,8 @@
   }
 }
 .prefs-head {
+  flex-wrap: wrap;
+  gap: 4px 12px;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -52,6 +55,7 @@
   font-weight: 500;
 }
 .prefs-head small {
+  white-space: nowrap;
   font-size: 10px;
   color: var(--mute);
   display: flex;
@@ -97,9 +101,11 @@
 }
 .prow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px 12px;
+  padding: 3px 0;
   min-height: 42px;
   font-size: 12px;
 }
@@ -124,6 +130,7 @@
 .seg {
   --n: 3;
   --idx: 0;
+  margin-left: auto;
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--n), 1fr);
@@ -297,9 +304,9 @@
 .player-bar {
   position: absolute;
   z-index: 2;
-  top: 10px;
-  left: 10px;
-  right: 10px;
+  top: calc(10px + var(--safe-t));
+  left: max(10px, env(safe-area-inset-left, 0px));
+  right: max(10px, env(safe-area-inset-right, 0px));
   display: flex;
   align-items: center;
   justify-content: space-between;

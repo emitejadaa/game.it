@@ -1,8 +1,6 @@
 /* ============ Menú (una sola pantalla) ============ */
 .menu {
-  padding: 28px var(--gutter) 40px;
-  max-width: 1600px;
-  margin: 0 auto;
+  padding: 28px var(--safe-r) calc(40px + env(safe-area-inset-bottom, 0px)) var(--safe-l);
   display: grid;
   gap: 40px;
 }
@@ -43,6 +41,28 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
+  .menu {
+    padding-top: 20px;
+    gap: 30px;
+  }
+}
+@media (min-width: 1800px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .menu {
+    padding-top: 18px;
+    gap: 26px;
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+.menu > .shelf > .empty {
+  padding: 0 0 16px;
 }
 
 .foot {
@@ -192,6 +212,23 @@
   display: inline;
 }
 @media (hover: none) {
+  .card:hover:not(:focus-visible) {
+    transform: none;
+    border-color: var(--line2);
+    box-shadow: none;
+  }
+  .card:hover:not(:focus-visible)::before {
+    opacity: 0;
+  }
+  .card:hover:not(:focus-visible) img {
+    transform: none;
+  }
+  .chip:hover {
+    transform: none;
+  }
+  .chip:not([aria-selected='true']):hover {
+    border-color: var(--line2);
+  }
   .card .name {
     transform: none;
     font-size: 12px;
@@ -259,6 +296,7 @@
   left: 0;
   right: 0;
   max-height: min(88dvh, 900px);
+  max-height: min(88svh, 900px);
   display: flex;
   flex-direction: column;
   background: var(--bg);
@@ -277,9 +315,7 @@
 }
 .search-inner {
   width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 18px var(--gutter) 26px;
+  padding: calc(18px + var(--safe-t)) var(--safe-r) 26px var(--safe-l);
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -398,4 +434,13 @@
   color: var(--mute);
   font-size: 13px;
   animation: card-in var(--t) var(--ease) both;
+}
+@media (max-width: 560px), (orientation: landscape) and (max-height: 500px) {
+  .search {
+    max-height: 100dvh;
+  }
+  .search-inner {
+    gap: 14px;
+    padding-bottom: 18px;
+  }
 }

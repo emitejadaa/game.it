@@ -57,7 +57,7 @@
       }
       @media (max-width: 640px) {
         .hud {
-          padding: 52px 12px 2px;
+          padding: calc(52px + env(safe-area-inset-top)) 12px 2px;
         }
       }
       .stat {
@@ -318,6 +318,34 @@
       }
       .btns button:active {
         transform: scale(0.97);
+      }
+      /* ---------- Celular horizontal: HUD a la izquierda, cruceta a la derecha ---------- */
+      @media (orientation: landscape) and (max-height: 540px) {
+        body {
+          flex-direction: row;
+        }
+        .hud {
+          flex-direction: column;
+          justify-content: center;
+          gap: 12px;
+          min-width: 124px;
+          padding: 56px 6px 12px max(12px, env(safe-area-inset-left));
+        }
+        .stat b {
+          font-size: 14px;
+        }
+        .area {
+          flex-direction: row;
+        }
+        #stage {
+          margin: 10px 8px;
+        }
+        body.touch .dpad {
+          align-content: center;
+          grid-template-columns: repeat(3, 50px);
+          grid-template-rows: repeat(3, 50px);
+          padding: 48px max(14px, env(safe-area-inset-right)) 10px 6px;
+        }
       }
       :root[data-gi-motion='reduced'] * {
         animation: none !important;

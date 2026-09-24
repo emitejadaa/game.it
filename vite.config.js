@@ -17,8 +17,14 @@ function gamesRegistry() {
       .filter((d) => d.isDirectory() && existsSync(join(GAMES_DIR, d.name, 'game.json')))
       .map((d) => {
         const manifest = JSON.parse(readFileSync(join(GAMES_DIR, d.name, 'game.json'), 'utf8'));
+        const where = `public/games/${d.name}/game.json`;
         if (manifest.id && manifest.id !== d.name) {
-          throw new Error(`[games] public/games/${d.name}/game.json tiene id "${manifest.id}"; debe coincidir con la carpeta.`);
+          throw new Error(`[games] ${where} tiene id "${manifest.id}"; debe coincidir con la carpeta.`);
+        }
+        // cada juego declara dónde se puede jugar: "desktop" (o "web"), "mobile" o ambos
+        const valid = ['desktop', 'web', 'mobile'];
+        if (!Array.isArray(manifest.platforms) || !manifest.platforms.length || manifest.platforms.some((p) => !valid.includes(p))) {
+          throw new Error(`[games] ${where}: "platforms" es obligatorio, p. ej. ["desktop", "mobile"].`);
         }
         return { ...manifest, id: d.name };
       })

@@ -1,4 +1,4 @@
-import { CATEGORIES, GAMES, search } from '../core/registry.js';
+import { CATEGORIES, available, search } from '../core/registry.js';
 import { t } from '../core/i18n.js';
 import { render } from './cards.js';
 
@@ -59,7 +59,8 @@ export function init({ onToggle } = {}) {
 }
 
 export function renderChips() {
-  const count = (c) => (c === 'all' ? GAMES.length : GAMES.filter((g) => g.categories.includes(c)).length);
+  const games = available();
+  const count = (c) => (c === 'all' ? games.length : games.filter((g) => g.categories.includes(c)).length);
   chips.innerHTML = ['all', ...CATEGORIES]
     .map((c, i) => {
       const n = count(c);

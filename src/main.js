@@ -4,7 +4,8 @@ import './styles/panels.css';
 
 import * as prefs from './core/prefs.js';
 import { setLang, t, translateDom } from './core/i18n.js';
-import { GAMES, byId } from './core/registry.js';
+import { available, byId, playable } from './core/registry.js';
+import * as device from './core/device.js';
 import { track, recent, recommend } from './core/recent.js';
 import * as loader from './ui/loader.js';
 import { render, fitNames, enableSpotlight } from './ui/cards.js';
@@ -23,8 +24,12 @@ function renderMenu({ animate = true } = {}) {
   $('shelf-for-you').hidden = !forYou.length;
   if (rec.length) render($('grid-recent'), rec, { animate });
   if (forYou.length) render($('grid-for-you'), forYou, { animate, offset: rec.length });
-  render($('grid-all'), GAMES, { fill: true, animate, offset: rec.length + forYou.length });
-  $('count-all').textContent = GAMES.length === 1 ? t('menu.game') : t('menu.games', { n: GAMES.length });
+  const games = available();
+  render($('grid-all'), games, { fill: true, animate, offset: rec.length + forYou.length });
+  $('count-all').textContent = games.length === 1 ? t('menu.game') : t('menu.games', { n: games.length });
+  const empty = $('all-empty');
+  empty.hidden = games.length > 0;
+  empty.textContent = t(device.platform() === 'mobile' ? 'menu.noneMobile' : 'menu.noneDesktop');
 }
 
 function applyLang() {
@@ -41,7 +46,17 @@ let enteredFromMenu = false;
 async function route() {
   const m = location.hash.match(/^#play\/([\w-]+)/);
   const g = m && byId(m[1]);
-  if (g) {
+  if (g && !playable(g)) {
+    // enlace directo a un juego que no corre en este dispositivo
+    history.replaceState(null, '', location.pathname + location.search);
+    enteredFromMenu = false;
+    if (player.isActive()) await player.close();
+    await loader.show('');
+    loader.setNote(t(g.platforms.includes('mobile') ? 'menu.onlyMobile' : 'menu.onlyDesktop'), true);
+    await new Promise((r) => setTimeout(r, 2200));
+    renderMenu({ animate: false });
+    await loader.hide(0);
+  } else if (g) {
     if (player.game()?.id === g.id) return;
     search.close();
     prefsPanel.close();
@@ -120,7 +135,8 @@ function preload(onStep) {
   const fontTimeout = new Promise((r) => setTimeout(r, 1800));
   const tasks = [
     Promise.race([document.fonts.ready, fontTimeout]),
-    ...GAMES.slice(0, 12)
+    ...available()
+      .slice(0, 12)
       .filter((g) => g.thumbnail)
       .map(
         (g) =>
@@ -158,6 +174,10 @@ async function boot() {
   });
   player.init({ onExit: exitGame });
   enableSpotlight(document.body);
+  device.onChange(() => {
+    renderMenu({ animate: false });
+    search.renderChips();
+  });
   enableBackground();
 
   // Al tocar el iframe de un juego la ventana pierde el foco: se cierra el popup.

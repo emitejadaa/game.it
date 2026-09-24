@@ -2,6 +2,8 @@
  * Preferencias globales: se guardan en localStorage y aplican a toda la web y a todos los juegos.
  * Los juegos reciben la versión "resuelta" (ver resolved()) a través del SDK.
  */
+import { platform } from './device.js';
+
 const KEY = 'gameit:prefs';
 const RESOLVED_KEY = 'gameit:prefs:resolved';
 
@@ -107,6 +109,7 @@ export function resolved() {
     keys: state.keys,
     touch: state.touch === 'on' || (state.touch === 'auto' && mqCoarse.matches),
     lang: state.lang,
+    platform: platform(),
   };
 }
 

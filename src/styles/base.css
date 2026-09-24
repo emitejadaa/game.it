@@ -9,7 +9,15 @@
   --r: 14px;
   --top-h: 64px;
   --gutter: clamp(16px, 4vw, 40px);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-l: max(var(--gutter), env(safe-area-inset-left, 0px));
+  --safe-r: max(var(--gutter), env(safe-area-inset-right, 0px));
   color-scheme: dark;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --top-h: 54px;
+  }
 }
 
 :root[data-theme='dark'] {
@@ -154,11 +162,11 @@ kbd {
   position: sticky;
   top: 0;
   z-index: 30;
-  height: var(--top-h);
+  height: calc(var(--top-h) + var(--safe-t));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--gutter);
+  padding: var(--safe-t) var(--safe-r) 0 var(--safe-l);
   background: color-mix(in oklab, var(--bg) 82%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -407,4 +415,25 @@ kbd {
 .loader-note.error {
   color: var(--c-red);
   letter-spacing: 0.1em;
+}
+
+/* En pantallas táctiles el hover queda "pegado" después de tocar: se neutraliza. */
+@media (hover: none) {
+  .icon-btn:hover:not([aria-expanded='true']) {
+    transform: none;
+    color: var(--fg);
+    border-color: var(--line2);
+    box-shadow: none;
+  }
+  .icon-btn:hover:not([aria-expanded='true']) svg {
+    transform: none;
+  }
+  .pill-btn:hover {
+    color: var(--fg);
+    border-color: var(--line2);
+    box-shadow: none;
+  }
+  .pill-btn:hover svg {
+    transform: none;
+  }
 }

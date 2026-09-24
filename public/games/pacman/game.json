@@ -12,6 +12,7 @@
   "tech": "canvas2d",
   "sdk": true,
   "orientation": "any",
+  "platforms": ["desktop", "mobile"],
   "input": ["keyboard", "touch"],
   "features": { "online": false, "multiplayer": false, "story": false },
   "order": 1

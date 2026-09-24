@@ -9,6 +9,8 @@ npm run build    # sitio estático en dist/ (se puede subir a Vercel, Netlify, G
 npm run preview  # prueba el build
 ```
 
+Publicado en Vercel: cada push a `main` se despliega solo.
+
 ## Cómo está armado
 
 ```
@@ -36,10 +38,11 @@ public/
 
 ## Reglas comunes para todos los juegos
 
-1. **Fluidez primero.** 60 fps estables antes que detalle gráfico. Estilo simple y minimalista, bien animado.
-2. **Preferencias globales.** El juego respeta tema, color de acento, volumen, "reducir movimiento", brillo neón, teclado (flechas/WASD) e idioma que llegan por el SDK.
-3. **Salir.** El portal siempre muestra el botón "Menú". Si el juego tiene su propio menú de pausa, su botón de salir llama a `GameIt.exit()`.
-4. **Carga.** El juego llama a `GameIt.ready()` cuando puede mostrarse; mientras tanto se ve la pantalla de carga general.
+1. **Plataformas.** Cada juego declara en `platforms` si es para computadora, celular o ambos; solo aparece donde se puede jugar. Si es para celular, tiene que funcionar en vertical y horizontal.
+2. **Fluidez primero.** 60 fps estables antes que detalle gráfico. Estilo simple y minimalista, bien animado.
+3. **Preferencias globales.** El juego respeta tema, color de acento, volumen, "reducir movimiento", brillo neón, teclado (flechas/WASD) e idioma que llegan por el SDK.
+4. **Salir.** El portal siempre muestra el botón "Menú". Si el juego tiene su propio menú de pausa, su botón de salir llama a `GameIt.exit()`.
+5. **Carga.** El juego llama a `GameIt.ready()` cuando puede mostrarse; mientras tanto se ve la pantalla de carga general.
 
 ## Integrar un juego
 
@@ -56,6 +59,7 @@ public/
   "thumbnail": "thumb.svg",
   "entry": "index.html",
   "tech": "phaser",
+  "platforms": ["desktop", "mobile"],
   "sdk": true,
   "orientation": "any",
   "input": ["keyboard", "touch"],
@@ -70,6 +74,7 @@ public/
 | `title`, `description` | Texto o `{ "es": …, "en": … }`. |
 | `categories` | `arcade`, `aventura`, `accion`, `puzzle`, `deporte`, `carreras`, `estrategia`, `historia`, `online`, `multijugador`, `clasicos`, `casual`. |
 | `tags` | Palabras extra para la búsqueda y las recomendaciones. |
+| `platforms` | **Obligatorio.** Dónde se puede jugar: `["desktop"]` (computadora/web), `["mobile"]` (celular y tablet) o ambos. El menú, la búsqueda y los recientes muestran solo los juegos jugables en el dispositivo actual. |
 | `thumbnail` | Imagen 16:10 (SVG, WebP o PNG). |
 | `entry` | Archivo de entrada. También puede ser una URL absoluta (juego alojado en otro servidor). |
 | `sdk` | `true` si el juego usa el SDK. Con `false` la carga termina con el evento `load` del iframe. |
@@ -85,6 +90,7 @@ public/
     // p.theme: 'dark' | 'light'      p.colors: { bg, fg, accent, cyan, magenta, … }
     // p.volume: { master, sfx, music, muted }
     // p.reducedMotion, p.glow, p.showFps, p.keys, p.touch, p.lang
+    // p.platform: 'desktop' | 'mobile'
   }, true);
   GameIt.onPause(() => {/* portal abrió preferencias o se ocultó la pestaña */});
   GameIt.onResume(() => {});
