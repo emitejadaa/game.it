@@ -1,0 +1,18 @@
+{
+  "id": "connect4",
+  "title": { "es": "4 en línea", "en": "Connect Four" },
+  "description": {
+    "es": "Fichas que caen y rebotan en un tablero de juguete. Contra la compu, de a dos u online.",
+    "en": "Bouncy discs on a toy board. Versus CPU, two players or online."
+  },
+  "categories": ["estrategia", "clasicos", "online", "multijugador", "casual"],
+  "tags": ["connect four", "cuatro en raya", "fichas", "2 jugadores"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "svg",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 2, "story": false },
+  "order": 7
+}

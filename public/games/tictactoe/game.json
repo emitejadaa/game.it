@@ -1,0 +1,18 @@
+{
+  "id": "tictactoe",
+  "title": { "es": "Tateti", "en": "Tic-Tac-Toe" },
+  "description": {
+    "es": "El clásico dibujado a mano en un cuaderno. Contra la compu, de a dos u online.",
+    "en": "The hand-drawn notebook classic. Versus CPU, two players or online."
+  },
+  "categories": ["estrategia", "clasicos", "online", "multijugador", "casual"],
+  "tags": ["ta-te-ti", "tres en raya", "tic tac toe", "cuaderno", "2 jugadores"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "svg",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "input": ["mouse", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 2, "story": false },
+  "order": 6
+}

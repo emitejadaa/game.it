@@ -1,20 +1,22 @@
 /**
- * game.it — servidor de salas online (minigolf).
+ * game.it — servidor de salas online.
  *
- * - Salas por código de 5 letras, 1 a 4 jugadores.
- * - Física autoritativa: el servidor simula cada tiro con el mismo código que el cliente
- *   (public/games/minigolf/shared) y envía la trayectoria a todos.
- * - Protecciones: límite de conexiones y de salas por IP, límite global de salas, rate limit de
- *   mensajes (token bucket), tamaño máximo de mensaje, intentos de unión limitados (evita adivinar
- *   códigos), salas inactivas cerradas, vida máxima de sala, tiempo por turno, heartbeat, orígenes
- *   permitidos y validación estricta de cada mensaje.
+ * Núcleo genérico de salas (código de 5 letras, anfitrión, lobby, reconexión) y un módulo por juego
+ * en ./games. Cada módulo define sus reglas; el núcleo aplica las protecciones para todos:
+ * límite de conexiones y de salas por IP, límite global de salas, rate limit de mensajes (token
+ * bucket), tamaño máximo de mensaje, intentos de unión limitados (evita adivinar códigos), salas
+ * inactivas cerradas, vida máxima de sala, heartbeat, orígenes permitidos y validación de mensajes.
  */
 import { createServer } from 'node:http';
 import { randomBytes, randomInt } from 'node:crypto';
 import { WebSocketServer } from 'ws';
-import { HOLES, COURSES } from '../public/games/minigolf/shared/holes.js';
-import { simulate, shotDuration } from '../public/games/minigolf/shared/physics.js';
-import { Match, COLORS } from '../public/games/minigolf/shared/match.js';
+import minigolf from './games/minigolf.js';
+import tictactoe from './games/tictactoe.js';
+import connect4 from './games/connect4.js';
+import drift from './games/drift.js';
+import doodle from './games/doodle.js';
+
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle };
 
 const env = (k, d) => (process.env[k] !== undefined ? process.env[k] : d);
 const num = (k, d) => Number(env(k, d));
@@ -28,27 +30,25 @@ const CFG = {
   trustProxy: env('TRUST_PROXY', '1') === '1',
   maxRooms: num('MAX_ROOMS', 300),
   maxConnPerIp: num('MAX_CONN_PER_IP', 6),
-  roomsPerIpWindow: num('ROOMS_PER_IP', 6), // salas creadas por IP…
-  roomsWindowMs: num('ROOMS_WINDOW_MS', 10 * 60e3), // …en esta ventana
+  roomsPerIpWindow: num('ROOMS_PER_IP', 6),
+  roomsWindowMs: num('ROOMS_WINDOW_MS', 10 * 60e3),
   joinsPerMinute: num('JOINS_PER_MIN', 20),
-  msgRate: num('MSG_RATE', 12), // mensajes/seg sostenidos
-  msgBurst: num('MSG_BURST', 30),
+  msgRate: num('MSG_RATE', 30), // mensajes/seg sostenidos (los juegos en tiempo real mandan ~15/s)
+  msgBurst: num('MSG_BURST', 60),
   maxPayload: num('MAX_PAYLOAD', 2048),
   lobbyIdleMs: num('LOBBY_IDLE_MS', 10 * 60e3),
   roomIdleMs: num('ROOM_IDLE_MS', 8 * 60e3),
   roomMaxLifeMs: num('ROOM_MAX_LIFE_MS', 2 * 3600e3),
-  turnMs: num('TURN_MS', 35e3),
   graceMs: num('RECONNECT_GRACE_MS', 45e3),
   heartbeatMs: num('HEARTBEAT_MS', 20e3),
-  betweenHolesMs: num('BETWEEN_HOLES_MS', 4500),
-  maxPlayers: 4,
 };
 
+const COLORS = ['#ff5a5f', '#3ec1ff', '#ffc93c', '#7bd389'];
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin 0/O ni 1/I
-const rooms = new Map(); // code -> room
-const ipConns = new Map(); // ip -> count
-const ipRooms = new Map(); // ip -> [timestamps]
-const ipJoins = new Map(); // ip -> [timestamps]
+const rooms = new Map();
+const ipConns = new Map();
+const ipRooms = new Map();
+const ipJoins = new Map();
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 
 // ---------------- utilidades ----------------
@@ -86,60 +86,98 @@ const cleanName = (v) =>
 
 const send = (ws, msg) => ws && ws.readyState === 1 && ws.send(JSON.stringify(msg));
 
-// ---------------- salas ----------------
-function roomView(room) {
+// ---------------- API para los módulos de juego ----------------
+function makeApi(room) {
   return {
-    code: room.code,
-    host: room.host,
-    state: room.state,
-    holes: room.holes,
-    players: [...room.players.values()].map((p) => ({ id: p.id, name: p.name, color: p.color, connected: p.connected })),
-    match: room.match ? room.match.toJSON() : null,
-    holeTime: room.holeStart ? (Date.now() - room.holeStart) / 1000 : 0,
-    turnDeadline: room.turnDeadline ? room.turnDeadline - Date.now() : 0,
-    busy: Math.max(0, room.busyUntil - Date.now()),
+    broadcast: (msg, exceptId) => broadcast(room, msg, exceptId),
+    send: (pid, msg) => send(room.players.get(pid)?.ws, msg),
+    sync: () => sync(room),
+    touch: () => touch(room),
+    players: () => [...room.players.values()],
+    connected: (pid) => !!room.players.get(pid)?.connected,
+    setTimer(name, ms, fn) {
+      clearTimeout(room.timers.get(name));
+      room.timers.set(
+        name,
+        setTimeout(() => {
+          room.timers.delete(name);
+          if (rooms.get(room.code) === room) fn();
+        }, Math.max(0, ms)),
+      );
+    },
+    clearTimer(name) {
+      clearTimeout(room.timers.get(name));
+      room.timers.delete(name);
+    },
+    /** Termina la partida: la sala queda en "finished" hasta la revancha. */
+    end(payload) {
+      room.state = 'finished';
+      broadcast(room, { t: 'end', ...payload });
+      sync(room);
+    },
+    /** Vuelve la sala al lobby (por ejemplo si quedan menos jugadores que el mínimo). */
+    toLobby() {
+      for (const k of room.timers.keys()) this.clearTimer(k);
+      room.state = 'lobby';
+      room.data = null;
+      sync(room);
+    },
   };
 }
 
-function broadcast(room, msg) {
+// ---------------- salas ----------------
+function roomView(room) {
+  const mod = GAMES[room.game];
+  return {
+    code: room.code,
+    game: room.game,
+    host: room.host,
+    state: room.state,
+    now: Date.now(),
+    players: [...room.players.values()].map((p) => ({ id: p.id, name: p.name, color: p.color, connected: p.connected })),
+    ...(mod.view ? mod.view(room) : {}),
+  };
+}
+
+function broadcast(room, msg, exceptId) {
   const data = JSON.stringify(msg);
-  for (const p of room.players.values()) if (p.ws && p.ws.readyState === 1) p.ws.send(data);
+  for (const p of room.players.values()) if (p.id !== exceptId && p.ws && p.ws.readyState === 1) p.ws.send(data);
 }
 
 const sync = (room) => broadcast(room, { t: 'room', room: roomView(room) });
 const touch = (room) => (room.lastActivity = Date.now());
 
 function closeRoom(room, reason) {
-  clearTimeout(room.turnTimer);
-  clearTimeout(room.nextTimer);
+  for (const t of room.timers.values()) clearTimeout(t);
+  room.timers.clear();
   broadcast(room, { t: 'closed', reason });
   for (const p of room.players.values()) if (p.ws) p.ws.room = null;
   rooms.delete(room.code);
-  log('room closed', room.code, reason, 'rooms:', rooms.size);
+  log('room closed', room.code, room.game, reason, 'rooms:', rooms.size);
 }
 
-function createRoom(ws, name) {
+function createRoom(ws, name, game) {
+  const mod = GAMES[game];
+  if (!mod) return send(ws, { t: 'error', code: 'bad_game' });
   if (rooms.size >= CFG.maxRooms) return send(ws, { t: 'error', code: 'server_full' });
   if (!windowHit(ipRooms, ws.ip, CFG.roomsPerIpWindow, CFG.roomsWindowMs)) return send(ws, { t: 'error', code: 'too_many_rooms' });
   const code = newCode();
   if (!code) return send(ws, { t: 'error', code: 'server_full' });
   const room = {
     code,
+    game,
     host: null,
     players: new Map(),
     state: 'lobby',
-    holes: 9,
-    match: null,
     createdAt: Date.now(),
     lastActivity: Date.now(),
-    holeStart: 0,
-    busyUntil: 0,
-    turnDeadline: 0,
-    turnTimer: null,
-    nextTimer: null,
+    timers: new Map(),
+    data: null, // estado propio del juego
+    settings: mod.defaults ? { ...mod.defaults } : {},
   };
+  room.api = makeApi(room);
   rooms.set(code, room);
-  log('room created', code, 'rooms:', rooms.size);
+  log('room created', code, game, 'rooms:', rooms.size);
   addPlayer(room, ws, name);
 }
 
@@ -159,19 +197,18 @@ function addPlayer(room, ws, name) {
   ws.room = room;
   ws.pid = p.id;
   touch(room);
-  send(ws, { t: 'joined', code: room.code, id: p.id, token: p.token });
+  send(ws, { t: 'joined', code: room.code, game: room.game, id: p.id, token: p.token });
   sync(room);
 }
 
-function joinRoom(ws, code, name, token) {
+function joinRoom(ws, code, name, token, game) {
   if (!windowHit(ipJoins, ws.ip, CFG.joinsPerMinute, 60e3)) return send(ws, { t: 'error', code: 'too_many_joins' });
   code = String(code || '')
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, '')
     .slice(0, 5);
   const room = rooms.get(code);
-  if (!room) return send(ws, { t: 'error', code: 'not_found' });
-  // reconexión con token
+  if (!room || (game && room.game !== game)) return send(ws, { t: 'error', code: 'not_found' });
   if (token) {
     const p = [...room.players.values()].find((x) => x.token === token);
     if (p) {
@@ -185,13 +222,15 @@ function joinRoom(ws, code, name, token) {
       ws.room = room;
       ws.pid = p.id;
       touch(room);
-      send(ws, { t: 'joined', code: room.code, id: p.id, token: p.token });
+      send(ws, { t: 'joined', code: room.code, game: room.game, id: p.id, token: p.token });
+      GAMES[room.game].onReconnect?.(room, room.api, p.id);
       sync(room);
       return;
     }
   }
+  const mod = GAMES[room.game];
   if (room.state !== 'lobby') return send(ws, { t: 'error', code: 'in_progress' });
-  if (room.players.size >= CFG.maxPlayers) return send(ws, { t: 'error', code: 'room_full' });
+  if (room.players.size >= mod.maxPlayers) return send(ws, { t: 'error', code: 'room_full' });
   addPlayer(room, ws, name);
 }
 
@@ -202,11 +241,10 @@ function leave(ws, reason = 'left') {
   ws.room = null;
   if (!p) return;
   if (reason === 'disconnect' && room.state === 'playing') {
-    // en partida se espera un rato por si vuelve
     p.connected = false;
     p.ws = null;
     p.goneAt = Date.now();
-    if (room.match?.turn === p.id) scheduleTurn(room, 1500);
+    GAMES[room.game].onDisconnect?.(room, room.api, p.id);
     sync(room);
     return;
   }
@@ -215,120 +253,20 @@ function leave(ws, reason = 'left') {
 
 function removePlayer(room, id) {
   room.players.delete(id);
-  room.match?.deactivate(id);
   if (!room.players.size || ![...room.players.values()].some((p) => p.connected)) return closeRoom(room, 'empty');
   if (room.host === id) room.host = [...room.players.values()].find((p) => p.connected)?.id;
-  if (room.match) afterMatchChange(room);
-  sync(room);
-}
-
-// ---------------- partida ----------------
-function startMatch(ws, holes) {
-  const room = ws.room;
-  if (!room || room.host !== ws.pid) return send(ws, { t: 'error', code: 'not_host' });
-  if (room.state === 'playing') return;
-  room.holes = COURSES[holes] ? holes : 9;
-  room.match = new Match({
-    course: COURSES[room.holes],
-    players: [...room.players.values()].map((p) => ({ id: p.id, name: p.name, color: p.color })),
-  });
-  room.state = 'playing';
-  touch(room);
-  nextHole(room);
-}
-
-function nextHole(room) {
-  clearTimeout(room.nextTimer);
-  if (!room.match.nextHole()) {
-    finish(room);
-    return;
-  }
-  room.holeStart = Date.now();
-  room.busyUntil = Date.now() + 1800; // tiempo para la animación de presentación del hoyo
-  scheduleTurn(room);
-  broadcast(room, { t: 'hole', idx: room.match.holeIdx });
-  sync(room);
-}
-
-function scheduleTurn(room, delay) {
-  clearTimeout(room.turnTimer);
-  const m = room.match;
-  if (!m || !m.turn) return;
-  const p = room.players.get(m.turn);
-  const wait = delay ?? Math.max(0, room.busyUntil - Date.now()) + (p?.connected ? CFG.turnMs : 1500);
-  room.turnDeadline = Date.now() + wait;
-  room.turnTimer = setTimeout(() => {
-    if (room.match !== m || !m.turn) return;
-    const id = m.turn;
-    const outcome = m.skip(id, 1);
-    broadcast(room, { t: 'timeout', id });
-    if (outcome) broadcast(room, { t: 'outcome', ...outcome });
-    afterMatchChange(room);
-  }, wait);
-}
-
-function afterMatchChange(room) {
-  const m = room.match;
-  if (m.state === 'playing') {
-    scheduleTurn(room);
-  } else if (m.state === 'between') {
-    clearTimeout(room.turnTimer);
-    room.turnDeadline = 0;
-    const wait = Math.max(0, room.busyUntil - Date.now()) + CFG.betweenHolesMs;
-    room.nextTimer = setTimeout(() => nextHole(room), wait);
-  } else if (m.state === 'finished') {
-    clearTimeout(room.turnTimer);
-    room.nextTimer = setTimeout(() => finish(room), Math.max(0, room.busyUntil - Date.now()) + 800);
-  }
-  sync(room);
-}
-
-function finish(room) {
-  room.state = 'finished';
-  room.turnDeadline = 0;
-  broadcast(room, { t: 'end', standings: room.match.standings() });
-  sync(room);
-}
-
-function shot(ws, angle, power) {
-  const room = ws.room;
-  const m = room?.match;
-  if (!m || room.state !== 'playing' || m.turn !== ws.pid) return send(ws, { t: 'error', code: 'not_your_turn' });
-  if (Date.now() < room.busyUntil) return send(ws, { t: 'error', code: 'busy' });
-  if (!Number.isFinite(angle) || !Number.isFinite(power) || power <= 0 || power > 1) return send(ws, { t: 'error', code: 'bad_shot' });
-  const p = m.player(ws.pid);
-  const t0 = (Date.now() - room.holeStart) / 1000;
-  const res = simulate(m.hole, p.ball, angle, power, t0);
-  const dur = shotDuration(res);
-  room.busyUntil = Date.now() + dur + 600;
-  touch(room);
-  const outcome = m.applyShot(ws.pid, res);
-  broadcast(room, { t: 'shot', id: ws.pid, res: { path: res.path, events: res.events, x: res.x, y: res.y, holed: res.holed, water: res.water, t0 } });
-  if (outcome) broadcast(room, { t: 'outcome', ...outcome });
-  afterMatchChange(room);
-}
-
-function rematch(ws) {
-  const room = ws.room;
-  if (!room || room.host !== ws.pid || room.state !== 'finished') return;
-  // vuelven al lobby solo los conectados
-  for (const p of [...room.players.values()]) if (!p.connected) room.players.delete(p.id);
-  room.state = 'lobby';
-  room.match = null;
-  room.holeStart = 0;
-  touch(room);
+  if (room.state === 'playing') GAMES[room.game].leave?.(room, room.api, id);
   sync(room);
 }
 
 // ---------------- mensajes ----------------
 function onMessage(ws, raw) {
-  // token bucket por conexión
   const now = Date.now();
   ws.tokens = Math.min(CFG.msgBurst, ws.tokens + ((now - ws.lastRefill) / 1000) * CFG.msgRate);
   ws.lastRefill = now;
   if (ws.tokens < 1) {
     ws.strikes++;
-    if (ws.strikes > 20) ws.close(4008, 'rate_limited');
+    if (ws.strikes > 40) ws.close(4008, 'rate_limited');
     return;
   }
   ws.tokens -= 1;
@@ -342,26 +280,52 @@ function onMessage(ws, raw) {
   }
   if (!msg || typeof msg !== 'object' || typeof msg.t !== 'string') return;
   ws.lastMsg = now;
+  const room = ws.room;
 
   switch (msg.t) {
     case 'ping':
       return send(ws, { t: 'pong', now });
     case 'create':
-      if (ws.room) leave(ws);
-      return createRoom(ws, msg.name);
+      if (room) leave(ws);
+      return createRoom(ws, msg.name, typeof msg.game === 'string' ? msg.game : 'minigolf');
     case 'join':
-      if (ws.room) leave(ws);
-      return joinRoom(ws, msg.code, msg.name, typeof msg.token === 'string' ? msg.token.slice(0, 64) : null);
+      if (room) leave(ws);
+      return joinRoom(ws, msg.code, msg.name, typeof msg.token === 'string' ? msg.token.slice(0, 64) : null, typeof msg.game === 'string' ? msg.game : null);
     case 'leave':
       return leave(ws, 'left');
-    case 'start':
-      return startMatch(ws, Number(msg.holes));
-    case 'shot':
-      return shot(ws, Number(msg.a), Number(msg.p));
-    case 'rematch':
-      return rematch(ws);
+    case 'settings': {
+      // el anfitrión cambia opciones en el lobby (pista, vueltas, hoyos…)
+      if (!room || room.host !== ws.pid || room.state !== 'lobby') return;
+      const mod = GAMES[room.game];
+      if (mod.settings) {
+        room.settings = mod.settings(room.settings, msg.settings || {});
+        touch(room);
+        sync(room);
+      }
+      return;
+    }
+    case 'start': {
+      if (!room) return;
+      if (room.host !== ws.pid) return send(ws, { t: 'error', code: 'not_host' });
+      if (room.state === 'playing') return;
+      const mod = GAMES[room.game];
+      const active = [...room.players.values()].filter((p) => p.connected);
+      if (active.length < (mod.minPlayers || 1)) return send(ws, { t: 'error', code: 'need_players' });
+      if (mod.settings) room.settings = mod.settings(room.settings, msg.settings || msg);
+      room.state = 'playing';
+      touch(room);
+      mod.start(room, room.api);
+      sync(room);
+      return;
+    }
+    case 'rematch': {
+      if (!room || room.host !== ws.pid || room.state !== 'finished') return;
+      for (const p of [...room.players.values()]) if (!p.connected) room.players.delete(p.id);
+      room.api.toLobby();
+      touch(room);
+      return;
+    }
     case 'kick': {
-      const room = ws.room;
       if (room && room.host === ws.pid && room.state === 'lobby' && msg.id !== ws.pid && room.players.has(msg.id)) {
         const target = room.players.get(msg.id);
         send(target.ws, { t: 'kicked' });
@@ -370,8 +334,14 @@ function onMessage(ws, raw) {
       }
       return;
     }
-    default:
-      ws.strikes++;
+    default: {
+      // mensajes propios de cada juego
+      if (!room || room.state !== 'playing') return;
+      const p = room.players.get(ws.pid);
+      if (!p) return;
+      const ok = GAMES[room.game].message?.(room, room.api, p, msg);
+      if (ok === false) ws.strikes++;
+    }
   }
 }
 
@@ -379,7 +349,7 @@ function onMessage(ws, raw) {
 const http = createServer((req, res) => {
   if (req.url === '/health') {
     res.writeHead(200, { 'content-type': 'application/json', 'access-control-allow-origin': '*' });
-    res.end(JSON.stringify({ ok: true, rooms: rooms.size, conns: wss.clients.size }));
+    res.end(JSON.stringify({ ok: true, rooms: rooms.size, conns: wss.clients.size, games: Object.keys(GAMES) }));
     return;
   }
   res.writeHead(404, { 'content-type': 'text/plain' });
@@ -418,10 +388,9 @@ wss.on('connection', (ws, req) => {
     leave(ws, 'disconnect');
   });
   ws.on('error', () => {});
-  send(ws, { t: 'hello', maxPlayers: CFG.maxPlayers, turnMs: CFG.turnMs });
+  send(ws, { t: 'hello', now: Date.now() });
 });
 
-// heartbeat + limpieza periódica
 setInterval(() => {
   for (const ws of wss.clients) {
     if (!ws.alive) {
@@ -430,7 +399,6 @@ setInterval(() => {
     }
     ws.alive = false;
     ws.ping();
-    // conexión sin sala y sin mensajes por mucho tiempo
     if (!ws.room && Date.now() - ws.lastMsg > 5 * 60e3) ws.close(4001, 'idle');
   }
   const now = Date.now();
@@ -447,6 +415,4 @@ setInterval(() => {
     for (const [ip, list] of map) if (!list.some((t) => now - t < CFG.roomsWindowMs)) map.delete(ip);
 }, CFG.heartbeatMs);
 
-http.listen(CFG.port, () => log(`game.it server en :${CFG.port}`, CFG.origins.length ? `orígenes: ${CFG.origins.join(', ')}` : 'orígenes: todos'));
-
-export { HOLES };
+http.listen(CFG.port, () => log(`game.it server en :${CFG.port}`, `juegos: ${Object.keys(GAMES).join(', ')}`, CFG.origins.length ? `orígenes: ${CFG.origins.join(', ')}` : 'orígenes: todos'));

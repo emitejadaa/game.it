@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>4 en línea · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <style>
+      /* Estética: juguete de plástico brillante */
+      :root {
+        --bg1: #ffe7c7;
+        --bg2: #ffc2a8;
+        --ink: #1b1f3b;
+        --board: #2457e6;
+        --board-dark: #173aa8;
+        --red: #ef3b3b;
+        --red-dark: #b81f2a;
+        --yel: #ffc928;
+        --yel-dark: #d99a00;
+        --muted: #6b5d7a;
+        --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      :root[data-gi-theme='dark'] {
+        --bg1: #1a1d3a;
+        --bg2: #0c0e1f;
+        --ink: #f5f3ff;
+        --board: #2f5cff;
+        --board-dark: #1a38b8;
+        --muted: #a9a5d6;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+      body { background: radial-gradient(ellipse at 50% 20%, var(--bg1), var(--bg2)); color: var(--ink); font: 800 18px/1.2 'Baloo 2', system-ui, sans-serif; }
+      button, input { font: inherit; color: inherit; background: none; border: 0; }
+      button { cursor: pointer; }
+      [hidden] { display: none !important; }
+      .screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 58px 14px 18px; opacity: 0; visibility: hidden; transition: opacity 0.35s var(--ease), visibility 0s linear 0.35s; }
+      .screen.on { opacity: 1; visibility: visible; transition: opacity 0.35s var(--ease); }
+      .col { display: grid; gap: 12px; justify-items: stretch; width: min(360px, 100%); text-align: center; }
+      .logo { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
+      .logo i { width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.2), inset 0 4px 0 rgba(255, 255, 255, 0.35); animation: hop 1.6s var(--spring) infinite; }
+      .logo i:nth-child(odd) { background: var(--red); }
+      .logo i:nth-child(even) { background: var(--yel); }
+      .logo i:nth-child(2) { animation-delay: 0.15s; }
+      .logo i:nth-child(3) { animation-delay: 0.3s; }
+      .logo i:nth-child(4) { animation-delay: 0.45s; }
+      @keyframes hop { 0%, 60%, 100% { transform: none; } 20% { transform: translateY(-16px); } 35% { transform: translateY(0) scaleY(0.85); } }
+      h1 { font-size: 46px; line-height: 1; }
+      h2 { font-size: 32px; }
+      .sub { color: var(--muted); font-weight: 600; margin-top: -6px; }
+      .btn { height: 58px; border-radius: 18px; background: var(--board); color: #fff; font-size: 22px; box-shadow: 0 6px 0 var(--board-dark), inset 0 2px 0 rgba(255, 255, 255, 0.25); transition: transform 0.3s var(--spring), box-shadow 0.2s; }
+      .btn small { display: block; font-size: 13px; font-weight: 600; opacity: 0.8; margin-top: -4px; }
+      .btn.red { background: var(--red); box-shadow: 0 6px 0 var(--red-dark), inset 0 2px 0 rgba(255, 255, 255, 0.3); }
+      .btn.yel { background: var(--yel); color: #3b2a00; box-shadow: 0 6px 0 var(--yel-dark), inset 0 2px 0 rgba(255, 255, 255, 0.4); }
+      .btn:hover { transform: translateY(-3px); }
+      .btn:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--board-dark); }
+      .btn.tall { height: 68px; }
+      .seg { display: flex; gap: 8px; }
+      .seg button { flex: 1; height: 44px; border-radius: 14px; background: rgba(255, 255, 255, 0.35); transition: transform 0.3s var(--spring), background 0.2s; }
+      :root[data-gi-theme='dark'] .seg button { background: rgba(255, 255, 255, 0.08); }
+      .seg button.on { background: var(--yel); color: #3b2a00; transform: translateY(-2px); box-shadow: 0 4px 0 var(--yel-dark); }
+      .field { height: 52px; border-radius: 16px; padding: 0 16px; background: rgba(255, 255, 255, 0.55); font-size: 22px; outline: none; -webkit-user-select: text; user-select: text; box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.08); }
+      :root[data-gi-theme='dark'] .field { background: rgba(255, 255, 255, 0.08); }
+      .field.code { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; }
+      .row { display: flex; gap: 8px; }
+      .row > .field { flex: 1; min-width: 0; }
+      .status { min-height: 1.3em; color: var(--red); font-weight: 600; }
+      .code { font-size: 48px; letter-spacing: 0.18em; color: var(--board); }
+      .plist { list-style: none; display: grid; gap: 6px; text-align: left; }
+      .plist li { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.35); }
+      :root[data-gi-theme='dark'] .plist li { background: rgba(255, 255, 255, 0.07); }
+      .plist li i { width: 22px; height: 22px; border-radius: 50%; }
+      .plist small { margin-left: auto; color: var(--muted); font-weight: 600; font-size: 14px; }
+      .back { color: var(--muted); font-weight: 600; margin-top: 4px; }
+
+      /* juego */
+      .game { display: grid; gap: 10px; justify-items: center; }
+      .score { display: flex; align-items: center; gap: 14px; font-size: 20px; }
+      .chip { display: flex; align-items: center; gap: 8px; padding: 4px 14px 4px 6px; border-radius: 99px; background: rgba(255, 255, 255, 0.45); transition: transform 0.4s var(--spring), box-shadow 0.3s; }
+      :root[data-gi-theme='dark'] .chip { background: rgba(255, 255, 255, 0.08); }
+      .chip i { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2); }
+      .chip.turn { transform: translateY(-4px) scale(1.06); box-shadow: 0 0 0 3px currentColor; }
+      .chip.r { color: var(--red); }
+      .chip.y { color: var(--yel-dark); }
+      .chip span { color: var(--ink); }
+      .chip.r i { background: var(--red); }
+      .chip.y i { background: var(--yel); }
+      .draws { color: var(--muted); font-size: 15px; }
+      #board { width: min(94vw, calc((100vh - 190px) * 7 / 7), 620px); height: auto; touch-action: manipulation; overflow: visible; filter: drop-shadow(0 14px 0 rgba(0, 0, 0, 0.15)); }
+      .msg { min-height: 1.3em; font-size: 28px; }
+      .msg.pop { animation: pop 0.6s var(--spring); }
+      @keyframes pop { from { transform: scale(0.5); opacity: 0; } }
+      .timer { height: 6px; width: 180px; border-radius: 6px; background: rgba(0, 0, 0, 0.1); overflow: hidden; }
+      .timer i { display: block; height: 100%; background: var(--board); transform-origin: left; }
+      .quit { position: fixed; right: 14px; bottom: calc(12px + env(safe-area-inset-bottom)); color: var(--muted); font-weight: 600; }
+      .disc.win { animation: winpulse 0.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+      @keyframes winpulse { 50% { transform: scale(1.12); } }
+      .disc.dim { opacity: 0.35; transition: opacity 0.6s; }
+      :root[data-gi-motion='reduced'] * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+    </style>
+  </head>
+  <body>
+    <section class="screen on" id="s-home">
+      <div class="col">
+        <div class="logo"><i></i><i></i><i></i><i></i></div>
+        <h1 data-t="title"></h1>
+        <p class="sub" data-t="tagline"></p>
+        <button class="btn red tall" data-go="cpu"><span data-t="vsCpu"></span><small data-t="vsCpuSub"></small></button>
+        <button class="btn yel tall" data-go="local"><span data-t="local"></span><small data-t="localSub"></small></button>
+        <button class="btn tall" data-go="online"><span data-t="online"></span><small data-t="onlineSub"></small></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-cpu">
+      <div class="col">
+        <h2 data-t="vsCpu"></h2>
+        <div class="seg" id="cpu-level"><button data-v="1" data-t="easy"></button><button data-v="2" class="on" data-t="normal"></button><button data-v="3" data-t="hard"></button></div>
+        <button class="btn red" id="cpu-start" data-t="play"></button>
+        <button class="back" data-go="home" data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-online">
+      <div class="col">
+        <h2 data-t="online"></h2>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+        <button class="btn red" id="on-create" data-t="create"></button>
+        <p class="sub" data-t="orJoin"></p>
+        <div class="row"><input class="field code" id="on-code" maxlength="5" autocomplete="off" placeholder="ABCDE" /><button class="btn yel" style="padding: 0 18px" id="on-join" data-t="join"></button></div>
+        <p class="status" id="on-status"></p>
+        <button class="back" data-go="home" data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-lobby">
+      <div class="col">
+        <p class="sub" data-t="shareCode"></p>
+        <div class="code" id="lobby-code">-----</div>
+        <button class="btn yel" id="lobby-share" data-t="copyLink"></button>
+        <ul class="plist" id="lobby-players"></ul>
+        <button class="btn red" id="lobby-start" data-t="start"></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="back" id="lobby-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-game">
+      <div class="game">
+        <div class="score" id="score"></div>
+        <svg id="board" viewBox="0 -100 700 700"></svg>
+        <div class="timer" id="timer" hidden><i></i></div>
+        <p class="msg" id="msg"></p>
+      </div>
+      <button class="quit" id="quit" data-t="quit"></button>
+    </section>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
