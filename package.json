@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "server": "node server/index.js"
+    "server": "node server/index.js",
+    "check": "node tools/check-games.mjs"
   },
   "devDependencies": {
     "three": "^0.186.1",

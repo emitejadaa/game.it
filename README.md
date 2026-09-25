@@ -68,6 +68,10 @@ public/
 
 ## Integrar un juego
 
+> **¿Sos parte del equipo y querés sumar un juego?** Seguí la guía paso a paso en
+> [`docs/INTEGRAR-UN-JUEGO.md`](docs/INTEGRAR-UN-JUEGO.md) (requisitos, plantilla en `templates/juego-base/`,
+> fork y pull request). `npm run check` revisa que el juego se pueda integrar.
+
 1. Crear `public/games/<id>/` con el juego ya compilado (su `index.html` y archivos).
 2. Agregar `public/games/<id>/game.json`:
 
@@ -94,7 +98,7 @@ public/
 | --- | --- |
 | `id` | Igual al nombre de la carpeta. Define la URL `#play/<id>`. |
 | `title`, `description` | Texto o `{ "es": …, "en": … }`. |
-| `categories` | `arcade`, `aventura`, `accion`, `puzzle`, `deporte`, `carreras`, `estrategia`, `historia`, `online`, `multijugador`, `clasicos`, `casual`. |
+| `categories` | `arcade`, `aventura`, `accion`, `puzzle`, `deporte`, `carreras`, `estrategia`, `cartas`, `palabras`, `idle`, `historia`, `online`, `multijugador`, `clasicos`, `casual`. |
 | `tags` | Palabras extra para la búsqueda y las recomendaciones. |
 | `platforms` | **Obligatorio.** Dónde se puede jugar: `["desktop"]` (computadora/web), `["mobile"]` (celular y tablet) o ambos. El menú, la búsqueda y los recientes muestran solo los juegos jugables en el dispositivo actual. |
 | `thumbnail` | Imagen 16:10 (SVG, WebP o PNG). |

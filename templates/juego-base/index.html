@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Mi Juego · game.it</title>
+    <link rel="stylesheet" href="./style.css" />
+    <!-- SDK del portal: preferencias, pausa, idioma, anuncios. Siempre con esta ruta. -->
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <canvas id="cv"></canvas>
+    <div class="hud"><span id="score">0</span><span id="lives">♥♥♥</span></div>
+    <section class="screen on" id="menu">
+      <h1 id="t-title"></h1>
+      <p id="t-help"></p>
+      <p class="best" id="best"></p>
+      <button id="play"></button>
+    </section>
+    <!-- rutas relativas (./): dentro del portal el juego vive en /games/<id>/ -->
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

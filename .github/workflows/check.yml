@@ -1,0 +1,27 @@
+# Revisión automática de cada pull request (y de cada push a main):
+# valida los game.json, las rutas y los módulos online, y que el portal compile.
+name: Revisar juegos
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Revisar los juegos (game.json, rutas, servidor online)
+        run: npm run check
+      - name: Compilar el portal
+        run: npm run build

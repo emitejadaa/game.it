@@ -1,0 +1,20 @@
+{
+  "id": "mi-juego",
+  "title": { "es": "Mi Juego", "en": "My Game" },
+  "description": {
+    "es": "Una o dos oraciones que cuenten de qué se trata y por qué es divertido.",
+    "en": "One or two sentences about what the game is and why it's fun."
+  },
+  "categories": ["arcade", "casual"],
+  "tags": ["estrellas", "atrapar", "reflejos"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "mouse", "touch"],
+  "features": { "online": false, "multiplayer": false, "story": false },
+  "order": 100,
+  "hidden": false
+}
