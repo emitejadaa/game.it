@@ -107,8 +107,8 @@ h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
 .seg .mini { width: 24px; height: 24px; }
 .duo { display: flex; }
 .duo svg + svg { margin-left: -12px; }
-.levels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.levels button { padding: 10px 2px 8px; border-radius: 12px; background: color-mix(in oklab, var(--fg) 6%, transparent); border: 1px solid transparent; display: grid; gap: 4px; justify-items: center; font-size: 11px; transition: border-color 0.2s, background 0.2s; }
+.levels { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.levels button { min-width: 0; overflow: hidden; padding: 10px 2px 8px; border-radius: 12px; background: color-mix(in oklab, var(--fg) 6%, transparent); border: 1px solid transparent; display: grid; gap: 4px; justify-items: center; font-size: 11px; transition: border-color 0.2s, background 0.2s; }
 .levels button i { display: flex; gap: 2px; }
 .levels button i::before { content: ''; }
 .levels button em { width: 6px; height: 14px; border-radius: 2px; background: var(--line); }
@@ -116,7 +116,7 @@ h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
 .levels button.on { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 14%, transparent); }
 .check { display: flex; align-items: center; gap: 10px; text-align: left; padding: 6px 2px; font-weight: 400; cursor: pointer; }
 .check input { width: 20px; height: 20px; accent-color: var(--accent); }
-.field { height: 50px; border-radius: 14px; padding: 0 16px; background: color-mix(in oklab, var(--fg) 7%, transparent); border: 1px solid var(--line); font-size: 17px; outline: none; -webkit-user-select: text; user-select: text; transition: border-color 0.2s; }
+.field { width: 100%; min-width: 0; height: 50px; border-radius: 14px; padding: 0 16px; background: color-mix(in oklab, var(--fg) 7%, transparent); border: 1px solid var(--line); font-size: 17px; outline: none; -webkit-user-select: text; user-select: text; transition: border-color 0.2s; }
 .field:focus { border-color: var(--accent); }
 .field.code { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; font-weight: 800; }
 .row { display: flex; gap: 8px; }

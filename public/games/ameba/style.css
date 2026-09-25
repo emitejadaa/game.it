@@ -34,7 +34,7 @@ h2 { font-size: 30px; font-weight: 700; }
 .logo i:nth-child(2) { width: 34px; height: 34px; margin: -30px 0 0 12px; background: #ff2bd6; box-shadow: 0 0 0 3px #b31e96; animation-delay: -1.3s; }
 .logo i:nth-child(3) { width: 20px; height: 20px; margin: 10px 0 0 22px; background: #b6ff00; box-shadow: 0 0 0 2px #80b300; animation-delay: -2.6s; }
 @keyframes blob { 0%, 100% { border-radius: 50%; transform: translate(0, 0); } 33% { border-radius: 46% 54% 52% 48%; transform: translate(3px, -4px); } 66% { border-radius: 54% 46% 48% 52%; transform: translate(-3px, 3px); } }
-.field { height: 52px; border-radius: 16px; padding: 0 16px; background: color-mix(in oklab, var(--fg) 7%, transparent); border: 1px solid var(--line); font-size: 19px; text-align: center; outline: none; -webkit-user-select: text; user-select: text; transition: border-color 0.2s, box-shadow 0.2s; }
+.field { width: 100%; min-width: 0; height: 52px; border-radius: 16px; padding: 0 16px; background: color-mix(in oklab, var(--fg) 7%, transparent); border: 1px solid var(--line); font-size: 19px; text-align: center; outline: none; -webkit-user-select: text; user-select: text; transition: border-color 0.2s, box-shadow 0.2s; }
 .field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent); }
 .field.code { text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700; }
 .colors { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; }

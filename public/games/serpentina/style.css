@@ -34,7 +34,7 @@ h2 { font-size: 30px; font-weight: 700; }
 .logo .stripes { fill: none; stroke-width: 20; stroke-dasharray: 8 12; animation: slither 3.2s ease-in-out infinite, stripes 1.2s linear infinite; }
 @keyframes slither { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(8px); } }
 @keyframes stripes { to { stroke-dashoffset: -40; } }
-.field { height: 52px; border-radius: 16px; padding: 0 16px; background: color-mix(in oklab, var(--fg) 7%, transparent); border: 1px solid var(--line); font-size: 19px; text-align: center; outline: none; -webkit-user-select: text; user-select: text; transition: border-color 0.2s, box-shadow 0.2s; }
+.field { width: 100%; min-width: 0; height: 52px; border-radius: 16px; padding: 0 16px; background: color-mix(in oklab, var(--fg) 7%, transparent); border: 1px solid var(--line); font-size: 19px; text-align: center; outline: none; -webkit-user-select: text; user-select: text; transition: border-color 0.2s, box-shadow 0.2s; }
 .field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent); }
 .field.code { text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700; }
 .colors { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; }

@@ -643,6 +643,7 @@ $('b-revive').onclick = async () => {
 function show(id) {
   $$('.screen').forEach((s) => s.classList.toggle('on', s.id === `s-${id}`));
   $('b-menu').hidden = !S.mode;
+  $('bottom').style.visibility = S.mode ? '' : 'hidden';
   if (S.mode === 'cpu' || S.mode === 'solo') {
     if (id === 'menu') pauseGame();
     else if (!id) resumeGame();

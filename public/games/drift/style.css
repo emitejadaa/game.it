@@ -151,7 +151,7 @@ body.touch .board { top: calc(106px + env(safe-area-inset-top)); }
 .field:focus { border-color: var(--cyan); }
 .code-in { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; font-family: 'Orbitron'; }
 .row { display: flex; gap: 8px; }
-.row > .field { flex: 1; min-width: 0; }
+.row > .field { flex: 1; min-width: 0; width: 0; }
 .row > .go { padding: 0 16px; }
 .status { min-height: 1.3em; color: #ff6b8b; text-align: center; font-size: 15px; }
 .code { text-align: center; font-family: 'Orbitron'; font-size: 40px; letter-spacing: 0.16em; color: var(--cyan); text-shadow: 0 0 18px var(--cyan); }
