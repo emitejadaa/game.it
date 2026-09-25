@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <title>Mecha Corta · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <main id="app">
+      <div id="stage">
+        <div id="ring"></div>
+        <div id="center">
+          <svg class="arrow" id="arrow" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 6 L57 18 L52.5 17 L51.5 30 L48.5 30 L47.5 17 L43 18 Z" /></svg>
+          <div class="bomb" id="bomb">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <defs>
+                <radialGradient id="bg" cx=".38" cy=".35" r=".7"><stop offset="0" stop-color="#4a3f63" /><stop offset=".55" stop-color="#1e1830" /><stop offset="1" stop-color="#0c0914" /></radialGradient>
+              </defs>
+              <path class="fuse" d="M78 26 C86 12 98 10 104 4" />
+              <rect x="68" y="20" width="18" height="14" rx="3" transform="rotate(35 77 27)" fill="#2e2742" stroke="#ff7a2f" stroke-width="2" />
+              <circle cx="60" cy="68" r="44" fill="url(#bg)" stroke="#ff7a2f" stroke-width="3" />
+              <ellipse cx="44" cy="50" rx="12" ry="7" fill="#fff" opacity=".12" transform="rotate(-35 44 50)" />
+            </svg>
+            <div class="spark" id="spark"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="prompt" id="prompt"></div>
+          </div>
+          <div class="info" id="info"></div>
+        </div>
+        <div class="fx" id="fx"></div>
+      </div>
+      <div id="bottom">
+        <div class="status" id="status"></div>
+        <div class="inbar">
+          <input id="word" maxlength="30" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" />
+          <button class="send" id="send" aria-label="enviar"><svg viewBox="0 0 24 24"><path d="M4 12h14M12 5l7 7-7 7" /></svg></button>
+        </div>
+        <div class="letters" id="letters"></div>
+      </div>
+      <button class="icon menu-b" id="b-menu" aria-label="menú" hidden><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg></button>
+    </main>
+
+    <section class="screen on" id="s-home">
+      <div class="panel">
+        <div class="logo"><div class="lb"></div><h1><span data-t="t1"></span><em data-t="t2"></em></h1></div>
+        <p class="sub" data-t="tagline"></p>
+        <button class="btn" data-go="cpu" data-t="vsCpu"></button>
+        <button class="btn alt" data-go="solo" data-t="solo"></button>
+        <button class="btn alt" data-go="online" data-t="online"></button>
+        <button class="link" data-go="rules" data-t="howTo"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-setup">
+      <div class="panel">
+        <h2 id="setup-title"></h2>
+        <div class="opt" id="o-bots"><span class="lbl" data-t="rivals"></span><div class="seg" data-o="bots"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="5">5</button><button data-v="7">7</button></div></div>
+        <div class="opt" id="o-level"><span class="lbl" data-t="level"></span><div class="seg" data-o="level"><button data-v="1" data-t="lv1"></button><button data-v="2" data-t="lv2"></button><button data-v="3" data-t="lv3"></button></div></div>
+        <div class="opt"><span class="lbl" data-t="lang"></span><div class="seg" data-o="lang"><button data-v="es">Español</button><button data-v="en">English</button></div></div>
+        <div class="opt"><span class="lbl" data-t="diff"></span><div class="seg" data-o="diff"><button data-v="1" data-t="d1"></button><button data-v="2" data-t="d2"></button><button data-v="3" data-t="d3"></button></div></div>
+        <div class="opt"><span class="lbl" data-t="lives"></span><div class="seg" data-o="lives"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div></div>
+        <div class="opt"><span class="lbl" data-t="fuse"></span><div class="seg" data-o="fuse"><button data-v="short" data-t="f1"></button><button data-v="normal" data-t="f2"></button><button data-v="long" data-t="f3"></button></div></div>
+        <p class="note" id="setup-note"></p>
+        <button class="btn" id="setup-go" data-t="play"></button>
+        <button class="link" data-back data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-rules">
+      <div class="panel">
+        <h2 data-t="howTo"></h2>
+        <div class="rules" id="rules-body"></div>
+        <button class="btn" data-back data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-online">
+      <div class="panel">
+        <h2 data-t="online"></h2>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+        <button class="btn" id="on-create" data-t="create"></button>
+        <div class="row"><input class="field code-in" id="on-code" maxlength="5" autocomplete="off" placeholder="ABCDE" /><button class="btn alt" id="on-join" data-t="join"></button></div>
+        <p class="err" id="on-status"></p>
+        <button class="link" data-back data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-lobby">
+      <div class="panel">
+        <span class="lbl center" data-t="shareCode"></span>
+        <div class="code" id="lobby-code">-----</div>
+        <button class="btn alt" id="lobby-share" data-t="copyLink"></button>
+        <ul class="plist" id="lobby-players"></ul>
+        <div id="lobby-host">
+          <div class="opt"><span class="lbl" data-t="lang"></span><div class="seg" data-l="lang"><button data-v="es">Español</button><button data-v="en">English</button></div></div>
+          <div class="opt"><span class="lbl" data-t="diff"></span><div class="seg" data-l="diff"><button data-v="1" data-t="d1"></button><button data-v="2" data-t="d2"></button><button data-v="3" data-t="d3"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="lives"></span><div class="seg" data-l="lives"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div></div>
+          <div class="opt"><span class="lbl" data-t="fuse"></span><div class="seg" data-l="fuse"><button data-v="short" data-t="f1"></button><button data-v="normal" data-t="f2"></button><button data-v="long" data-t="f3"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="addBots"></span><div class="seg" data-l="bots"><button data-v="0">0</button><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="5">5</button></div></div>
+          <div class="opt"><span class="lbl" data-t="level"></span><div class="seg" data-l="level"><button data-v="1" data-t="lv1"></button><button data-v="2" data-t="lv2"></button><button data-v="3" data-t="lv3"></button></div></div>
+        </div>
+        <p class="note" id="lobby-info"></p>
+        <button class="btn" id="lobby-start" data-t="start"></button>
+        <p class="err" id="lobby-status"></p>
+        <button class="link" id="lobby-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-over">
+      <div class="panel">
+        <div class="boomlogo"></div>
+        <h2 id="ov-title"></h2>
+        <p class="sub" id="ov-sub"></p>
+        <ul class="scores" id="ov-list"></ul>
+        <button class="btn" id="ov-again" data-t="again"></button>
+        <p class="note" id="ov-status"></p>
+        <button class="link" id="ov-menu" data-t="menu"></button>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-menu">
+      <div class="panel">
+        <h2 data-t="paused"></h2>
+        <button class="btn" id="m-resume" data-t="resume"></button>
+        <button class="link" id="m-quit" data-t="quit"></button>
+      </div>
+    </section>
+
+    <div class="loading" id="loading" hidden><div class="lb"></div><p data-t="loadingDict"></p></div>
+    <button class="btn revive" id="b-revive" hidden></button>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

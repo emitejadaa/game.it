@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar y Chispa): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa y Mecha Corta): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -209,6 +209,17 @@ determinista: online el cliente manda el golpe exacto (velocidad y giro iniciale
 y aplica las reglas (`shared/rules.js`), y los dos navegadores animan el mismo tiro y terminan igual. La mesa se
 dibuja con three.js desde arriba y solo se vuelve a renderizar cuando algo cambia. La compu (`shared/ai.js`, en un
 worker) prueba tiros simulándolos y juega de seguridad si no hay nada claro.
+
+### Mecha Corta (palabras)
+
+Juego de palabras con bomba: el que la tiene ve una sílaba y escribe una palabra que la contenga (existente y sin
+repetir) antes de que explote; la mecha dura un tiempo al azar que nadie ve y explotar cuesta una vida. Usar todas las
+letras del abecedario (menos las raras) da una vida extra y todos ven lo que escribe el de turno, letra por letra.
+Idiomas español e inglés con diccionarios de `an-array-of-spanish-words` y `an-array-of-english-words` (MIT, ver
+`public/games/mecha/dict/LICENSE.txt`), guardados ordenados y con codificación de prefijo (≈2,4 MB y 1,2 MB sin
+comprimir) y buscados con búsqueda binaria; se regeneran con `node tools/mecha-dict.mjs`. La partida
+(`shared/game.js`) corre igual en el navegador (compu o práctica) y en el servidor (online hasta 12, con compu opcional),
+que valida las palabras y no revela cuánto le queda a la mecha.
 
 ### Chispa (cartas)
 
