@@ -76,6 +76,7 @@ function newGame(level = S.level) {
   });
   board.replaceChildren(frag);
   $('overlay').classList.remove('on');
+  G.gameplay(true);
   fit();
   hud();
 }
@@ -250,12 +251,13 @@ function result(win, isBest) {
     ${win && isBest ? `<span class="new">${tr('newBest')}</span>` : ''}
     <div class="row"><button class="btn primary" data-a="again">${tr('again')}</button><button class="btn" data-a="menu">${tr('menu')}</button></div>`;
   $('overlay').classList.add('on');
+  G.gameplay(false); // fin de partida: el portal puede mostrar un banner aparte
   setTimeout(() => $('panel').querySelector('.primary')?.focus(), 50);
 }
 
 $('panel').addEventListener('click', (e) => {
   const a = e.target.closest('[data-a]')?.dataset.a;
-  if (a === 'again') newGame();
+  if (a === 'again') G.commercialBreak('otra-vez').then(() => newGame()); // pausa natural (por defecto sin anuncio)
   else if (a === 'menu') G.exit();
 });
 

@@ -246,6 +246,8 @@ function refreshChrome() {
   $('chat').hidden = !(S.kind === 'online' && inMatch && !menuOpen);
   $('btn-chat').hidden = !(S.kind === 'online' && touch);
   input.setEnabled(inMatch && !menuOpen);
+  // anuncios (portal): nunca con un partido online en curso ni mientras se juega; sí en menús y pausas
+  G.gameplay(S.kind === 'online' ? inMatch && !S.ended : inMatch && !menuOpen && !S.ended);
 }
 
 function toast(msg) {
@@ -661,10 +663,12 @@ function localOver() {
   S.ended = S.session.match.summary();
   showResults(S.ended);
 }
-$('res-again').onclick = () => {
+$('res-again').onclick = async () => {
   sfx.play('ui');
-  if (S.kind === 'online') net.send({ t: 'start' });
-  else startLocal(S.lastCfg.kind, S.lastCfg.o);
+  if (S.kind === 'online') return net.send({ t: 'start' });
+  // pausa natural antes de la revancha (el portal decide si hay anuncio; por defecto no)
+  await G.commercialBreak('revancha');
+  startLocal(S.lastCfg.kind, S.lastCfg.o);
 };
 $('res-alt').onclick = () => {
   sfx.play('ui');

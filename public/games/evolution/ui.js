@@ -68,6 +68,8 @@ const TXT = {
   lucky: { es: 'Mutación dorada: +{n} de energía', en: 'Golden mutation: +{n} energy' },
   clickfrenzy: { es: 'Mutación dorada: clics ×{m} durante {d} s', en: 'Golden mutation: clicks ×{m} for {d} s' },
   bFrenzy: { es: 'Producción ×{m}', en: 'Production ×{m}' },
+  adBoost: { es: '▶ Producción ×2 durante 3 min · ver anuncio', en: '▶ Production ×2 for 3 min · watch an ad' },
+  adBoosted: { es: 'Impulso: producción ×2 durante 3 min', en: 'Boost: production ×2 for 3 min' },
   bClick: { es: 'Clics ×{m}', en: 'Clicks ×{m}' },
   ability: { es: 'Conquista · +{m} min de producción', en: 'Conquest · +{m} min of production' },
   abilityWait: { es: 'Conquista · {t}', en: 'Conquest · {t}' },
@@ -881,6 +883,32 @@ function removeSpore(caught) {
   setTimeout(() => el.remove(), 500);
   scheduleSpore();
 }
+// ================= impulso con anuncio (opcional: solo si el jugador lo pide) =================
+let lastAdBoost = performance.now();
+let adOffer = false;
+function checkAdOffer() {
+  const boosted = s?.buffs.some((b) => b.ad);
+  if (!s || adOffer || boosted || performance.now() - lastAdBoost < 4 * 60e3 || document.querySelector('.modal.on')) return;
+  G.rewardAvailable('impulso').then((ok) => {
+    if (!ok || adOffer) return;
+    adOffer = true;
+    const b = $('ad-boost');
+    b.textContent = T('adBoost');
+    b.hidden = false;
+  });
+}
+setInterval(checkAdOffer, 60e3);
+$('ad-boost').onclick = async () => {
+  $('ad-boost').hidden = true;
+  adOffer = false;
+  if (!(await G.showReward())) return;
+  lastAdBoost = performance.now();
+  s.buffs.push({ type: 'frenzy', mult: 2, until: s.time + 180, dur: 180, ad: true });
+  E.recalc(s);
+  toast(T('adBoosted'), 'gold');
+  dirty = true;
+};
+
 function catchSpore() {
   if (!spore) return;
   audio();

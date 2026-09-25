@@ -18,6 +18,7 @@ const TXT = {
   exit: { es: 'Salir al menú', en: 'Exit to menu' },
   over: { es: 'GAME OVER', en: 'GAME OVER' },
   again: { es: 'Jugar de nuevo', en: 'Play again' },
+  continue: { es: '▶ Continuar · ver anuncio', en: '▶ Continue · watch an ad' },
   score: { es: 'Puntaje', en: 'Score' },
   best: { es: 'Mejor (sesión)', en: 'Best (session)' },
   level: { es: 'Nivel', en: 'Level' },
@@ -461,6 +462,7 @@ function newGame() {
   S.level = 1;
   S.score = 0;
   S.lives = 3;
+  S.continued = false;
   S.extraGiven = false;
   resetLevel();
   resetActors();
@@ -1089,6 +1091,8 @@ function overlay() {
   const st = S.userPaused && S.state !== 'over' && S.state !== 'intro' ? 'pause' : S.state;
   ov.dataset.state = st;
   const show = st === 'intro' || st === 'pause' || st === 'over';
+  // anuncios (portal): banner aparte solo en pausa y fin de partida; nunca en la intro (se toca en cualquier lado)
+  G.gameplay(!(st === 'pause' || st === 'over'));
   ov.classList.toggle('on', show);
   if (!show) return;
   const touch = G.prefs.touch;
@@ -1104,15 +1108,42 @@ function overlay() {
   } else {
     ov.innerHTML = `<div class="panel"><h2>${tr('over')}</h2>
       <p class="big">${tr('score')} <b>${S.score}</b></p><p class="sub">${tr('best')} ${S.best}</p>
-      <div class="btns"><button data-a="restart" class="primary">${tr('again')}</button><button data-a="exit">${tr('exit')}</button></div></div>`;
+      <div class="btns"><button data-a="restart" class="primary">${tr('again')}</button><button data-a="continue" hidden>${tr('continue')}</button><button data-a="exit">${tr('exit')}</button></div></div>`;
+    offerContinue();
   }
   requestAnimationFrame(() => ov.querySelector('button.primary')?.focus({ preventScroll: true }));
 }
 
-ov.addEventListener('click', (e) => {
+// ================= continuar con un anuncio (opcional, una vez por partida) =================
+let continueToken = 0;
+function offerContinue() {
+  if (S.continued || S.score < 200) return;
+  const token = ++continueToken;
+  G.rewardAvailable('continuar').then((ok) => {
+    const b = ov.querySelector('[data-a="continue"]');
+    if (ok && b && token === continueToken && S.state === 'over') b.hidden = false;
+  });
+}
+function continueGame() {
+  // una vida más en el mismo nivel, con el puntaje y los puntos comidos
+  S.continued = true;
+  S.lives = 1;
+  S.diedThisLevel = true;
+  resetActors();
+  hud();
+  setState('ready', 1.6);
+}
+
+ov.addEventListener('click', async (e) => {
   const a = e.target.closest('button')?.dataset.a;
   if (a === 'resume') setUserPause(false);
-  else if (a === 'restart') {
+  else if (a === 'continue') {
+    continueToken++;
+    e.target.closest('button').hidden = true;
+    if (await G.showReward()) continueGame();
+  } else if (a === 'restart') {
+    // pausa natural antes de otra partida (el portal decide; por defecto sin anuncio)
+    if (S.state === 'over') await G.commercialBreak('otra-partida');
     S.userPaused = false;
     Sound.pause(false);
     newGame();

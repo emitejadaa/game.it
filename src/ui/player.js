@@ -6,6 +6,7 @@
 import * as loader from './loader.js';
 import * as prefs from '../core/prefs.js';
 import { pick, t } from '../core/i18n.js';
+import * as gameAds from './game-ads.js';
 
 const player = document.getElementById('player');
 const stage = document.getElementById('player-stage');
@@ -45,7 +46,7 @@ function onMessage(e) {
   if (!d || d.gameit !== 1) return;
   switch (d.type) {
     case 'hello':
-      send('init', { prefs: prefs.resolved(), game: { id: current.id } });
+      send('init', { prefs: prefs.resolved(), game: { id: current.id }, ads: 1 });
       break;
     case 'progress':
       creep = Math.max(creep, Math.min(0.98, +d.value || 0));
@@ -62,6 +63,9 @@ function onMessage(e) {
       break;
     case 'exit':
       hooks.onExit();
+      break;
+    case 'ad':
+      gameAds.message(d);
       break;
   }
 }
@@ -83,6 +87,7 @@ export async function launch(g, query = '') {
   await loader.show(t('loader.game', { name: pick(g.title) }));
 
   origin = new URL(g.entry, location.href).origin;
+  gameAds.attach(send, (on) => (on ? pause() : resume()));
   frame = document.createElement('iframe');
   frame.title = pick(g.title);
   frame.allow = 'autoplay; fullscreen; gamepad; clipboard-write; screen-wake-lock';
@@ -128,6 +133,7 @@ export async function launch(g, query = '') {
 }
 
 function teardown() {
+  gameAds.detach();
   pendingReady?.(false);
   frame?.remove(); // libera memoria, audio y WebGL del juego anterior
   frame = null;

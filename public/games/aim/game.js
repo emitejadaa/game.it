@@ -670,6 +670,7 @@ function showResults() {
 // ================= pantallas y config =================
 function showScreen(id) {
   $$('.screen').forEach((s) => s.classList.toggle('on', s.id === id));
+  G.gameplay(!id); // en menús, pausa y resultados el portal puede mostrar un banner aparte
 }
 
 const MODES = [
@@ -834,4 +835,5 @@ resize();
   requestAnimationFrame(idle);
 })(0);
 requestAnimationFrame(frame);
+G.gameplay(R.state === 'play' || R.state === 'countdown');
 G.ready();

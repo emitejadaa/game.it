@@ -800,8 +800,9 @@ function showResults(serverResults) {
   show('results');
 }
 
-$('res-again').onclick = () => {
+$('res-again').onclick = async () => {
   if (S.mode === 'online') return online.isHost && online.send({ t: 'rematch' });
+  await G.commercialBreak('revancha'); // pausa natural (el portal decide; por defecto sin anuncio)
   startRace(S.lastOpts);
 };
 $('res-menu').onclick = () => {
@@ -1019,6 +1020,7 @@ for (const b of $$('.pad button')) {
 function show(id) {
   $$('.screen').forEach((s) => s.classList.toggle('on', s.id === `s-${id}`));
   const inGame = !id;
+  G.gameplay(inGame); // en menús y resultados el portal puede mostrar un banner aparte
   $('hud').hidden = !inGame;
   $('quit').hidden = !inGame;
   const touch = G.prefs.touch && inGame && S.mode !== 'local';
@@ -1339,4 +1341,5 @@ if (code) {
   $('on-name').value = defaultName();
   show('online');
 } else if (ensureOnline().resume()) show('online');
+if ($('s-home').classList.contains('on') || $('s-online').classList.contains('on')) G.gameplay(false);
 G.ready();

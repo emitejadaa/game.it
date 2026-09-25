@@ -17,23 +17,46 @@ npm run preview  # prueba el build
 
 ## Anuncios (Google AdSense)
 
-El portal ya tiene el script de AdSense (`ca-pub-6804681798545706`) en el `<head>`, la meta de verificación y `public/ads.txt`.
-Los anuncios **solo** aparecen en zonas muertas del menú (hoy: un banner al final, separado de las tarjetas), con la etiqueta
-"Publicidad" y un botón "Ocultar" (queda oculto 24 h). Nunca dentro de un juego, en la pantalla de carga ni tapando contenido.
-Cada espacio se pide una sola vez (no se refresca solo) y se colapsa si AdSense no tiene anuncio o si hay un bloqueador.
+**Dónde aparecen** (todo se configura en `src/ads.config.js`; `enabled: false` apaga todo):
 
-Para terminar de conectarlo:
-1. En AdSense → **Sitios**, agregar el dominio y esperar la aprobación (usa el script del `<head>` o `ads.txt`).
-2. En **Anuncios → Por bloque de anuncios → Anuncios gráficos**, crear un bloque (por ejemplo "game.it menú", adaptable)
-   y copiar su `data-ad-slot` en `src/ads.config.js` → `slots.menuBottom`.
-3. En **Anuncios → Por sitio**, dejar **apagados los anuncios automáticos** (sobre todo los superpuestos: anclados y viñetas),
-   que taparían los juegos.
-4. En **Privacidad y mensajes**, activar el mensaje de consentimiento para Europa/Reino Unido.
+| Lugar | Formato | Cuándo | Requiere |
+| --- | --- | --- | --- |
+| Menú del portal | Banner al final, separado de las tarjetas | Siempre | Bloque `slots.menuBottom` |
+| Dentro de los juegos | Banner en una franja abajo: **el juego se achica**, nunca queda tapado | Solo en menús, pausas y fin de partida; se quita al volver a jugar; con 1,2 s de demora; como mucho uno nuevo por minuto | Bloque `slots.gameBreak` |
+| Dentro de los juegos | Con recompensa ("Continuar · ver anuncio", "Producción ×2") | Solo si el jugador lo elige | H5 Games Ads |
+| Dentro de los juegos | Pantalla completa entre partidas | **Apagado** (`games.interstitials: false`) | H5 Games Ads |
 
-Con `?ads=preview` en la URL se ven los espacios (recuadros punteados) sin pedir anuncios. `enabled: false` en
-`src/ads.config.js` los apaga todos.
+Todos llevan la etiqueta "Publicidad" y los banners se pueden ocultar (24 h). Nunca aparecen en la pantalla de carga,
+mientras se juega ni durante un partido online en curso. Stack no muestra banners (se toca en cualquier parte de la
+pantalla y habría clics sin querer). Con `?ads=preview` se ven todos los espacios simulados, sin pedir anuncios.
+
+### Paso a paso para que funcionen
+
+1. **Dominio propio.** AdSense no aprueba subdominios de hosting (`*.onrender.com`, `*.vercel.app`…). Comprar un
+   dominio y en Render → sitio estático → *Settings* → *Custom Domains* agregarlo y crear en el DNS el registro que
+   indica Render. Después, en el servicio del servidor online, sumar el dominio nuevo a `ALLOWED_ORIGINS`
+   (por ejemplo `https://tudominio.com,https://www.tudominio.com`), o los juegos online no van a conectar.
+2. **Agregar el sitio en AdSense** (*Sitios* → *Agregar sitio*, con el dominio sin `www`). El script del `<head>`,
+   la etiqueta `google-adsense-account` y `public/ads.txt` ya están publicados: elegir cualquiera de los tres métodos
+   y tocar *Verificar*. Pedir la revisión; puede tardar de días a un par de semanas.
+3. **Mientras tanto**: completar *Pagos* (datos fiscales y de pago; al llegar a US$10 Google envía un PIN por correo
+   postal para verificar la dirección).
+4. **Privacidad y mensajes** → crear el mensaje de consentimiento para Europa/Reino Unido/Suiza (obligatorio para
+   mostrar anuncios allí) y, si querés, el de regulaciones de EE. UU.
+5. **Apagar los anuncios automáticos**: *Anuncios* → *Por sitio* → editar el sitio → desactivar *Anuncios automáticos*
+   (los superpuestos —anclados y viñetas— taparían los juegos). Los espacios ya están ubicados a mano.
+6. **Crear los dos bloques** en *Anuncios* → *Por bloque de anuncios* → *Anuncios de display* (tipo adaptable):
+   "game.it menú" y "game.it juegos". Copiar el número de `data-ad-slot` de cada uno en `src/ads.config.js`
+   (`slots.menuBottom` y `slots.gameBreak`) y hacer push.
+7. **Recompensas y pantalla completa (opcional)**: con la cuenta ya aprobada, pedir acceso a **AdSense H5 Games Ads**
+   (formulario en https://adsense.google.com/start/h5-beta/). Mientras no esté aprobado, las ofertas con recompensa
+   simplemente no aparecen. Para probarlas, agregar temporalmente `data-adbreak-test="on"` al script de AdSense en
+   `index.html` (sacarlo al terminar). Para activar los de pantalla completa: `games.interstitials: true`.
+8. **Controlar**: en *Sitios* el estado del sitio y de `ads.txt` tiene que decir "Preparado"/"Autorizado"; en
+   *Informes* aparecen las impresiones al día siguiente. Nunca hacer clic en tus propios anuncios.
 
 ## Cómo está armado
+
 
 ```
 index.html              menú (una sola pantalla) + pantalla de carga
@@ -120,6 +143,18 @@ public/
   GameIt.ready();
 </script>
 ```
+
+**Anuncios desde el juego** (opcional; si no hay anuncios, todo resuelve enseguida y el juego sigue igual):
+
+```js
+GameIt.gameplay(true);   // empieza el juego activo: el portal saca cualquier anuncio
+GameIt.gameplay(false);  // menú, pausa o fin de partida: el portal puede mostrar un banner en una franja aparte
+await GameIt.commercialBreak('revancha');          // pausa natural antes de seguir (pantalla completa, si está activada)
+if (await GameIt.rewardAvailable('continuar')) {   // ofrecer una recompensa solo si hay anuncio disponible…
+  if (await GameIt.showReward()) darRecompensa();  // …y darla solo si el jugador lo vio completo
+}
+```
+No llamar a `gameplay(false)` en pantallas donde se toca en cualquier lado (habría clics sin querer en el anuncio).
 
 El SDK además:
 - expone los colores como variables CSS (`--gi-bg`, `--gi-fg`, `--gi-accent`, `--gi-cyan`…) y `data-gi-theme` en `<html>`;

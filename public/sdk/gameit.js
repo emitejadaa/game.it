@@ -8,6 +8,14 @@
  *   GameIt.ready();         // obligatorio: oculta la pantalla de carga del portal
  *   GameIt.exit();          // vuelve al menú principal
  *
+ * Anuncios (los decide el portal; si no hay anuncios todo sigue funcionando igual):
+ *   GameIt.gameplay(true);  // empieza el juego activo: el portal saca cualquier anuncio
+ *   GameIt.gameplay(false); // menú, pausa o fin de partida: el portal puede mostrar un banner
+ *                           // en una franja propia (el juego se achica; nada queda tapado)
+ *   await GameIt.commercialBreak('revancha'); // pausa natural antes de seguir (solo si está habilitado)
+ *   if (await GameIt.rewardAvailable('continuar')) mostrarBoton();   // recompensa opcional…
+ *   if (await GameIt.showReward()) darRecompensa();                  // …solo si el jugador la pide
+ *
  * Funciona igual si el juego se abre suelto (fuera del portal): lee las preferencias
  * guardadas en este dispositivo y exit() navega a "/".
  * Documentación completa: README.md → "Integrar un juego".
@@ -23,6 +31,10 @@
   var paused = false;
   var readySent = false;
   var fpsEl = null;
+  var playing = null;
+  var adsHost = false; // el portal avisa en 'init' si maneja anuncios
+  var reqs = {};
+  var reqId = 0;
 
   var DEFAULTS = {
     theme: 'dark',
@@ -114,7 +126,12 @@
     var d = e.data;
     if (!d || d.gameit !== 1 || e.source !== window.parent) return;
     parentOrigin = e.origin;
+    if (d.type === 'init') adsHost = !!d.ads;
     if (d.type === 'init' || d.type === 'prefs') setPrefs(d.prefs);
+    else if (d.type === 'ad-result' && reqs[d.id]) {
+      reqs[d.id](d.value);
+      delete reqs[d.id];
+    }
     else if (d.type === 'pause') setPaused(true);
     else if (d.type === 'resume') setPaused(false);
   });
@@ -142,6 +159,24 @@
   ['pointermove', 'pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
     window.addEventListener(ev, activity, { passive: true, capture: true });
   });
+
+  /** Pedido al portal con respuesta (false si no hay portal o no contesta a tiempo). */
+  function request(op, data, timeout) {
+    return new Promise(function (resolve) {
+      if (!embedded || !adsHost) return resolve(false);
+      var id = ++reqId;
+      reqs[id] = resolve;
+      var msg = { op: op, id: id };
+      if (data) for (var k in data) msg[k] = data[k];
+      post('ad', msg);
+      setTimeout(function () {
+        if (reqs[id]) {
+          reqs[id](false);
+          delete reqs[id];
+        }
+      }, timeout);
+    });
+  }
 
   var DIRS = {
     arrows: { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' },
@@ -185,6 +220,24 @@
       var k = prefs.keys;
       return (k !== 'wasd' && DIRS.arrows[e.key]) || (k !== 'arrows' && DIRS.wasd[e.code]) || null;
     },
+    /**
+     * Avisa si se está jugando (true) o si el juego está en un menú, pausa o fin de partida
+     * (false). Con false el portal puede mostrar un banner en una franja aparte, nunca encima.
+     */
+    gameplay: function (on) {
+      on = !!on;
+      if (playing === on) return;
+      playing = on;
+      post('ad', { op: 'gameplay', on: on });
+    },
+    gameplayStart: function () { api.gameplay(true); },
+    gameplayStop: function () { api.gameplay(false); },
+    /** Pausa natural (antes de una revancha o del siguiente nivel). Resuelve cuando se puede seguir. */
+    commercialBreak: function (name) { return request('break', { name: String(name || 'next') }, 100000); },
+    /** ¿Hay un anuncio con recompensa disponible? Mostrar la oferta solo si resuelve true. */
+    rewardAvailable: function (name) { return request('reward?', { name: String(name || 'reward') }, 5000); },
+    /** El jugador eligió ver el anuncio: resuelve true si lo vio y corresponde la recompensa. */
+    showReward: function () { return request('reward!', null, 150000); },
     /** Elige entre textos { es, en } según el idioma de las preferencias. */
     t: function (obj) { return obj[prefs.lang] || obj.es || obj.en; },
   };

@@ -8,7 +8,7 @@
     <title>game.it</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="google-adsense-account" content="ca-pub-6804681798545706" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6804681798545706" crossorigin="anonymous"></script>
+    <script async data-ad-client="ca-pub-6804681798545706" data-ad-frequency-hint="180s" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6804681798545706" crossorigin="anonymous"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -99,6 +99,11 @@
           </button>
         </div>
         <div class="player-stage" id="player-stage"></div>
+        <aside class="game-ad" id="game-ad" hidden data-i18n-label="ads.label">
+          <span class="ga-label" data-i18n="ads.label"></span>
+          <div class="ga-body"></div>
+          <button class="ga-close" type="button" data-i18n-title="ads.hide"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+        </aside>
       </section>
     </div>
 

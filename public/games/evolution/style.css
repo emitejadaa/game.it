@@ -101,6 +101,8 @@ body.frenzy .counter em { color: #fde047; }
 .ability button:disabled { opacity: 0.45; }
 .ability button:not(:disabled):hover { transform: scale(1.03); }
 .buffs { display: grid; gap: 6px; }
+.ad-boost { padding: 8px 10px; border-radius: 12px; border: 1px dashed rgba(253, 224, 71, 0.6); color: #fde047; font-size: 12px; text-align: left; transition: background 0.2s; }
+.ad-boost:hover { background: rgba(253, 224, 71, 0.12); }
 .buff { position: relative; padding: 6px 10px; border-radius: 10px; background: rgba(253, 224, 71, 0.15); border: 1px solid rgba(253, 224, 71, 0.4); font-size: 12px; overflow: hidden; }
 .buff i { position: absolute; left: 0; bottom: 0; height: 3px; background: #fde047; }
 .mini-stats { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }

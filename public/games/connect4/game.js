@@ -178,6 +178,7 @@ function canPlay() {
 // ================= flujo =================
 function show(id) {
   $$('.screen').forEach((s) => s.classList.toggle('on', s.id === `s-${id}`));
+  G.gameplay(id === 'game'); // en menús el portal puede mostrar un banner aparte
 }
 document.addEventListener('click', (e) => {
   const go = e.target.closest('[data-go]');
@@ -514,4 +515,5 @@ if (code) {
   $('on-name').value = defaultName();
   show('online');
 } else if (ensureOnline().resume()) show('online');
+if (!$('s-game').classList.contains('on')) G.gameplay(false);
 G.ready();

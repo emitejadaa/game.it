@@ -231,6 +231,8 @@ function show(name, dim = false) {
     s.classList.toggle('dim', on && dim);
   });
   const inGame = !name || dim;
+  // anuncios (portal): banner aparte en menús, pausa y tarjeta final; nunca entre hoyos ni jugando
+  G.gameplay(!name || (name === 'card' && !S.cardFinal));
   $('hud').hidden = !S.match || !inGame;
   $('players').hidden = !S.match || !inGame;
   if (name) $('hint').hidden = true;
@@ -717,6 +719,7 @@ function scoreTable(m) {
 
 function showCard(final, standings) {
   const m = S.match;
+  S.cardFinal = !!final;
   $('score-table').innerHTML = scoreTable(m);
   $('podium').innerHTML = '';
   const act = $('card-actions');
@@ -752,7 +755,7 @@ $('card-actions').onclick = (e) => {
   const a = e.target.closest('[data-card]')?.dataset.card;
   A.S.click();
   if (a === 'close') show(null);
-  else if (a === 'again') startLocal(S.config);
+  else if (a === 'again') G.commercialBreak('otra-vez').then(() => startLocal(S.config)); // pausa natural
   else if (a === 'menu') quitToMenu();
   else if (a === 'rematch') net.send({ t: 'rematch' });
   else if (a === 'leave') leaveOnline();

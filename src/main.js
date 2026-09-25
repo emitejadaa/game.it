@@ -13,6 +13,7 @@ import * as search from './ui/search.js';
 import * as prefsPanel from './ui/prefs-panel.js';
 import * as player from './ui/player.js';
 import * as ads from './ui/ads.js';
+import * as gameAds from './ui/game-ads.js';
 
 const app = document.getElementById('app');
 const $ = (id) => document.getElementById(id);
@@ -177,6 +178,7 @@ async function boot() {
   });
   player.init({ onExit: exitGame });
   ads.init();
+  gameAds.init();
   enableSpotlight(document.body);
   device.onChange(() => {
     renderMenu({ animate: false });

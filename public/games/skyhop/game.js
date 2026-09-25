@@ -39,6 +39,7 @@ const TXT = {
   springs: { es: 'resortes', en: 'springs' },
   reached: { es: 'llegaste a', en: 'reached' },
   again: { es: 'Otra vez', en: 'Again' },
+  revive: { es: '▶ Continuar · ver anuncio', en: '▶ Continue · watch an ad' },
   menu: { es: 'Menú', en: 'Menu' },
   waitOthers: { es: 'Esperando que caigan los demás…', en: 'Waiting for the others to fall…' },
   playing: { es: 'jugando', en: 'playing' },
@@ -965,6 +966,38 @@ function gameOver() {
     $('over-again').disabled = false;
   }
   show('over');
+  offerRevive();
+}
+
+// ================= continuar con un anuncio (opcional, una vez por partida) =================
+let reviveToken = 0;
+function offerRevive() {
+  const btn = $('over-revive');
+  btn.hidden = true;
+  if (S.mode !== 'solo' || S.revived || S.score < 10) return;
+  const token = ++reviveToken;
+  G.rewardAvailable('continuar').then((ok) => {
+    if (ok && token === reviveToken && S.state === 'over') {
+      btn.textContent = t('revive');
+      btn.hidden = false;
+    }
+  });
+}
+$('over-revive').onclick = async () => {
+  $('over-revive').hidden = true;
+  reviveToken++;
+  if (await G.showReward()) revive();
+};
+function revive() {
+  // reaparece sobre una plataforma nueva abajo de la pantalla, con escudo y sin enemigos cerca
+  S.revived = true;
+  const y = S.camY + 90;
+  S.plats.push({ x: W / 2, baseX: W / 2, y, baseY: y, w: 150, type: 'normal', item: null, gone: 0, t: 0 });
+  S.mons = S.mons.filter((m) => m.y > y + 420);
+  S.holes = S.holes.filter((h) => h.y > y + 420);
+  Object.assign(P, { x: W / 2, y, vx: 0, vy: JUMP, spin: 0, shield: true, jet: 0, prop: 0, squash: 1 });
+  S.state = 'play';
+  show(null);
 }
 
 // ================= bucle =================
@@ -1100,6 +1133,7 @@ $('ctrl').onclick = async (e) => {
 function show(id) {
   $$('.screen').forEach((s) => s.classList.toggle('on', s.id === `s-${id}`));
   const inGame = !id;
+  G.gameplay(inGame); // en menús y fin de partida el portal puede mostrar un banner aparte
   $('hud').hidden = !inGame;
   if (!inGame) $('power').hidden = true;
 }
@@ -1111,6 +1145,7 @@ function begin(seed) {
 function startSolo() {
   audio();
   S.mode = 'solo';
+  S.revived = false;
   others.clear();
   begin(Math.floor(Math.random() * 2 ** 31));
   S.state = 'play';
@@ -1119,7 +1154,7 @@ $('play-solo').onclick = startSolo;
 $('over-again').onclick = () => {
   if (S.mode === 'online') {
     if (online.isHost) online.send({ t: 'rematch' });
-  } else startSolo();
+  } else G.commercialBreak('otra-vez').then(startSolo); // pausa natural (por defecto sin anuncio)
 };
 $('over-menu').onclick = () => {
   if (S.mode === 'online') online.leave();
@@ -1350,4 +1385,6 @@ if (code) {
   $('on-name').value = defaultName();
   show('online');
 } else if (ensureOnline().resume()) show('online');
+if (/[?&]debug\b/.test(location.search)) window.__skyhop = { S, P, die };
+G.gameplay(false);
 G.ready();
