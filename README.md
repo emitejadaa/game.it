@@ -21,14 +21,17 @@ npm run preview  # prueba el build
 
 | Lugar | Formato | Cuándo | Requiere |
 | --- | --- | --- | --- |
-| Menú del portal | Banner al final, separado de las tarjetas | Siempre | Bloque `slots.menuBottom` |
-| Dentro de los juegos | Banner en una franja abajo: **el juego se achica**, nunca queda tapado | Solo en menús, pausas y fin de partida; se quita al volver a jugar; con 1,2 s de demora; como mucho uno nuevo por minuto | Bloque `slots.gameBreak` |
+| Menú del portal | Banner al final, a más de 150 px de las tarjetas | Siempre | Bloque `slots.menuBottom` |
+| Dentro de los juegos | Banner en una columna al costado, **a 150 px del juego** (el juego se achica, nunca queda tapado). Solo en computadora | Solo en menús, pausas y fin de partida; se quita al volver a jugar; con 1,2 s de demora; como mucho uno nuevo por minuto | Bloque `slots.gameBreak` |
 | Dentro de los juegos | Con recompensa ("Continuar · ver anuncio", "Producción ×2") | Solo si el jugador lo elige | H5 Games Ads |
 | Dentro de los juegos | Pantalla completa entre partidas | **Apagado** (`games.interstitials: false`) | H5 Games Ads |
 
 Todos llevan la etiqueta "Publicidad" y los banners se pueden ocultar (24 h). Nunca aparecen en la pantalla de carga,
-mientras se juega ni durante un partido online en curso. Stack no muestra banners (se toca en cualquier parte de la
-pantalla y habría clics sin querer). Con `?ads=preview` se ven todos los espacios simulados, sin pedir anuncios.
+mientras se juega ni durante un partido online en curso. Los 150 px de separación son lo que AdSense recomienda para
+páginas con juegos; en celulares y tablets no hay banners dentro de los juegos (con el dedo es fácil tocarlos sin
+querer): ahí quedan los formatos para juegos (con recompensa y entre partidas). La política de privacidad que pide
+AdSense está en `public/privacidad.html` (enlazada desde el pie del menú). Con `?ads=preview` se ven todos los espacios
+simulados, sin pedir anuncios.
 
 **Paso a paso para configurar AdSense (dominio, verificación, pagos, bloques, H5 Games Ads): [ANUNCIOS.md](ANUNCIOS.md).**
 
@@ -147,13 +150,13 @@ public/
 
 ```js
 GameIt.gameplay(true);   // empieza el juego activo: el portal saca cualquier anuncio
-GameIt.gameplay(false);  // menú, pausa o fin de partida: el portal puede mostrar un banner en una franja aparte
+GameIt.gameplay(false);  // menú, pausa o fin de partida: el portal puede mostrar un banner al costado
 await GameIt.commercialBreak('revancha');          // pausa natural antes de seguir (pantalla completa, si está activada)
 if (await GameIt.rewardAvailable('continuar')) {   // ofrecer una recompensa solo si hay anuncio disponible…
   if (await GameIt.showReward()) darRecompensa();  // …y darla solo si el jugador lo vio completo
 }
 ```
-No llamar a `gameplay(false)` en pantallas donde se toca en cualquier lado (habría clics sin querer en el anuncio).
+El banner va a 150 px del juego y solo en computadora, así que `gameplay(false)` se puede avisar en cualquier menú o pausa.
 
 El SDK además:
 - expone los colores como variables CSS (`--gi-bg`, `--gi-fg`, `--gi-accent`, `--gi-cyan`…) y `data-gi-theme` en `<html>`;

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="es" data-theme="dark" data-accent="cyan">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Política de privacidad de game.it: qué datos se usan, anuncios de Google y reportes de problemas." />
+    <title>Privacidad · game.it</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <script>
+      // mismo tema y color de acento que eligió la persona en el portal
+      (function () {
+        var p = {};
+        try { p = JSON.parse(localStorage.getItem('gameit:prefs')) || {}; } catch (e) {}
+        var d = document.documentElement;
+        var sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+        d.dataset.theme = p.theme === 'light' || p.theme === 'dark' ? p.theme : sysDark ? 'dark' : 'light';
+        d.dataset.accent = p.accent || 'cyan';
+        window.__lang = p.lang || ((navigator.language || 'es').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+      })();
+    </script>
+    <style>
+      :root[data-theme='dark'] { --bg: #07070a; --fg: #eaeaf0; --mute: #8a8a9c; --line: rgba(255, 255, 255, 0.1); color-scheme: dark; }
+      :root[data-theme='light'] { --bg: #f3f3f7; --fg: #15151c; --mute: #626276; --line: rgba(0, 0, 0, 0.1); color-scheme: light; }
+      :root[data-theme='dark'][data-accent='cyan'] { --accent: #00f0ff; }
+      :root[data-theme='dark'][data-accent='magenta'] { --accent: #ff2bd6; }
+      :root[data-theme='dark'][data-accent='lime'] { --accent: #b6ff00; }
+      :root[data-theme='dark'][data-accent='amber'] { --accent: #ffb800; }
+      :root[data-theme='dark'][data-accent='violet'] { --accent: #9d6bff; }
+      :root[data-theme='dark'][data-accent='red'] { --accent: #ff3b5c; }
+      :root[data-theme='light'][data-accent='cyan'] { --accent: #00809b; }
+      :root[data-theme='light'][data-accent='magenta'] { --accent: #b0007f; }
+      :root[data-theme='light'][data-accent='lime'] { --accent: #3d7700; }
+      :root[data-theme='light'][data-accent='amber'] { --accent: #a86400; }
+      :root[data-theme='light'][data-accent='violet'] { --accent: #6d3df0; }
+      :root[data-theme='light'][data-accent='red'] { --accent: #c4133a; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font: 400 14px/1.7 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+      header, main { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+      header { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; border-bottom: 1px solid var(--line); }
+      .logo { color: var(--fg); text-decoration: none; font-size: 18px; font-weight: 500; letter-spacing: -0.03em; }
+      .logo b { color: var(--accent); font-weight: 500; }
+      .langs { display: flex; gap: 6px; }
+      .langs button { font: inherit; font-size: 11px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line); background: none; color: var(--mute); cursor: pointer; }
+      .langs button[aria-pressed='true'] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+      main { padding-top: 36px; padding-bottom: 64px; }
+      h1 { font-size: 28px; font-weight: 500; letter-spacing: -0.03em; line-height: 1.2; }
+      .date { margin-top: 6px; font-size: 12px; color: var(--mute); }
+      h2 { margin-top: 34px; font-size: 12px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mute); }
+      p, ul { margin-top: 12px; }
+      ul { padding-left: 20px; }
+      li + li { margin-top: 6px; }
+      .legal { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--mute); }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="logo" href="/"><span>game</span><b>.it</b></a>
+      <div class="langs" role="group" aria-label="Idioma / Language">
+        <button type="button" data-set="es" aria-pressed="true">ES</button>
+        <button type="button" data-set="en" aria-pressed="false">EN</button>
+      </div>
+    </header>
+
+    <main>
+      <article data-lang="es" lang="es">
+        <h1>Política de privacidad</h1>
+        <p class="date">Última actualización: 25 de septiembre de 2026</p>
+
+        <p>game.it es un portal de juegos web gratis y sin cuentas. Para jugar no hace falta darnos ningún dato personal.
+          Acá contamos qué información se usa, para qué y qué podés hacer al respecto.</p>
+
+        <h2>Lo que queda en tu dispositivo</h2>
+        <p>Tus preferencias (tema, color, sonido, controles e idioma), los juegos que jugaste hace poco (para "Jugados
+          recientemente" y "Para vos"), los anuncios que ocultaste y, si mandaste un reporte, que tu correo ya está
+          verificado. Todo esto se guarda solo en el almacenamiento de tu navegador: no lo mandamos a ningún servidor y lo
+          podés borrar cuando quieras desde la configuración del navegador.</p>
+
+        <h2>Juegos online</h2>
+        <p>Cuando jugás online, nuestro servidor recibe el nombre que elijas para la sala y tu dirección IP, que usamos
+          mientras estás conectado para limitar abusos (por ejemplo, demasiadas salas desde el mismo lugar). No guardamos
+          ninguna de las dos cosas: las salas se borran cuando se cierran.</p>
+
+        <h2>Reportes de problemas</h2>
+        <p>Si nos mandás un reporte desde "Reportar un problema":</p>
+        <ul>
+          <li>Usamos tu <strong>correo</strong> para mandarte un código de verificación (así evitamos el spam) y, si lo
+            pedís, para avisarte cuando el problema esté resuelto. No te suscribimos a nada y nunca lo usamos para
+            publicidad ni lo vendemos.</li>
+          <li>Guardamos el <strong>texto del reporte</strong> y, si los dejás activados, <strong>datos técnicos</strong>:
+            versión del sitio, navegador, pantalla, preferencias y errores recientes. Antes de enviar podés ver
+            exactamente qué se manda.</li>
+          <li>Guardamos tu correo mientras el reporte esté abierto y hasta 90 días después de cerrarlo; después lo
+            borramos. Si un correo se bloquea por abuso, guardamos solo una huella cifrada (hash) para mantener el
+            bloqueo.</li>
+          <li>Si un reporte lleva a un arreglo, la descripción del problema (nunca tu correo) puede aparecer en el
+            código público del proyecto y ser procesada por herramientas de programación asistida por IA.</li>
+        </ul>
+
+        <h2>Publicidad de Google (AdSense)</h2>
+        <p>Mostramos anuncios de Google AdSense para mantener el sitio gratis.</p>
+        <ul>
+          <li>Proveedores externos, incluido Google, usan cookies para mostrar anuncios según las visitas anteriores que
+            hiciste a este sitio o a otros sitios web.</li>
+          <li>El uso de cookies de publicidad le permite a Google y a sus socios mostrarte anuncios según tus visitas a
+            este sitio y/o a otros sitios de Internet.</li>
+          <li>Podés desactivar la publicidad personalizada en la
+            <a href="https://www.google.com/settings/ads" rel="noopener">configuración de anuncios de Google</a>, o la de
+            otros proveedores en <a href="https://www.aboutads.info/choices/" rel="noopener">www.aboutads.info</a>.</li>
+          <li>Más información: <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">cómo usa
+            Google la información de los sitios que usan sus servicios</a>.</li>
+          <li>Si estás en el Espacio Económico Europeo, el Reino Unido o Suiza, te pedimos tu consentimiento antes de usar
+            cookies de publicidad.</li>
+        </ul>
+
+        <h2>Otros servicios que usamos</h2>
+        <ul>
+          <li>Google Fonts, para la tipografía del sitio.</li>
+          <li>Un proveedor de envío de correos, solo para los códigos y avisos de los reportes.</li>
+          <li>Cloudflare, para que el sitio cargue rápido, protegerlo de ataques y comprobar que no sos un robot.</li>
+        </ul>
+
+        <h2>Menores</h2>
+        <p>Los juegos son para todo público y no piden datos. Para mandar un reporte hace falta un correo: si tenés menos
+          de 13 años, pedile a una persona adulta que lo mande por vos.</p>
+
+        <h2>Tus derechos y contacto</h2>
+        <p>Podés pedirnos ver, corregir o borrar los datos de tus reportes escribiéndonos desde "Reportar un problema"
+          (tipo "Otra cosa") con el mismo correo. Si cambiamos esta política, actualizamos la fecha de arriba.</p>
+
+        <p class="legal">El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos
+          en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto
+          conforme lo establecido en el artículo 14, inciso 3 de la Ley N° 25.326. La AGENCIA DE ACCESO A LA INFORMACIÓN
+          PÚBLICA, en su carácter de Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y
+          reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en
+          materia de protección de datos personales.</p>
+      </article>
+
+      <article data-lang="en" lang="en" hidden>
+        <h1>Privacy policy</h1>
+        <p class="date">Last updated: September 25, 2026</p>
+
+        <p>game.it is a free web games portal with no accounts. You do not need to give us any personal data to play.
+          This page explains what information is used, what for, and what you can do about it.</p>
+
+        <h2>What stays on your device</h2>
+        <p>Your preferences (theme, color, sound, controls and language), the games you played recently (for "Recently
+          played" and "For you"), the ads you hid and, if you sent a report, the fact that your email is verified. All of
+          this is stored only in your browser: we do not send it to any server and you can delete it anytime from your
+          browser settings.</p>
+
+        <h2>Online games</h2>
+        <p>When you play online, our server receives the name you choose for the room and your IP address, which we use
+          while you are connected to limit abuse (for example, too many rooms from the same place). We do not store
+          either: rooms are deleted when they close.</p>
+
+        <h2>Problem reports</h2>
+        <p>If you send us a report from "Report a problem":</p>
+        <ul>
+          <li>We use your <strong>email</strong> to send you a verification code (to prevent spam) and, if you ask, to let
+            you know when the problem is fixed. We never subscribe you to anything, use it for advertising or sell
+            it.</li>
+          <li>We store the <strong>report text</strong> and, if you leave them on, <strong>technical data</strong>: site
+            version, browser, screen, preferences and recent errors. You can see exactly what is sent before sending.</li>
+          <li>We keep your email while the report is open and up to 90 days after it is closed; then we delete it. If an
+            email is blocked for abuse, we keep only an encrypted fingerprint (hash) to keep the block.</li>
+          <li>If a report leads to a fix, the description of the problem (never your email) may appear in the project's
+            public source code and be processed by AI-assisted programming tools.</li>
+        </ul>
+
+        <h2>Google advertising (AdSense)</h2>
+        <p>We show Google AdSense ads to keep the site free.</p>
+        <ul>
+          <li>Third party vendors, including Google, use cookies to serve ads based on your prior visits to this website
+            or other websites.</li>
+          <li>Google's use of advertising cookies enables it and its partners to serve ads to you based on your visit to
+            this site and/or other sites on the Internet.</li>
+          <li>You may opt out of personalized advertising in
+            <a href="https://www.google.com/settings/ads" rel="noopener">Google Ads Settings</a>, or from other vendors at
+            <a href="https://www.aboutads.info/choices/" rel="noopener">www.aboutads.info</a>.</li>
+          <li>More information: <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">how Google
+            uses information from sites that use its services</a>.</li>
+          <li>If you are in the European Economic Area, the United Kingdom or Switzerland, we ask for your consent before
+            using advertising cookies.</li>
+        </ul>
+
+        <h2>Other services we use</h2>
+        <ul>
+          <li>Google Fonts, for the site's typeface.</li>
+          <li>An email delivery provider, only for report codes and notifications.</li>
+          <li>Cloudflare, to make the site load fast, protect it from attacks and check that you are not a robot.</li>
+        </ul>
+
+        <h2>Children</h2>
+        <p>The games are for everyone and do not ask for any data. Sending a report requires an email: if you are under
+          13, ask an adult to send it for you.</p>
+
+        <h2>Your rights and contact</h2>
+        <p>You can ask us to see, correct or delete the data from your reports by writing to us from "Report a problem"
+          (type "Other") with the same email. If we change this policy, we update the date above.</p>
+      </article>
+    </main>
+
+    <script>
+      (function () {
+        var buttons = document.querySelectorAll('[data-set]');
+        function show(lang) {
+          document.documentElement.lang = lang;
+          document.querySelectorAll('article[data-lang]').forEach(function (a) { a.hidden = a.dataset.lang !== lang; });
+          buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === lang)); });
+          document.title = lang === 'es' ? 'Privacidad · game.it' : 'Privacy · game.it';
+        }
+        buttons.forEach(function (b) { b.addEventListener('click', function () { show(b.dataset.set); }); });
+        show(window.__lang === 'en' ? 'en' : 'es');
+      })();
+    </script>
+  </body>
+</html>

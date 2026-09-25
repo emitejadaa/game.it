@@ -13,8 +13,8 @@ El código ya está integrado: solo falta la configuración en AdSense, en Rende
 
 | Lugar | Formato | Cuándo se muestra | Qué necesita |
 | --- | --- | --- | --- |
-| Menú del portal | Banner al final, separado de las tarjetas | Siempre que se ve el menú | Bloque `slots.menuBottom` |
-| Dentro de los juegos | Banner en una franja abajo: el juego se achica y nada queda tapado | Solo en menús, pausas y fin de partida | Bloque `slots.gameBreak` |
+| Menú del portal | Banner al final, a más de 150 px de las tarjetas | Siempre que se ve el menú | Bloque `slots.menuBottom` |
+| Dentro de los juegos | Banner en una columna al costado, a 150 px del juego (el juego se achica y nada queda tapado). Solo en computadora | Solo en menús, pausas y fin de partida | Bloque `slots.gameBreak` |
 | Dentro de los juegos | Con recompensa: "Continuar · ver anuncio" (Sky Hop, Pac-Man), "Producción ×2" (Evolución) | Solo si el jugador lo elige | Aprobación de H5 Games Ads |
 | Dentro de los juegos | Pantalla completa antes de una revancha | **Apagado** | Aprobación de H5 Games Ads + `games.interstitials: true` |
 
@@ -24,7 +24,13 @@ Reglas que ya cumple el código:
 - Nunca hay anuncios en la pantalla de carga, mientras se juega ni durante un partido online en curso.
 - El banner de los juegos aparece 1,2 s después de pausar, como mucho uno nuevo por minuto, y se destruye al volver a jugar.
 - Cada anuncio se pide una sola vez (no se refresca solo) y el espacio se cierra si Google no tiene anuncio o hay un bloqueador.
-- Stack y la intro de Pac-Man no muestran banners: se toca en cualquier parte de la pantalla y habría clics sin querer.
+- Los banners quedan a 150 px o más del juego y de las tarjetas para jugar: es lo que [AdSense recomienda para páginas
+  con juegos](https://support.google.com/adsense/answer/2768340), para evitar clics sin querer (que bajan lo que paga
+  cada clic y pueden poner en riesgo la cuenta).
+- En celulares y tablets no hay banners dentro de los juegos: con el dedo es fácil tocarlos sin querer. Ahí se gana con
+  los formatos para juegos (con recompensa y entre partidas), que necesitan H5 Games Ads.
+- El banner de los juegos elige 300×250 (o 160×600 en pantallas altas) solo si al juego le quedan al menos ~780 px de
+  ancho; si no hay lugar, no aparece.
 
 ---
 
@@ -75,7 +81,16 @@ En **Pagos** → **Administrar la configuración**:
 
 ---
 
-## 5. Consentimiento de privacidad
+## 5. Consentimiento y política de privacidad
+
+**Política de privacidad (obligatoria para AdSense):** ya está publicada en `public/privacidad.html` (se abre en
+`https://tudominio.com/privacidad.html` y está enlazada desde el pie del menú). Incluye lo que AdSense pide explicar
+sobre las cookies de publicidad de Google. Antes de pedir la revisión:
+
+- Leela y ajustala si hace falta (no reemplaza el consejo de un abogado).
+- Agregá un correo de contacto del dominio (por ejemplo `contacto@tudominio.com`) donde dice "Contacto".
+
+**Mensaje de consentimiento:**
 
 En **Privacidad y mensajes**:
 
@@ -148,7 +163,8 @@ Estos formatos usan **AdSense H5 Games Ads**, un programa aparte que hay que ped
 
 1. En **Sitios**: el estado del sitio tiene que decir **Preparado** y el de `ads.txt`, **Autorizado**.
 2. Abrí la web en una ventana normal (sin bloqueador de anuncios): el banner del menú aparece al final.
-   Abrí un juego (por ejemplo Clashball): en el menú del juego aparece la franja de abajo; al empezar a jugar desaparece.
+   Abrí un juego en computadora (por ejemplo Clashball): en el menú del juego aparece la columna al costado; al empezar a
+   jugar desaparece.
 3. En **Informes** vas a ver impresiones y ganancias desde el día siguiente.
 
 ---

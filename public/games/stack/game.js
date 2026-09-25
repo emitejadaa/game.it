@@ -187,7 +187,10 @@ function gameOver() {
   zoomTarget = Math.max(1, (S.stack.length * H) / 4.5);
   camTarget.y = (S.stack.length * H) / 2 - 1;
   $('stats').innerHTML = `<div><b>${score}</b>${tr('score')}</div><div><b>${S.best}</b>${tr('best')}</div><div><b>${S.perfects}</b>${tr('perfect')}</div>`;
-  setTimeout(() => $('over').classList.add('on'), 500);
+  setTimeout(() => {
+    $('over').classList.add('on');
+    G.gameplay(false); // fin de partida: en computadora el portal puede mostrar un banner al costado
+  }, 500);
 }
 
 function start() {
@@ -196,6 +199,7 @@ function start() {
   $('over').classList.remove('on');
   reset();
   S.state = 'play';
+  G.gameplay(true);
   spawn();
 }
 
@@ -356,4 +360,5 @@ addEventListener('resize', resize);
 resize();
 reset();
 requestAnimationFrame(frame);
+G.gameplay(false);
 G.ready();

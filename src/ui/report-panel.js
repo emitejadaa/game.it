@@ -14,7 +14,7 @@ import { ALL_GAMES } from '../core/registry.js';
 import { getLang, pick, t } from '../core/i18n.js';
 
 const panel = document.getElementById('report');
-const triggers = [document.getElementById('btn-report'), document.getElementById('btn-player-report')];
+const triggers = ['btn-report', 'btn-player-report', 'foot-report'].map((id) => document.getElementById(id));
 
 const SESSION_KEY = 'gameit:report:session'; // localStorage: { email, token, exp }
 const PENDING_KEY = 'gameit:report:pending'; // sessionStorage: código pedido y todavía sin verificar

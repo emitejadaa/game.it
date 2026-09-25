@@ -2,9 +2,11 @@
  * Anuncios dentro de los juegos, manejados desde el portal (los juegos solo avisan en qué momento
  * están, vía el SDK). De menos a más invasivo:
  *
- *  1. Banner en pausas, menús y fin de partida: el área del juego se achica y el anuncio va en la
- *     franja liberada, así nunca tapa nada. Aparece con demora (las pausas cortas no muestran
- *     nada), como mucho uno nuevo por minuto, se puede ocultar y se quita al volver a jugar.
+ *  1. Banner en pausas, menús y fin de partida, solo en computadora: va en una columna al costado,
+ *     a 150 px del juego (lo que recomienda AdSense para páginas con juegos) y el juego se achica a
+ *     lo ancho, así nunca tapa nada. Aparece con demora (las pausas cortas no cambian nada), como
+ *     mucho uno nuevo por minuto, se puede ocultar y se quita al volver a jugar. En celulares y
+ *     tablets no hay banners dentro de los juegos: con el dedo es fácil tocarlos sin querer.
  *  2. Con recompensa (H5 Games Ads): solo si el jugador elige verlo a cambio de algo.
  *  3. Pantalla completa entre partidas (H5 Games Ads): apagado por defecto.
  *
@@ -13,6 +15,7 @@
 import cfg from '../ads.config.js';
 import * as prefs from '../core/prefs.js';
 import { t } from '../core/i18n.js';
+import { platform } from '../core/device.js';
 
 const G = { banners: true, bannerGapSec: 60, bannerDelayMs: 1200, rewarded: true, interstitials: false, interstitialGapSec: 240, firstInterstitialSec: 180, ...(cfg.games || {}) };
 const preview = new URLSearchParams(location.search).get('ads') === 'preview';
@@ -27,6 +30,7 @@ let pauseGame = () => {};
 let active = false;
 let inBreak = false;
 let showTimer = 0;
+let shown = null; // tamaño del banner a la vista
 let lastBannerAt = -Infinity;
 let lastInterstitialAt = -Infinity;
 const pageStart = performance.now();
@@ -46,35 +50,40 @@ const dismissed = () => {
   }
 };
 
-// ------------------------------------------------------------------ banner en pausas
-/** Tamaño estándar según el espacio (en pantallas bajas, el más chico). */
-function adSize() {
-  const w = innerWidth;
-  const h = innerHeight;
-  if (w >= 800 && h >= 560) return [728, 90];
-  if (w >= 520 && h >= 430) return [468, 60];
-  return [320, 50];
+// ------------------------------------------------------------------ banner en pausas (solo computadora)
+const GAP = 150; // px vacíos entre el juego y el anuncio
+const EDGE = 20; // margen del lado de afuera
+
+/** Tamaño del banner al costado, o null si no hay lugar sin dejar el juego apretado. */
+function railSize() {
+  if (platform() !== 'desktop') return null;
+  const room = (w) => innerWidth - (GAP + w + EDGE); // ancho que le queda al juego
+  if (room(300) >= 780 && innerHeight >= 400) return [300, 250];
+  if (room(160) >= 760 && innerHeight >= 780) return [160, 600];
+  return null;
 }
 
 const bannerAllowed = () =>
-  cfg.enabled && G.banners !== false && (preview || (cfg.client && cfg.slots?.gameBreak)) && !dismissed() && performance.now() - lastBannerAt >= G.bannerGapSec * 1000;
+  cfg.enabled && G.banners !== false && (preview || (cfg.client && cfg.slots?.gameBreak)) && !dismissed() && performance.now() - lastBannerAt >= G.bannerGapSec * 1000 && !!railSize();
 
-/** Reserva la franja: el juego se achica ahora, antes de que aparezca el anuncio (sin saltos después). */
-function reserve() {
-  const [w, h] = adSize();
+/** Abre la columna (el juego se achica) justo antes de pedir el anuncio: el anuncio carga en un lugar ya reservado. */
+function reserve([w, h]) {
   strip.hidden = false;
   strip.classList.remove('on');
   body.innerHTML = '';
   body.style.width = `${w}px`;
   body.style.height = `${h}px`;
-  player.style.setProperty('--ga-h', `${strip.offsetHeight}px`);
+  player.style.setProperty('--ga-w', `${GAP + w + EDGE}px`);
   player.classList.add('ad-space');
 }
 
 function fill() {
-  if (!inBreak || !active) return;
+  const size = railSize();
+  if (!inBreak || !active || busy || !size) return;
+  reserve(size);
+  shown = size;
   lastBannerAt = performance.now();
-  const [w, h] = adSize();
+  const [w, h] = size;
   if (preview) {
     body.innerHTML = `<div class="ad-preview" style="width:${w}px;height:${h}px"><span>${w}×${h}</span></div>`;
   } else {
@@ -94,6 +103,7 @@ function fill() {
 function hideBanner() {
   clearTimeout(showTimer);
   showTimer = 0;
+  shown = null;
   body.innerHTML = ''; // el anuncio se destruye: nunca queda oculto detrás del juego
   strip.classList.remove('on');
   strip.hidden = true;
@@ -104,12 +114,18 @@ function gameplay(on) {
   inBreak = !on;
   if (on) return hideBanner();
   if (busy || showTimer || !strip.hidden || !bannerAllowed()) return;
-  reserve();
   showTimer = setTimeout(() => {
     showTimer = 0;
     fill();
   }, G.bannerDelayMs);
 }
+
+// si la ventana se achica y el banner ya no entra (o cambia el tamaño que corresponde), se quita
+addEventListener('resize', () => {
+  if (!shown) return;
+  const size = railSize();
+  if (!size || size[0] !== shown[0]) hideBanner();
+});
 
 strip.querySelector('.ga-close').addEventListener('click', () => {
   try {

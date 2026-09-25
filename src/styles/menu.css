@@ -438,12 +438,13 @@
 }
 
 /* ============ Publicidad (zona muerta al final del menú) ============ */
+/* A 150 px o más de las tarjetas de juegos (AdSense pide separar los anuncios de los botones para jugar). */
 .ad-slot {
   display: grid;
   justify-items: center;
   gap: 8px;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 72px;
+  padding-top: 24px;
   border-top: 1px dashed var(--line2);
   opacity: 0;
   transform: translateY(10px);
@@ -524,4 +525,33 @@
   font-size: 11px;
   letter-spacing: 0.1em;
   background: var(--accent-soft);
+}
+
+/* ============ Pie: privacidad y contacto ============ */
+.site-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 20px;
+  margin-top: 16px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+}
+.site-foot a,
+.site-foot button {
+  font-size: inherit;
+  letter-spacing: inherit;
+  color: var(--mute);
+  text-decoration: underline;
+  text-decoration-color: var(--line2);
+  text-underline-offset: 3px;
+  transition: color var(--t-fast) var(--ease);
+}
+.site-foot a:hover,
+.site-foot button:hover {
+  color: var(--accent);
 }
