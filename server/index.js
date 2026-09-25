@@ -25,8 +25,9 @@ import chess from './games/chess.js';
 import ameba from './games/ameba.js';
 import serpentina from './games/serpentina.js';
 import billar from './games/billar.js';
+import chispa from './games/chispa.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa };
 /** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
 const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
 
@@ -55,7 +56,7 @@ const CFG = {
   heartbeatMs: num('HEARTBEAT_MS', 20e3),
 };
 
-const COLORS = ['#ff5a5f', '#3ec1ff', '#ffc93c', '#7bd389'];
+const COLORS = ['#ff5a5f', '#3ec1ff', '#ffc93c', '#7bd389', '#c77dff', '#ff9f43', '#2de2e6', '#f15bb5'];
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin 0/O ni 1/I
 const rooms = new Map();
 const ipConns = new Map();

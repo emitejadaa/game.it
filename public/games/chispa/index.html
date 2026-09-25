@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Chispa · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <main id="table" aria-live="polite">
+      <div class="felt"></div>
+      <div id="seats"></div>
+      <div id="center">
+        <svg class="dir" id="dir" viewBox="0 0 200 200" aria-hidden="true">
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor" /></marker></defs>
+          <path d="M100 12 A88 88 0 0 1 188 100" marker-end="url(#ah)" />
+          <path d="M100 188 A88 88 0 0 1 12 100" marker-end="url(#ah)" />
+        </svg>
+        <div class="glow" id="glow"></div>
+        <button class="deck" id="deck" aria-label="mazo"><span class="card back"></span><span class="card back"></span><span class="card back" id="deck-top"></span><b id="deck-n">0</b></button>
+        <div class="pile" id="pile"></div>
+        <div class="pending" id="pending" hidden></div>
+        <div class="cname" id="cname"></div>
+      </div>
+      <div class="toast" id="toast"></div>
+      <section class="mine" id="mine">
+        <div class="mybar">
+          <span class="me-name" id="me-name"></span>
+          <span class="me-turn" id="me-turn"></span>
+          <div class="acts">
+            <button class="act" id="b-draw" data-t="draw"></button>
+            <button class="act" id="b-pass" data-t="pass" hidden></button>
+            <button class="act call" id="b-call" data-t="call"></button>
+          </div>
+        </div>
+        <div class="hand" id="hand"></div>
+      </section>
+      <div class="fx" id="fx"></div>
+      <button class="icon quit" id="b-menu" aria-label="menú" hidden><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg></button>
+    </main>
+
+    <!-- elegir color del comodín -->
+    <div class="picker" id="picker" hidden>
+      <div class="pk">
+        <p data-t="pick"></p>
+        <div class="quad"><button data-c="0"></button><button data-c="1"></button><button data-c="2"></button><button data-c="3"></button></div>
+        <button class="link" id="pk-cancel" data-t="cancel"></button>
+      </div>
+    </div>
+
+    <section class="screen on" id="s-home">
+      <div class="panel">
+        <div class="logo" aria-label="Chispa"><span class="spark"></span><h1>CHISPA</h1></div>
+        <p class="sub" data-t="tagline"></p>
+        <div class="fanlogo" id="fanlogo"></div>
+        <button class="btn" data-go="cpu" data-t="vsCpu"></button>
+        <button class="btn alt" data-go="online" data-t="online"></button>
+        <button class="link" data-go="rules" data-t="howTo"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-setup">
+      <div class="panel">
+        <h2 data-t="vsCpu"></h2>
+        <div class="opt"><span class="lbl" data-t="rivals"></span><div class="seg" data-o="rivals"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div></div>
+        <div class="opt"><span class="lbl" data-t="level"></span><div class="seg" data-o="level"><button data-v="1" data-t="lv1"></button><button data-v="2" data-t="lv2"></button><button data-v="3" data-t="lv3"></button></div></div>
+        <div class="opt"><span class="lbl" data-t="target"></span><div class="seg" data-o="target"><button data-v="0" data-t="oneRound"></button><button data-v="200">200</button><button data-v="500">500</button></div></div>
+        <div class="opt"><span class="lbl" data-t="stack"></span><div class="seg" data-o="stack"><button data-v="1" data-t="yes"></button><button data-v="0" data-t="no"></button></div></div>
+        <p class="note" data-t="stackNote"></p>
+        <button class="btn" id="setup-go" data-t="play"></button>
+        <button class="link" data-back data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-rules">
+      <div class="panel rules">
+        <h2 data-t="howTo"></h2>
+        <div id="rules-body"></div>
+        <button class="btn" data-back data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-online">
+      <div class="panel">
+        <h2 data-t="online"></h2>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+        <button class="btn" id="on-create" data-t="create"></button>
+        <div class="row"><input class="field code-in" id="on-code" maxlength="5" autocomplete="off" placeholder="ABCDE" /><button class="btn alt" id="on-join" data-t="join"></button></div>
+        <p class="status" id="on-status"></p>
+        <button class="link" data-back data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-lobby">
+      <div class="panel">
+        <span class="lbl center" data-t="shareCode"></span>
+        <div class="code" id="lobby-code">-----</div>
+        <button class="btn alt" id="lobby-share" data-t="copyLink"></button>
+        <ul class="plist" id="lobby-players"></ul>
+        <div id="lobby-host">
+          <div class="opt"><span class="lbl" data-t="addBots"></span><div class="seg" data-l="bots"><button data-v="0">0</button><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button></div></div>
+          <div class="opt"><span class="lbl" data-t="level"></span><div class="seg" data-l="level"><button data-v="1" data-t="lv1"></button><button data-v="2" data-t="lv2"></button><button data-v="3" data-t="lv3"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="target"></span><div class="seg" data-l="target"><button data-v="0" data-t="oneRound"></button><button data-v="200">200</button><button data-v="500">500</button></div></div>
+          <div class="opt"><span class="lbl" data-t="stack"></span><div class="seg" data-l="stack"><button data-v="1" data-t="yes"></button><button data-v="0" data-t="no"></button></div></div>
+        </div>
+        <p class="note" id="lobby-info"></p>
+        <button class="btn" id="lobby-start" data-t="start"></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="link" id="lobby-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-round">
+      <div class="panel wide">
+        <h2 id="rd-title"></h2>
+        <p class="sub" id="rd-sub"></p>
+        <ul class="scores" id="rd-list"></ul>
+        <p class="note" id="rd-next"></p>
+        <button class="btn" id="rd-go" data-t="nextRound"></button>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-over">
+      <div class="panel wide">
+        <div class="trophy" id="ov-trophy"></div>
+        <h2 id="ov-title"></h2>
+        <ul class="scores" id="ov-list"></ul>
+        <button class="btn" id="ov-again" data-t="again"></button>
+        <button class="btn alt" id="ov-reward" hidden></button>
+        <p class="status" id="ov-status"></p>
+        <button class="link" id="ov-menu" data-t="menu"></button>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-menu">
+      <div class="panel">
+        <h2 data-t="paused"></h2>
+        <button class="btn" id="m-resume" data-t="resume"></button>
+        <button class="btn alt" id="m-rules" data-t="howTo"></button>
+        <button class="link" id="m-quit" data-t="quit"></button>
+      </div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

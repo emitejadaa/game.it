@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina y Billar): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar y Chispa): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -209,6 +209,15 @@ determinista: online el cliente manda el golpe exacto (velocidad y giro iniciale
 y aplica las reglas (`shared/rules.js`), y los dos navegadores animan el mismo tiro y terminan igual. La mesa se
 dibuja con three.js desde arriba y solo se vuelve a renderizar cuando algo cambia. La compu (`shared/ai.js`, en un
 worker) prueba tiros simulándolos y juega de seguridad si no hay nada claro.
+
+### Chispa (cartas)
+
+Juego de cartas de colores con nombre, diseño y cartas propias (4 colores de neón con una forma cada uno para quien no
+distingue colores). Las reglas están en `public/games/chispa/shared/rules.js` y la mesa (rondas, puntos, turnos de la
+compu, tiempo por turno y lo que ve cada jugador) en `shared/table.js`: el mismo código corre en el navegador contra la
+compu y en el servidor online, que baraja, valida cada jugada y a cada jugador le manda solo su mano. Se avisa
+"¡Última!" con una carta; si otro te agarra antes de que juegue el siguiente, robás 2. Opcional: acumular +2/+4.
+Online de 2 a 6 (el anfitrión puede sumar compu); si alguien se desconecta juega solo hasta que vuelve.
 
 ### Drift Neon
 
