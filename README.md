@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta y Garabato): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato y Teléfono Loco): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -198,6 +198,17 @@ en curso. Hoja fija de 1000×750 para que el relleno con balde dé igual en todo
 (aparecen en la lista y en "Partida rápida") o privadas, con palabras propias. Listas de palabras propias en
 `public/games/garabato/shared/words.js` (español e inglés).
 
+### Teléfono Loco (teléfono descompuesto con dibujos)
+
+Online de 2 a 10: cada uno escribe una frase (o se arranca con frases al azar), las cadenas rotan y al que le llega una
+frase la dibuja y al que le llega un dibujo lo describe, sin ver lo anterior; cada cadena pasa una sola vez por cada
+jugador (rotación fija, `server/games/telefono.js`). Lo que se escribe y se dibuja llega al servidor mientras se hace,
+así nada se pierde si se acaba el tiempo o se corta la conexión; si alguien no responde, el siguiente recibe lo último
+útil de la cadena (o una frase al azar). Al final se muestran los álbumes paso a paso para todos a la vez (avanza el
+anfitrión o solos), con los dibujos repitiéndose trazo a trazo, reacciones y la opción de guardar cada álbum como una
+imagen. Opciones: tiempos de dibujo y de escritura, largo de las cadenas, idioma de las frases y sala pública o
+privada. Frases en `public/games/telefono/shared/prompts.js`; la hoja y el balde en `paper.js`.
+
 ### Mecha Corta (palabras)
 
 Juego de palabras con bomba: el que la tiene ve una sílaba y escribe una palabra que la contenga (existente y sin
@@ -223,12 +234,16 @@ Online de 2 a 6 (el anfitrión puede sumar compu); si alguien se desconecta jueg
 Física arcade propia en `public/games/drift/shared/car.js` (paso fijo de 1/120 s): el volante define una velocidad de
 giro que el auto alcanza con inercia y el agarre gira la velocidad hacia la trompa sin crear energía. Para derrapar se
 tira del freno de mano doblando (o se frena/acelera fuerte en plena curva); el acelerador sostiene el derrape, el
-contravolante lo cierra y pasado cierto ángulo es trompo. Nueve pistas largas (`tracks.js`): tres con puntos de control
-y seis trazadas con rectas y curvas de radio exacto (`shared/turtle.js`, que cierra el circuito solo), todas validadas
-para que ningún tramo se pise con otro. La compu (`shared/ai.js`) usa la misma física: sigue una línea de carrera
+contravolante lo cierra y pasado cierto ángulo es trompo. Quince pistas largas (`tracks.js`, 15 a 21 km de juego
+cada una) con tema propio (ciudad, autopista, desierto, puerto, costa, montaña, nieve, estadio, aeródromo, cañón,
+bosque con río, volcán, base lunar y bahía con lluvia): unas con puntos de control y otras trazadas con rectas y
+curvas de radio exacto (`shared/turtle.js`, que cierra el circuito solo), todas validadas para que ningún tramo se
+pise con otro. Todas tienen grava en las curvas cerradas, flechas y carteles de frenada. La compu (`shared/ai.js`) usa la misma física: sigue una línea de carrera
 calculada, frena antes de las curvas, usa freno de mano en las horquillas y nitro en las rectas (tres niveles).
 Modos: carrera contra hasta 5 autos de la compu, contrarreloj contra el fantasma de tu mejor recorrido de la sesión
 (con parciales), desafío de drift, 2 jugadores en pantalla dividida y online de hasta 6 (el servidor valida los
-tiempos con el largo de cada pista). El fondo se dibuja en mosaicos cacheados, así solo se redibuja lo que se mueve.
+tiempos con el largo de cada pista). El selector muestra el mapa grande con sus datos (largo, curvas, recta más
+larga, dificultad, superficie y récord). El fondo se dibuja en mosaicos cacheados, así solo se redibuja lo que se
+mueve.
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

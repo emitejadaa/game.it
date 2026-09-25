@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#241047"/><stop offset="1" stop-color="#8a2466"/></linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#bg)"/>
+  <circle cx="40" cy="36" r="60" fill="#ffd23f" opacity=".12"/>
+  <circle cx="290" cy="180" r="70" fill="#2ee6c5" opacity=".12"/>
+  <!-- cable enrulado -->
+  <path d="M64 120c10-14 22-14 22 0s12 14 22 0 22-14 22 0 12 14 22 0 22-14 22 0 12 14 22 0 22-14 22 0 12 14 22 0" fill="none" stroke="#ff5c9a" stroke-width="6" stroke-linecap="round"/>
+  <!-- globo de texto -->
+  <g transform="rotate(-5 70 70)">
+    <rect x="18" y="30" width="118" height="58" rx="16" fill="#fffdf6"/>
+    <path d="M40 86l-8 18 22-16z" fill="#fffdf6"/>
+    <path d="M34 52h80M34 68h56" stroke="#1d1633" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <!-- hoja con dibujo -->
+  <g transform="rotate(5 240 80)">
+    <rect x="184" y="22" width="120" height="90" rx="10" fill="#fffdf6"/>
+    <circle cx="232" cy="66" r="22" fill="#facc15" stroke="#111" stroke-width="4"/>
+    <path d="M232 36v-6M232 102v-6M202 66h-6M268 66h-6M211 45l-4-4M253 87l4 4M253 45l4-4M211 87l-4 4" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="225" cy="62" r="3" fill="#111"/><circle cx="239" cy="62" r="3" fill="#111"/>
+    <path d="M224 72c5 5 11 5 16 0" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+    <path d="M280 42l14 10-14 10" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- teléfono -->
+  <g transform="translate(128 108) rotate(-8)">
+    <path d="M4 38c0-16 16-26 36-26s36 10 36 26c0 6-6 8-12 6l-8-3c-4-2-5-6-4-10-8-3-16-3-24 0 1 4 0 8-4 10l-8 3c-6 2-12 0-12-6z" fill="#ff5c9a" stroke="#1d1633" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="16" y="42" width="48" height="36" rx="10" fill="#ff5c9a" stroke="#1d1633" stroke-width="4"/>
+    <circle cx="40" cy="60" r="9" fill="#fffdf6" stroke="#1d1633" stroke-width="3"/>
+  </g>
+  <text x="160" y="190" text-anchor="middle" font-family="Comic Sans MS, cursive" font-size="22" fill="#ffd23f">Teléfono Loco</text>
+</svg>

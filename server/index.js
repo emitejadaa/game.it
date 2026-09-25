@@ -28,8 +28,9 @@ import billar from './games/billar.js';
 import chispa from './games/chispa.js';
 import mecha from './games/mecha.js';
 import garabato from './games/garabato.js';
+import telefono from './games/telefono.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono };
 /** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
 const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
 

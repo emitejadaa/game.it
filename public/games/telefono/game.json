@@ -1,0 +1,19 @@
+{
+  "id": "telefono",
+  "title": { "es": "Teléfono Loco", "en": "Wacky Phone" },
+  "description": {
+    "es": "El teléfono descompuesto con dibujos: escribí una frase, el siguiente la dibuja, otro describe el dibujo… y al final se ven los álbumes completos. Online, de 2 a 10 jugadores.",
+    "en": "Broken telephone with drawings: write a phrase, the next player draws it, another describes the drawing… and at the end you watch the whole albums. Online, 2 to 10 players."
+  },
+  "categories": ["palabras", "online", "multijugador", "casual"],
+  "tags": ["dibujar", "draw", "telefono", "telephone", "gartic", "descompuesto", "party", "fiesta", "amigos", "adivinar"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 10, "story": false },
+  "order": 19
+}
