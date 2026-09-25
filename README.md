@@ -234,7 +234,7 @@ Online de 2 a 6 (el anfitrión puede sumar compu); si alguien se desconecta jueg
 Física arcade propia en `public/games/drift/shared/car.js` (paso fijo de 1/120 s): el volante define una velocidad de
 giro que el auto alcanza con inercia y el agarre gira la velocidad hacia la trompa sin crear energía. Para derrapar se
 tira del freno de mano doblando (o se frena/acelera fuerte en plena curva); el acelerador sostiene el derrape, el
-contravolante lo cierra y pasado cierto ángulo es trompo. Quince pistas largas (`tracks.js`, 15 a 21 km de juego
+contravolante lo cierra y pasado cierto ángulo es trompo. Quince pistas largas (`tracks.js`, de 1,5 a 2,1 km
 cada una) con tema propio (ciudad, autopista, desierto, puerto, costa, montaña, nieve, estadio, aeródromo, cañón,
 bosque con río, volcán, base lunar y bahía con lluvia): unas con puntos de control y otras trazadas con rectas y
 curvas de radio exacto (`shared/turtle.js`, que cierra el circuito solo), todas validadas para que ningún tramo se
