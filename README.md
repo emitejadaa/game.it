@@ -11,9 +11,27 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas del minigolf): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop y Clashball): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
-- En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que el minigolf usa automáticamente.
+- En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
+
+## Anuncios (Google AdSense)
+
+El portal ya tiene el script de AdSense (`ca-pub-6804681798545706`) en el `<head>`, la meta de verificación y `public/ads.txt`.
+Los anuncios **solo** aparecen en zonas muertas del menú (hoy: un banner al final, separado de las tarjetas), con la etiqueta
+"Publicidad" y un botón "Ocultar" (queda oculto 24 h). Nunca dentro de un juego, en la pantalla de carga ni tapando contenido.
+Cada espacio se pide una sola vez (no se refresca solo) y se colapsa si AdSense no tiene anuncio o si hay un bloqueador.
+
+Para terminar de conectarlo:
+1. En AdSense → **Sitios**, agregar el dominio y esperar la aprobación (usa el script del `<head>` o `ads.txt`).
+2. En **Anuncios → Por bloque de anuncios → Anuncios gráficos**, crear un bloque (por ejemplo "game.it menú", adaptable)
+   y copiar su `data-ad-slot` en `src/ads.config.js` → `slots.menuBottom`.
+3. En **Anuncios → Por sitio**, dejar **apagados los anuncios automáticos** (sobre todo los superpuestos: anclados y viñetas),
+   que taparían los juegos.
+4. En **Privacidad y mensajes**, activar el mensaje de consentimiento para Europa/Reino Unido.
+
+Con `?ads=preview` en la URL se ven los espacios (recuadros punteados) sin pedir anuncios. `enabled: false` en
+`src/ads.config.js` los apaga todos.
 
 ## Cómo está armado
 
@@ -112,5 +130,16 @@ El SDK además:
 
 **Juegos con build propio** (React, Phaser con npm, Unity, Godot): compilar con base relativa (`./`) o con base `/games/<id>/` y copiar la salida a `public/games/<id>/`.
 **Juegos online:** el cliente vive acá; el servidor (WebSocket, API) puede estar en otro dominio. Se declara en `features` y el juego maneja su conexión.
+El servidor de `server/` tiene un núcleo de salas y un módulo por juego en `server/games/`. Además de `start`/`message`, un módulo
+puede declarar `lateJoin` (entrar con la partida en curso), `onJoin`, `removed`, `command` (mensajes en cualquier estado),
+`canStart` y `listable` + `listInfo` (lista de salas públicas, mensaje `{ t: 'list', game }`).
+
+### Clashball (tiempo real)
+
+Fútbol 2D con las físicas de HaxBall (`public/games/clashball/shared/`, el mismo código en cliente y servidor):
+paso fijo de 60 ticks/s, jugador radio 15 / aceleración 0,1 (0,07 con la patada armada) / amortiguación 0,96,
+pelota radio 10 / amortiguación 0,99, patada de fuerza 5 a menos de 4 px, saque con barrera en el círculo, gol de oro.
+Online: el servidor simula y manda el estado 30 veces por segundo; cada cliente manda sus teclas solo cuando cambian,
+predice su jugador y corrige con las confirmaciones del servidor (se nota como si jugara en local).
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

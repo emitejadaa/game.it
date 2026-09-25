@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <radialGradient id="vg" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>
+    <radialGradient id="r" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#ff98a2"/><stop offset="1" stop-color="#ff4b5c"/></radialGradient>
+    <radialGradient id="b" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#a3c8ff"/><stop offset="1" stop-color="#3d8bff"/></radialGradient>
+    <radialGradient id="ball" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#dfe5f2"/></radialGradient>
+    <linearGradient id="tr" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".55"/></linearGradient>
+    <pattern id="net" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V6M0 0H6" stroke="#fff" stroke-opacity=".35" stroke-width="1"/></pattern>
+  </defs>
+  <rect width="320" height="200" fill="#1f4a2c"/>
+  <g>
+    <rect x="18" y="16" width="284" height="168" fill="#46995a"/>
+    <path d="M38.3 16h20.3v168H38.3zM78.9 16h20.3v168H78.9zM119.4 16h20.3v168h-20.3zM160 16h20.3v168H160zM200.6 16h20.3v168h-20.3zM241.1 16h20.3v168h-20.3zM281.7 16H302v168h-20.3z" fill="#3f9150"/>
+  </g>
+  <g fill="none" stroke="#fff" stroke-opacity=".88" stroke-width="2.5">
+    <rect x="18" y="16" width="284" height="168"/>
+    <path d="M160 16v168"/>
+    <circle cx="160" cy="100" r="30"/>
+  </g>
+  <rect x="302" y="72" width="14" height="56" fill="url(#net)"/>
+  <rect x="302" y="72" width="14" height="56" fill="#3d8bff" fill-opacity=".2"/>
+  <path d="M302 72v56" stroke="#3d8bff" stroke-width="3"/>
+  <circle cx="302" cy="72" r="4.5" fill="#3d8bff" stroke="#0a0f1c" stroke-width="1.5"/>
+  <circle cx="302" cy="128" r="4.5" fill="#3d8bff" stroke="#0a0f1c" stroke-width="1.5"/>
+  <rect x="4" y="72" width="14" height="56" fill="url(#net)"/>
+  <path d="M18 72v56" stroke="#ff4b5c" stroke-width="3"/>
+  <circle cx="18" cy="72" r="4.5" fill="#ff4b5c" stroke="#0a0f1c" stroke-width="1.5"/>
+  <circle cx="18" cy="128" r="4.5" fill="#ff4b5c" stroke="#0a0f1c" stroke-width="1.5"/>
+  <g fill="#000" fill-opacity=".22">
+    <circle cx="204" cy="120" r="15"/><circle cx="246" cy="84" r="15"/><circle cx="124" cy="140" r="15"/><circle cx="266" cy="118" r="15"/><circle cx="224" cy="105" r="10"/>
+  </g>
+  <path d="M168 128 L221 101 L221 109 Z" fill="url(#tr)"/>
+  <circle cx="121" cy="136" r="14" fill="url(#r)" stroke="#0a0f1c" stroke-width="2.5"/>
+  <circle cx="200" cy="116" r="14" fill="url(#r)" stroke="#fff" stroke-width="3.5"/>
+  <circle cx="243" cy="80" r="14" fill="url(#b)" stroke="#0a0f1c" stroke-width="2.5"/>
+  <circle cx="263" cy="114" r="14" fill="url(#b)" stroke="#0a0f1c" stroke-width="2.5"/>
+  <circle cx="200" cy="116" r="22" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+  <circle cx="222" cy="102" r="9" fill="url(#ball)" stroke="#0a0f1c" stroke-width="2"/>
+  <g font-family="Arial Black, Impact, sans-serif" font-weight="900" font-style="italic" text-anchor="middle" fill="#fff" font-size="11">
+    <text x="121" y="140">7</text><text x="200" y="120">10</text><text x="243" y="84">4</text><text x="263" y="118">9</text>
+  </g>
+  <rect width="320" height="200" fill="url(#vg)"/>
+  <g transform="translate(18 44) skewX(-8)" font-family="Arial Black, Impact, sans-serif" font-weight="900">
+    <text x="0" y="0" font-size="34" fill="#0a0f1c" fill-opacity=".45" dx="2" dy="3">CLASHBALL</text>
+    <text x="0" y="0" font-size="34" fill="#fff">CLASH<tspan fill="#c6ff3d">BALL</tspan></text>
+  </g>
+</svg>

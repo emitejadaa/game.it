@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Clashball · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js" data-no-theme></script>
+  </head>
+  <body>
+    <canvas id="cv"></canvas>
+    <div class="shade" id="shade"></div>
+
+    <!-- ============ HUD ============ -->
+    <div class="hud" id="hud" hidden>
+      <div class="board" id="board">
+        <div class="side red"><span class="tag" data-t="tagRed"></span><b id="sc-red">0</b></div>
+        <div class="clock"><b id="clock">0:00</b><small id="phase"></small></div>
+        <div class="side blue"><b id="sc-blue">0</b><span class="tag" data-t="tagBlue"></span></div>
+      </div>
+      <div class="banner" id="banner"><b id="banner-t"></b><small id="banner-s"></small></div>
+      <div class="hud-right">
+        <span class="ping" id="ping" hidden></span>
+        <button class="hud-btn" id="btn-chat" hidden aria-label="Chat"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z" /></svg></button>
+        <button class="hud-btn" id="btn-pause" aria-label="Pausa"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" /></svg></button>
+      </div>
+      <p class="hint" id="hint"></p>
+    </div>
+
+    <div class="chat" id="chat" hidden>
+      <ul id="chat-log"></ul>
+      <form id="chat-form" autocomplete="off"><input id="chat-in" maxlength="140" enterkeyhint="send" /></form>
+    </div>
+
+    <div class="touch" id="touch" hidden>
+      <div class="stick-zone" id="stick-zone"><div class="stick" id="stick"><i id="knob"></i></div></div>
+      <button class="kick-btn" id="kick-btn" data-t="kickBtn"></button>
+    </div>
+
+    <!-- ============ Inicio ============ -->
+    <section class="screen on" id="s-home">
+      <div class="home">
+        <div class="brand">
+          <div class="logo" aria-label="Clashball"><span>CLASH</span><span class="b">B<i class="ball"></i>LL</span></div>
+          <p class="tagline" data-t="tagline"></p>
+        </div>
+        <nav class="menu">
+          <button class="item" data-go="solo"><em>01</em><b data-t="solo"></b><small data-t="soloSub"></small></button>
+          <button class="item" data-go="online"><em>02</em><b data-t="online"></b><small data-t="onlineSub"></small></button>
+          <button class="item" data-go="local" id="go-local"><em>03</em><b data-t="local"></b><small data-t="localSub"></small></button>
+          <button class="item ghost" data-go="help"><em>?</em><b data-t="help"></b><small data-t="helpSub"></small></button>
+        </nav>
+        <div class="me-chip" id="me-chip"><i id="me-av"></i><span id="me-name"></span><button class="link" data-go="profile" data-t="edit"></button></div>
+      </div>
+    </section>
+
+    <!-- ============ Perfil (nombre y avatar) ============ -->
+    <section class="screen" id="s-profile">
+      <div class="panel narrow">
+        <h2 data-t="profile"></h2>
+        <label class="lbl" for="pf-name" data-t="name"></label>
+        <input class="field" id="pf-name" maxlength="16" autocomplete="off" />
+        <label class="lbl" for="pf-av" data-t="avatar"></label>
+        <div class="row"><input class="field av" id="pf-av" maxlength="4" autocomplete="off" placeholder="10" /><p class="note" data-t="avatarNote"></p></div>
+        <div class="actions"><button class="btn" id="pf-save" data-t="save"></button><button class="btn ghost" data-back data-t="back"></button></div>
+      </div>
+    </section>
+
+    <!-- ============ Configurar partido (sin conexión) ============ -->
+    <section class="screen" id="s-setup">
+      <div class="panel wide">
+        <header class="phead"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></button><h2 id="setup-title"></h2></header>
+        <div class="opts">
+          <div class="opt full"><span class="lbl" data-t="mode"></span><div class="modes" id="opt-mode"></div></div>
+          <div class="opt" id="opt-format-row" hidden><span class="lbl" data-t="format"></span><div class="seg" id="opt-format"></div></div>
+          <div class="opt"><span class="lbl" data-t="teams"></span><div class="seg" id="opt-size"></div></div>
+          <div class="opt" id="opt-level-row"><span class="lbl" data-t="level"></span><div class="seg" id="opt-level"></div></div>
+          <div class="opt"><span class="lbl" data-t="stadium"></span><div class="seg wrap" id="opt-stadium"></div></div>
+          <div class="opt"><span class="lbl" data-t="goals"></span><div class="seg" id="opt-score"></div></div>
+          <div class="opt"><span class="lbl" data-t="time"></span><div class="seg" id="opt-time"></div></div>
+        </div>
+        <p class="keys" id="setup-keys"></p>
+        <button class="btn big" id="setup-go" data-t="play"></button>
+      </div>
+    </section>
+
+    <!-- ============ Online: salas ============ -->
+    <section class="screen" id="s-online">
+      <div class="panel wide">
+        <header class="phead"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></button><h2 data-t="online"></h2><span class="grow"></span><button class="me-mini" data-go="profile"><i id="on-av"></i><span id="on-name"></span></button></header>
+        <div class="on-top">
+          <button class="btn" id="on-quick"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z" /></svg><span data-t="quick"></span></button>
+          <button class="btn ghost" id="on-create-open"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg><span data-t="create"></span></button>
+          <form class="join" id="on-join-form" autocomplete="off"><input class="field code" id="on-code" maxlength="5" placeholder="CÓDIGO" /><button class="btn ghost" data-t="join"></button></form>
+        </div>
+        <form class="create" id="on-create-form" hidden autocomplete="off">
+          <input class="field" id="on-room-name" maxlength="28" />
+          <label class="check"><input type="checkbox" id="on-public" checked /><span data-t="public"></span></label>
+          <button class="btn" data-t="createGo"></button>
+        </form>
+        <div class="rooms-head"><span class="lbl" data-t="rooms"></span><button class="link" id="on-refresh" data-t="refresh"></button></div>
+        <ul class="rooms" id="rooms"></ul>
+        <p class="status" id="on-status"></p>
+      </div>
+    </section>
+
+    <!-- ============ Sala online ============ -->
+    <section class="screen" id="s-room">
+      <div class="panel room">
+        <header class="phead">
+          <button class="back" id="room-leave" aria-label="Salir de la sala"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></button>
+          <div class="rtitle"><h2 id="room-name"></h2><small id="room-sub"></small></div>
+          <span class="grow"></span>
+          <button class="code-chip" id="room-code" title="Copiar link"></button>
+        </header>
+        <div class="room-body">
+          <div class="teams">
+            <div class="tcol red" data-team="1"><header><b data-t="red"></b><button class="link" data-join="1" data-t="joinTeam"></button></header><ul id="team-1"></ul><div class="addbot" data-bot="1"></div></div>
+            <div class="tcol spec" data-team="0"><header><b data-t="specs"></b><button class="link" data-join="0" data-t="joinTeam"></button></header><ul id="team-0"></ul></div>
+            <div class="tcol blue" data-team="2"><header><b data-t="blue"></b><button class="link" data-join="2" data-t="joinTeam"></button></header><ul id="team-2"></ul><div class="addbot" data-bot="2"></div></div>
+          </div>
+          <div class="rset" id="room-settings">
+            <div class="opt"><span class="lbl" data-t="mode"></span><div class="seg" id="rs-mode"></div></div>
+            <div class="opt"><span class="lbl" data-t="stadium"></span><div class="seg wrap" id="rs-stadium"></div></div>
+            <div class="opt half"><span class="lbl" data-t="goals"></span><div class="seg" id="rs-score"></div></div>
+            <div class="opt half"><span class="lbl" data-t="time"></span><div class="seg" id="rs-time"></div></div>
+            <div class="opt checks"><label class="check"><input type="checkbox" id="rs-lock" /><span data-t="lock"></span></label><label class="check"><input type="checkbox" id="rs-public" /><span data-t="public"></span></label></div>
+          </div>
+          <div class="rchat">
+            <ul id="room-chat"></ul>
+            <form id="room-chat-form" autocomplete="off"><input class="field" id="room-chat-in" maxlength="140" enterkeyhint="send" /></form>
+          </div>
+        </div>
+        <footer class="room-foot">
+          <p class="status" id="room-status"></p>
+          <span class="grow"></span>
+          <button class="btn ghost" id="room-shuffle" data-t="shuffle"></button>
+          <button class="btn ghost" id="room-pause" hidden></button>
+          <button class="btn ghost" id="room-stop" data-t="stop" hidden></button>
+          <button class="btn ghost" id="room-back" data-t="backToGame" hidden></button>
+          <button class="btn big" id="room-start" data-t="start"></button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ============ Pausa ============ -->
+    <section class="screen" id="s-pause">
+      <div class="panel narrow center">
+        <h2 data-t="paused"></h2>
+        <button class="btn big" id="pz-resume" data-t="resume"></button>
+        <button class="btn ghost" id="pz-restart" data-t="restart"></button>
+        <button class="btn ghost" id="pz-setup" data-t="options"></button>
+        <button class="btn ghost" id="pz-quit" data-t="quitMatch"></button>
+        <p class="keys" id="pz-keys"></p>
+      </div>
+    </section>
+
+    <!-- ============ Resultados ============ -->
+    <section class="screen" id="s-results">
+      <div class="panel results">
+        <p class="res-kicker" id="res-kicker"></p>
+        <h2 class="res-title" id="res-title"></h2>
+        <div class="res-score"><span class="r" id="res-r">0</span><i>–</i><span class="b" id="res-b">0</span></div>
+        <div class="poss"><span id="poss-r"></span><div class="bar"><i id="poss-bar"></i></div><span id="poss-b"></span></div>
+        <small class="lbl center" data-t="possession"></small>
+        <table class="stats"><thead><tr><th></th><th data-t="thGoals"></th><th data-t="thAssists"></th><th data-t="thKicks"></th><th data-t="thTouches"></th></tr></thead><tbody id="res-stats"></tbody></table>
+        <div class="actions"><button class="btn big" id="res-again"></button><button class="btn ghost" id="res-alt"></button><button class="btn ghost" id="res-menu" data-t="menu"></button></div>
+      </div>
+    </section>
+
+    <!-- ============ Cómo se juega ============ -->
+    <section class="screen" id="s-help">
+      <div class="panel wide help">
+        <header class="phead"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></button><h2 data-t="help"></h2></header>
+        <div class="help-grid" id="help-body"></div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

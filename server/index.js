@@ -6,6 +6,11 @@
  * límite de conexiones y de salas por IP, límite global de salas, rate limit de mensajes (token
  * bucket), tamaño máximo de mensaje, intentos de unión limitados (evita adivinar códigos), salas
  * inactivas cerradas, vida máxima de sala, heartbeat, orígenes permitidos y validación de mensajes.
+ *
+ * Opcionales por módulo: `lateJoin` (se puede entrar con la partida en curso), `onJoin`,
+ * `removed` (sale un jugador, en cualquier estado), `command` (mensajes propios en cualquier
+ * estado: devuelve true si lo manejó, false si era inválido), `canStart` (código de error o null)
+ * y `listable` + `listInfo` (aparece en la lista de salas públicas si settings.public).
  */
 import { createServer } from 'node:http';
 import { randomBytes, randomInt } from 'node:crypto';
@@ -15,8 +20,11 @@ import tictactoe from './games/tictactoe.js';
 import connect4 from './games/connect4.js';
 import drift from './games/drift.js';
 import doodle from './games/doodle.js';
+import clashball from './games/clashball.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball };
+/** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
+const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
 
 const env = (k, d) => (process.env[k] !== undefined ? process.env[k] : d);
 const num = (k, d) => Number(env(k, d));
@@ -158,7 +166,7 @@ function closeRoom(room, reason) {
 }
 
 function createRoom(ws, name, game) {
-  const mod = GAMES[game];
+  const mod = gameMod(game);
   if (!mod) return send(ws, { t: 'error', code: 'bad_game' });
   if (rooms.size >= CFG.maxRooms) return send(ws, { t: 'error', code: 'server_full' });
   if (!windowHit(ipRooms, ws.ip, CFG.roomsPerIpWindow, CFG.roomsWindowMs)) return send(ws, { t: 'error', code: 'too_many_rooms' });
@@ -199,6 +207,7 @@ function addPlayer(room, ws, name) {
   ws.pid = p.id;
   touch(room);
   send(ws, { t: 'joined', code: room.code, game: room.game, id: p.id, token: p.token });
+  GAMES[room.game].onJoin?.(room, room.api, p.id);
   sync(room);
 }
 
@@ -230,7 +239,7 @@ function joinRoom(ws, code, name, token, game) {
     }
   }
   const mod = GAMES[room.game];
-  if (room.state !== 'lobby') return send(ws, { t: 'error', code: 'in_progress' });
+  if (room.state !== 'lobby' && !mod.lateJoin) return send(ws, { t: 'error', code: 'in_progress' });
   if (room.players.size >= mod.maxPlayers) return send(ws, { t: 'error', code: 'room_full' });
   addPlayer(room, ws, name);
 }
@@ -256,6 +265,7 @@ function removePlayer(room, id) {
   room.players.delete(id);
   if (!room.players.size || ![...room.players.values()].some((p) => p.connected)) return closeRoom(room, 'empty');
   if (room.host === id) room.host = [...room.players.values()].find((p) => p.connected)?.id;
+  GAMES[room.game].removed?.(room, room.api, id);
   if (room.state === 'playing') GAMES[room.game].leave?.(room, room.api, id);
   sync(room);
 }
@@ -294,6 +304,16 @@ function onMessage(ws, raw) {
       return joinRoom(ws, msg.code, msg.name, typeof msg.token === 'string' ? msg.token.slice(0, 64) : null, typeof msg.game === 'string' ? msg.game : null);
     case 'leave':
       return leave(ws, 'left');
+    case 'list': {
+      // salas públicas de un juego (solo módulos con `listable`)
+      const mod = gameMod(msg.game);
+      if (!mod?.listable) return send(ws, { t: 'list', game: msg.game, rooms: [] });
+      const list = [...rooms.values()]
+        .filter((r) => r.game === msg.game && r.settings?.public)
+        .slice(0, 60)
+        .map((r) => ({ code: r.code, n: r.players.size, max: mod.maxPlayers, state: r.state, ...mod.listInfo?.(r) }));
+      return send(ws, { t: 'list', game: msg.game, rooms: list });
+    }
     case 'settings': {
       // el anfitrión cambia opciones en el lobby (pista, vueltas, hoyos…)
       if (!room || room.host !== ws.pid || room.state !== 'lobby') return;
@@ -313,6 +333,8 @@ function onMessage(ws, raw) {
       const active = [...room.players.values()].filter((p) => p.connected);
       if (active.length < (mod.minPlayers || 1)) return send(ws, { t: 'error', code: 'need_players' });
       if (mod.settings) room.settings = mod.settings(room.settings, msg.settings || msg);
+      const why = mod.canStart?.(room);
+      if (why) return send(ws, { t: 'error', code: why });
       room.state = 'playing';
       touch(room);
       mod.start(room, room.api);
@@ -327,7 +349,8 @@ function onMessage(ws, raw) {
       return;
     }
     case 'kick': {
-      if (room && room.host === ws.pid && room.state === 'lobby' && msg.id !== ws.pid && room.players.has(msg.id)) {
+      const kickable = room && (room.state === 'lobby' || GAMES[room.game].lateJoin);
+      if (kickable && room.host === ws.pid && msg.id !== ws.pid && room.players.has(msg.id)) {
         const target = room.players.get(msg.id);
         send(target.ws, { t: 'kicked' });
         if (target.ws) target.ws.room = null;
@@ -337,10 +360,17 @@ function onMessage(ws, raw) {
     }
     default: {
       // mensajes propios de cada juego
-      if (!room || room.state !== 'playing') return;
+      if (!room) return;
       const p = room.players.get(ws.pid);
       if (!p) return;
-      const ok = GAMES[room.game].message?.(room, room.api, p, msg);
+      const mod = GAMES[room.game];
+      if (mod.command) {
+        const handled = mod.command(room, room.api, p, msg);
+        if (handled === false) ws.strikes++;
+        if (handled !== undefined) return;
+      }
+      if (room.state !== 'playing') return;
+      const ok = mod.message?.(room, room.api, p, msg);
       if (ok === false) ws.strikes++;
     }
   }

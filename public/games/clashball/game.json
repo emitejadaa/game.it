@@ -1,0 +1,19 @@
+{
+  "id": "clashball",
+  "title": "Clashball",
+  "description": {
+    "es": "Fútbol 2D con las físicas de HaxBall: salas online con chat y espectadores, bots, 2 jugadores y modos Clásico, Futsal, Hielo y Caos.",
+    "en": "2D football with HaxBall physics: online rooms with chat and spectators, bots, 2 players and Classic, Futsal, Ice and Chaos modes."
+  },
+  "categories": ["deporte", "online", "multijugador", "arcade"],
+  "tags": ["futbol", "fútbol", "football", "soccer", "haxball", "pelota", "ball", "equipos", "teams", "bots", "hockey", "futsal"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "gamepad", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 12, "localPlayers": 2, "bots": true, "chat": true, "story": false },
+  "order": 11
+}
