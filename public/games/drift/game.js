@@ -92,6 +92,17 @@ const TXT = {
   keys: { es: '<kbd>↑↓←→</kbd>/<kbd>WASD</kbd> manejar · <kbd>ESPACIO</kbd> freno de mano · <kbd>SHIFT</kbd> nitro<br><kbd>C</kbd> cámara · <kbd>R</kbd> reiniciar · <kbd>ESC</kbd> pausa', en: '<kbd>↑↓←→</kbd>/<kbd>WASD</kbd> drive · <kbd>SPACE</kbd> handbrake · <kbd>SHIFT</kbd> nitro<br><kbd>C</kbd> camera · <kbd>R</kbd> restart · <kbd>ESC</kbd> pause' },
   howDrift: { es: 'Para derrapar: doblá y tirá del freno de mano, después dosificá con acelerador y contravolante.', en: 'To drift: turn and pull the handbrake, then balance it with throttle and countersteer.' },
   howTouch: { es: 'Acelera solo. Mantené DRIFT mientras doblás para cruzar el auto.', en: 'Auto throttle. Hold DRIFT while turning to kick the tail out.' },
+  count: { es: '{n} pistas · de la ciudad a la Luna', en: '{n} tracks · from the city to the Moon' },
+  corners: { es: 'curvas', en: 'corners' },
+  straight: { es: 'm de recta', en: 'm straight' },
+  isNew: { es: 'NUEVA', en: 'NEW' },
+  bestLapPop: { es: 'MEJOR VUELTA', en: 'BEST LAP' },
+  lapsN: { es: '{n} vueltas', en: '{n} laps' },
+  lap1: { es: '1 vuelta', en: '1 lap' },
+  secs: { es: '{n} segundos', en: '{n} seconds' },
+  up: { es: '▲ {n}°', en: '▲ P{n}' },
+  prev: { es: 'pista anterior', en: 'previous track' },
+  next: { es: 'pista siguiente', en: 'next track' },
 };
 const t = (k, v) => {
   let s = G.t(TXT[k]) ?? k;
@@ -110,6 +121,29 @@ const fmt = (ms) => {
 const fmtD = (ms) => `${ms < 0 ? '−' : '+'}${(Math.abs(ms) / 1000).toFixed(2)}`;
 const km = (T) => `${(T.length / 10000).toFixed(1)} km`;
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(3 - n);
+const KIND = {
+  city: { es: 'Ciudad', en: 'City' },
+  bridge: { es: 'Autopista', en: 'Highway' },
+  desert: { es: 'Desierto', en: 'Desert' },
+  port: { es: 'Puerto', en: 'Harbor' },
+  tokyo: { es: 'Ciudad', en: 'City' },
+  coast: { es: 'Costa', en: 'Coast' },
+  mountain: { es: 'Montaña', en: 'Mountain' },
+  snow: { es: 'Nieve', en: 'Snow' },
+  cyber: { es: 'Estadio', en: 'Stadium' },
+  airport: { es: 'Aeródromo', en: 'Airfield' },
+  canyon: { es: 'Cañón', en: 'Canyon' },
+  forest: { es: 'Bosque', en: 'Forest' },
+  volcano: { es: 'Volcán', en: 'Volcano' },
+  moon: { es: 'Luna', en: 'Moon' },
+  rain: { es: 'Lluvia', en: 'Rain' },
+};
+const GEARS = [0, 170, 330, 490, 650, 820, 2000]; // cambios (motor y velocímetro)
+const gearOf = (sp) => {
+  let gi = 0;
+  while (gi < GEARS.length - 2 && sp > GEARS[gi + 1]) gi++;
+  return gi;
+};
 
 const STEP = 1 / 120;
 const SECTORS = 3; // parciales por vuelta
@@ -145,6 +179,7 @@ try {
   S.camMode = localStorage.getItem('drift.cam') === 'top' ? 'top' : 'chase';
 } catch {}
 let online = null;
+const dbg = { auto: false }; // ?debug: la compu maneja por el jugador (pruebas)
 
 function rng(seed) {
   let a = seed >>> 0;
@@ -230,7 +265,7 @@ function stepRacer(c, dt, racing) {
   const T = S.T;
   let inp;
   if (c.ai && (racing || c.finished || S.state === 'menu' || S.state === 'done')) inp = drive(c.ai, c, T, dt, S.cars);
-  else if (c.human && racing && !c.finished) inp = c.inp;
+  else if (c.human && racing && !c.finished) inp = dbg.auto ? drive((c.auto ||= aiDriver(3, rng(9))), c, T, dt, S.cars) : c.inp;
   else inp = NONE;
   stepCar(c, inp, dt, T.grip);
   c.inBrake = (inp.brake > 0.2 && c.u > 30) || (inp.hand && c.speed > 40);
@@ -308,7 +343,7 @@ function laps(c) {
   if (c.best == null || lt < c.best) c.best = lt;
   const id = S.T.id;
   if (c.human && S.mode !== 'online' && (S.bestLap[id] == null || lt < S.bestLap[id])) S.bestLap[id] = lt;
-  if (c.human) onLap(c, n, lt);
+  if (c.human) onLap(c, n, lt, n > 1 && lt === c.best);
   if (S.mode !== 'drift' && n >= S.o.laps) finishCar(c);
 }
 
@@ -677,6 +712,10 @@ function makeHud() {
   return {
     root,
     lap: q('.h-lap'),
+    best: q('.h-best'),
+    lapt: q('.h-lapt'),
+    gear: q('.h-gear'),
+    nitroPct: q('.h-nitro'),
     time: q('.h-time'),
     timeL: q('.h-time-l'),
     pos: q('.h-pos'),
@@ -729,6 +768,17 @@ function hud() {
       setText(h, 'pos', h.pos, `${order.indexOf(c) + 1}/${order.length}`);
     }
     if (drift) setText(h, 'pts', h.pts, Math.round(c.dpts).toLocaleString());
+    // mejor vuelta y vuelta en curso
+    setText(h, 'best', h.best, !drift && c.best != null ? `★ ${fmt(c.best)}` : '');
+    const running = !drift && S.state === 'race' && !c.finished && c.lapsDone >= 1;
+    setText(h, 'lapt', h.lapt, running ? fmt(S.rt - c.lapStartT) : '');
+    // subir de puesto
+    if (!drift && mode !== 'trial') {
+      const p = order.indexOf(c) + 1;
+      if (h.lastPos && p < h.lastPos && S.state === 'race' && S.rt > 4000 && !c.finished) popup(c, t('up', { n: p }), 'bank');
+      h.lastPos = p;
+    }
+    setText(h, 'gear', h.gear, c.u < -20 ? 'R' : `${gearOf(c.speed) + 1}`);
     const K = c.combo;
     const on = K.pts > 30;
     h.combo.classList.toggle('on', on);
@@ -748,6 +798,7 @@ function hud() {
     if (h.last.nt !== nt) {
       h.last.nt = nt;
       h.nitro.style.transform = `scaleX(${nt})`;
+      h.nitroPct.textContent = `${Math.round(c.nitro * 100)}%`;
       h.nitroBox.classList.toggle('full', c.nitro > 0.99);
     }
   }
@@ -777,7 +828,7 @@ function drawMini(T) {
     const dpr = Math.min(2, devicePixelRatio || 1);
     mm.width = Math.round(w * dpr);
     mm.height = Math.round(h * dpr);
-    S.miniMap = { T, ...outline(T, w, h, 8, 3) };
+    S.miniMap = { T, ...outline(T, w, h, 10, 3, true) };
   }
   const M = S.miniMap;
   const g = mm.getContext('2d');
@@ -798,8 +849,24 @@ function drawMini(T) {
   }
   for (const c of S.cars) if (!S.views.some((v) => v.car === c)) dot(c.x, c.y, c.color, 3);
   for (const v of S.views) {
-    dot(v.car.x, v.car.y, '#fff', 5);
-    dot(v.car.x, v.car.y, v.car.color, 3.5);
+    const c = v.car;
+    const x = c.x * M.k + M.ox;
+    const y = c.y * M.k + M.oy;
+    g.save();
+    g.translate(x, y);
+    g.rotate(c.h);
+    g.fillStyle = c.color;
+    g.strokeStyle = '#fff';
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.moveTo(7, 0);
+    g.lineTo(-5, -5);
+    g.lineTo(-2, 0);
+    g.lineTo(-5, 5);
+    g.closePath();
+    g.fill();
+    g.stroke();
+    g.restore();
   }
 }
 
@@ -830,13 +897,14 @@ function onSplit(c, sec) {
   const d = S.rt - ref;
   splitMsg(c, fmtD(d), d < 0 ? 'good' : 'bad');
 }
-function onLap(c, n, lt) {
+function onLap(c, n, lt, pb) {
   sfx('lap');
   const g = S.ghost;
   if (S.mode === 'trial' && g && g.splits[n * SECTORS - 1] != null) {
     const d = S.rt - g.splits[n * SECTORS - 1];
     splitMsg(c, `${t('lapN', { n })} ${fmt(lt)}  ${fmtD(d)}`, d < 0 ? 'good' : 'bad');
-  } else splitMsg(c, `${t('lapN', { n })} ${fmt(lt)}`, 'info');
+  } else splitMsg(c, `${t('lapN', { n })} ${fmt(lt)}`, pb ? 'best' : 'info');
+  if (pb && S.mode !== 'drift') setTimeout(() => popup(c, t('bestLapPop'), 'best'), 300);
   if (S.mode !== 'drift' && n === S.o.laps - 1) setTimeout(() => popup(c, t('lastLap'), 'info'), 900);
 }
 
@@ -937,6 +1005,7 @@ function frame(now) {
     if (!frozen) carFx(c, dt);
   }
   render(now, frozen ? 0 : dt);
+  if (activePicker) drawHero(activePicker, now);
   if (S.state !== 'menu' && now - lastHud > 66) {
     lastHud = now;
     hud();
@@ -1012,6 +1081,17 @@ const down = new Set();
 const touchIn = { left: 0, right: 0, hand: 0, boost: 0, brake: 0 };
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
+  if (activePicker === pickSetup) {
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      e.preventDefault();
+      pickSetup.onPick((S.opts.track + (e.code === 'ArrowLeft' ? -1 : 1) + TRACKS.length) % TRACKS.length);
+      return;
+    }
+    if (e.code === 'Enter' && !e.repeat && !e.target.closest?.('button')) {
+      $('setup-go').click();
+      return;
+    }
+  }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (!e.repeat) {
     if (e.code === 'Escape' || e.code === 'KeyP') togglePause();
@@ -1094,6 +1174,19 @@ function togglePause() {
   }
   sfx('ui');
 }
+function modeName(mode) {
+  return t({ race: 'race', trial: 'trial', drift: 'driftMode', local: 'local', online: 'online' }[mode] || 'race');
+}
+function raceLabel(o) {
+  const tr = TRACKS[o.track];
+  const extra = o.mode === 'drift' ? t('secs', { n: o.time }) : o.laps === 1 ? t('lap1') : t('lapsN', { n: o.laps });
+  return `${G.t(tr.name)} · ${extra}`;
+}
+function pauseInfo() {
+  if (!S.o) return;
+  $('p-info').textContent = `${modeName(S.o.mode)} — ${raceLabel(S.o)}`;
+  $('p-keys').innerHTML = G.prefs.touch ? esc(t('howTouch')) : S.o.mode === 'local' ? esc(t('localNote')) : t('keys');
+}
 $('p-resume').onclick = () => togglePause();
 $('p-restart').onclick = () => restart();
 $('p-quit').onclick = () => toMenu();
@@ -1110,8 +1203,11 @@ function toMenu() {
 }
 
 // ================================================================ menús
+let activePicker = null;
 function show(id) {
   $$('.screen').forEach((s) => s.classList.toggle('on', s.id === `s-${id}`));
+  activePicker = id === 'setup' ? pickSetup : id === 'lobby' ? pickLobby : null;
+  if (id === 'pause') pauseInfo();
   const inGame = !id;
   const racingView = S.state !== 'menu' && S.views.length > 0;
   $('hud').hidden = !racingView || id === 'results';
@@ -1126,33 +1222,179 @@ function show(id) {
   }
 }
 
+// ---------------------------------------------------------------- selector de pista
+const facts = new Map();
+/** Datos de una pista para mostrar: largo, cantidad de curvas y recta más larga. */
+function trackFacts(i) {
+  if (facts.has(i)) return facts.get(i);
+  const T = build(TRACKS[i]);
+  let s0 = 0;
+  while (s0 < T.N - 1 && Math.abs(T.curv[s0]) > 1 / 900) s0++;
+  let corners = 0;
+  let acc = 0;
+  let sign = 0;
+  let run = 0;
+  let longest = 0;
+  const flush = () => {
+    if (Math.abs(acc) > 0.5) corners++;
+    acc = 0;
+  };
+  for (let k = 0; k < T.N; k++) {
+    const i2 = (s0 + k) % T.N;
+    const c = T.curv[i2];
+    const ds = T.dist[i2 + 1] - T.dist[i2];
+    const sg = Math.abs(c) > 1 / 900 ? Math.sign(c) : 0;
+    if (sg !== sign) flush();
+    sign = sg;
+    if (sg) acc += c * ds;
+    if (Math.abs(c) < 1 / 4000) longest = Math.max(longest, (run += ds));
+    else run = 0;
+  }
+  flush();
+  const f = { T, corners, straight: Math.round(longest / 100) * 10 };
+  facts.set(i, f);
+  return f;
+}
+
 const thumbs = new Map();
 function thumb(i) {
-  if (!thumbs.has(i)) thumbs.set(i, outline(build(TRACKS[i]), 150, 62, 5, 2.5).canvas);
-  return thumbs.get(i);
+  if (!thumbs.has(i)) thumbs.set(i, outline(build(TRACKS[i]), 104, 58, 5, 2.5).canvas);
+  const src = thumbs.get(i);
+  const c = document.createElement('canvas');
+  c.width = src.width;
+  c.height = src.height;
+  c.getContext('2d').drawImage(src, 0, 0);
+  return c;
 }
-function trackCards(el, cur, { disabled = false, badge } = {}) {
-  el.innerHTML = '';
+
+/** Selector: mapa grande con datos, flechas y una tira con todas las pistas. */
+function makePicker(root, onPick) {
+  root.innerHTML = `<div class="hero"><div class="map"><canvas></canvas><button class="nav prev">‹</button><button class="nav next">›</button><span class="num"></span></div><div class="info"><span class="kind"></span><h3 class="tname orb"></h3><p class="about"></p><div class="chips"></div><div class="rec"><small></small><b></b></div></div></div><div class="strip"></div>`;
+  const q = (sel) => root.querySelector(sel);
+  const P = { root, cur: -1, disabled: false, onPick, map: q('.map'), cv: q('.map canvas'), strip: q('.strip'), base: null, cards: [] };
   TRACKS.forEach((tr, i) => {
     const b = document.createElement('button');
-    b.className = `tcard${i === cur ? ' on' : ''}`;
+    b.className = 'tcard';
     b.dataset.v = i;
-    b.disabled = disabled;
-    const T = build(tr);
-    const cvs = document.createElement('canvas');
-    const src = thumb(i);
-    cvs.width = src.width;
-    cvs.height = src.height;
-    cvs.getContext('2d').drawImage(src, 0, 0);
-    b.append(cvs);
-    b.insertAdjacentHTML('beforeend', `<b>${esc(G.t(tr.name))}</b><small>${stars(tr.level)} · ${km(T)}</small>${badge?.(tr) ? `<span class="best">${badge(tr)}</span>` : ''}`);
-    el.append(b);
+    b.append(thumb(i));
+    b.insertAdjacentHTML('beforeend', `<b></b><span class="best"></span>${tr.isNew ? '<span class="new"></span>' : ''}`);
+    P.strip.append(b);
+    P.cards.push(b);
   });
+  const pick = (i) => !P.disabled && P.onPick((i + TRACKS.length) % TRACKS.length);
+  P.strip.onclick = (e) => {
+    const b = e.target.closest('.tcard');
+    if (b) pick(Number(b.dataset.v));
+  };
+  q('.prev').onclick = () => pick(P.cur - 1);
+  q('.next').onclick = () => pick(P.cur + 1);
+  P.strip.addEventListener(
+    'wheel',
+    (e) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      P.strip.scrollLeft += e.deltaY;
+      e.preventDefault();
+    },
+    { passive: false },
+  );
+  // deslizar el mapa para cambiar de pista
+  let sx = null;
+  P.map.addEventListener('pointerdown', (e) => (sx = e.clientX));
+  P.map.addEventListener('pointerup', (e) => {
+    if (sx != null && Math.abs(e.clientX - sx) > 40) pick(P.cur + (e.clientX < sx ? 1 : -1));
+    sx = null;
+  });
+  return P;
 }
-function trackInfo(el, i) {
+
+function setPicker(P, i, { disabled = false, badge, rec } = {}) {
+  const changed = P.cur !== i;
+  P.cur = i;
+  P.disabled = disabled;
+  P.root.classList.toggle('ro', disabled);
   const tr = TRACKS[i];
-  const T = build(tr);
-  el.innerHTML = `<b>${esc(G.t(tr.name))}</b> · ${esc(G.t(tr.about))} · ${km(T)}${T.grip < 1 ? ' · ❄' : ''}`;
+  const f = trackFacts(i);
+  const q = (sel) => P.root.querySelector(sel);
+  q('.prev').setAttribute('aria-label', t('prev'));
+  q('.next').setAttribute('aria-label', t('next'));
+  q('.num').textContent = `${i + 1}/${TRACKS.length}`;
+  const kind = q('.kind');
+  kind.textContent = G.t(KIND[tr.theme]) || '';
+  kind.style.setProperty('--a', tr.colors[0]);
+  kind.style.setProperty('--b', tr.colors[1]);
+  q('.tname').textContent = G.t(tr.name);
+  q('.about').textContent = G.t(tr.about);
+  const chip = (v, l, cls = '') => `<span class="${cls}"><b>${v}</b> ${l}</span>`;
+  q('.chips').innerHTML =
+    chip((f.T.length / 10000).toFixed(1), 'km') +
+    chip(f.corners, t('corners')) +
+    (f.straight >= 150 ? chip(f.straight, t('straight')) : '') +
+    `<span class="lv lv${tr.level}">${stars(tr.level)} ${t(`lv${tr.level}`)}</span>` +
+    (tr.surface ? `<span class="surf">${esc(G.t(tr.surface))}</span>` : '');
+  const r = q('.rec');
+  r.hidden = !rec;
+  if (rec) {
+    r.querySelector('small').textContent = rec.label;
+    r.querySelector('b').textContent = rec.value;
+  }
+  P.cards.forEach((b, k) => {
+    const on = k === i;
+    b.classList.toggle('on', on);
+    b.disabled = disabled && !on;
+    b.querySelector('b').textContent = G.t(TRACKS[k].name);
+    b.querySelector('.best').textContent = badge?.(TRACKS[k]) || '';
+    const n = b.querySelector('.new');
+    if (n) n.textContent = t('isNew');
+  });
+  if (changed) {
+    P.base = null;
+    const card = P.cards[i];
+    const st = P.strip;
+    st.scrollTo({ left: card.offsetLeft - (st.clientWidth - card.offsetWidth) / 2, behavior: G.prefs.reducedMotion ? 'auto' : 'smooth' });
+  }
+}
+
+/** Mapa grande del selector: el trazado y un punto de luz que da la vuelta. */
+function drawHero(P, now) {
+  const cv = P.cv;
+  const w = cv.clientWidth;
+  const h = cv.clientHeight;
+  if (!w || !h || P.cur < 0) return;
+  const T = build(TRACKS[P.cur]);
+  if (!P.base || P.base.w !== w || P.base.h !== h || P.base.T !== T) {
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    P.base = { T, ...outline(T, w, h, 16, 3.5, true) };
+  }
+  const B = P.base;
+  const g = cv.getContext('2d');
+  const dpr = cv.width / B.w;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, cv.width, cv.height);
+  g.drawImage(B.canvas, 0, 0, cv.width, cv.height);
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const u = G.prefs.reducedMotion ? 0.02 : ((now / 7000) % 1);
+  const at = (d) => {
+    let s = ((d % 1) + 1) % 1 * T.length;
+    let lo = 0;
+    let hi = T.N - 1;
+    while (lo < hi) {
+      const m = (lo + hi + 1) >> 1;
+      if (T.dist[m] <= s) lo = m;
+      else hi = m - 1;
+    }
+    return [T.xs[lo] * B.k + B.ox, T.ys[lo] * B.k + B.oy];
+  };
+  for (let k = 12; k >= 0; k--) {
+    const [x, y] = at(u - k * 0.004);
+    g.globalAlpha = 1 - k / 13;
+    g.fillStyle = k ? TRACKS[P.cur].colors[1] : '#fff';
+    g.beginPath();
+    g.arc(x, y, k ? 3 : 4.5, 0, Math.PI * 2);
+    g.fill();
+  }
+  g.globalAlpha = 1;
 }
 
 function openSetup(mode) {
@@ -1168,19 +1410,27 @@ function openSetup(mode) {
   refreshSetup();
   show('setup');
 }
+const pickSetup = makePicker($('picker'), (i) => {
+  if (i === S.opts.track) return;
+  S.opts.track = i;
+  sfx('ui');
+  refreshSetup();
+  startDemo(i);
+});
+/** Récord de la sesión en una pista, según el modo. */
+function recordOf(mode, tr, laps) {
+  if (mode === 'trial') {
+    const g = S.ghosts[`${tr.id}:${laps}`];
+    return g ? { label: t('record'), value: fmt(g.time) } : null;
+  }
+  if (mode === 'drift') return S.driftBest[tr.id] ? { label: t('sessionBest'), value: Math.round(S.driftBest[tr.id]).toLocaleString() } : null;
+  return S.bestLap[tr.id] != null ? { label: t('bestLap'), value: fmt(S.bestLap[tr.id]) } : null;
+}
 function refreshSetup() {
   const mode = S.setupMode;
   const o = S.opts;
-  const badge = (tr) => {
-    if (mode === 'trial') {
-      const g = S.ghosts[`${tr.id}:${o.laps}`];
-      return g ? fmt(g.time) : '';
-    }
-    if (mode === 'drift') return S.driftBest[tr.id] ? Math.round(S.driftBest[tr.id]).toLocaleString() : '';
-    return S.bestLap[tr.id] != null ? fmt(S.bestLap[tr.id]) : '';
-  };
-  trackCards($('tracks'), o.track, { badge });
-  trackInfo($('tinfo'), o.track);
+  const badge = (tr) => recordOf(mode, tr, o.laps)?.value || '';
+  setPicker(pickSetup, o.track, { badge, rec: recordOf(mode, TRACKS[o.track], o.laps) });
   for (const seg of $$('#s-setup .seg')) {
     const k = seg.dataset.o;
     $$('button', seg).forEach((b) => b.classList.toggle('on', Number(b.dataset.v) === o[k]));
@@ -1195,14 +1445,6 @@ function refreshSetup() {
   else note = G.prefs.touch ? t('howTouch') : t('howDrift');
   $('setup-note').textContent = note;
 }
-$('tracks').onclick = (e) => {
-  const b = e.target.closest('.tcard');
-  if (!b) return;
-  S.opts.track = Number(b.dataset.v);
-  sfx('ui');
-  refreshSetup();
-  startDemo(S.opts.track);
-};
 for (const seg of $$('#s-setup .seg'))
   seg.onclick = (e) => {
     const b = e.target.closest('button');
@@ -1240,6 +1482,7 @@ function showResults(R) {
   const { rows, me } = R;
   const T = S.T;
   const mode = S.mode;
+  $('res-track').textContent = raceLabel(S.o);
   const big = $('res-big');
   big.classList.remove('rec');
   $('res-sub').textContent = '';
@@ -1301,6 +1544,7 @@ function showOnlineResults(results) {
   S.state = 'done';
   G.gameplay(false);
   const myId = online.myId;
+  if (S.o) $('res-track').textContent = raceLabel(S.o);
   const i = results.findIndex((r) => r.id === myId);
   const me = results[i];
   $('res-title').textContent = i === 0 && !me?.dnf ? t('youWin') : t('place', { n: `${i + 1}°` });
@@ -1417,10 +1661,9 @@ $('lobby-share').onclick = async () => {
   const r = await share('drift', online.room.code);
   $('lobby-status').textContent = r === 'copied' ? t('copied') : '';
 };
-$('lobby-tracks').onclick = (e) => {
-  const b = e.target.closest('.tcard');
-  if (b && online.isHost) online.send({ t: 'settings', settings: { track: Number(b.dataset.v), laps: lobby.laps } });
-};
+const pickLobby = makePicker($('lobby-picker'), (i) => {
+  if (online.isHost) online.send({ t: 'settings', settings: { track: i, laps: lobby.laps } });
+});
 $('lobby-laps').onclick = (e) => {
   const b = e.target.closest('button');
   if (b && online.isHost) online.send({ t: 'settings', settings: { laps: Number(b.dataset.v), track: lobby.track } });
@@ -1437,14 +1680,10 @@ function applyRoom(room) {
       .join('');
     const st = room.settings || {};
     const tr = clamp(st.track ?? 0, 0, TRACKS.length - 1);
-    if (tr !== lobby.track || $('lobby-tracks').dataset.host !== String(online.isHost)) {
-      trackCards($('lobby-tracks'), tr, { disabled: !online.isHost });
-      $('lobby-tracks').dataset.host = String(online.isHost);
-      if (S.state === 'menu' && S.T.id !== TRACKS[tr].id) startDemo(tr);
-    }
+    if (tr !== lobby.track && S.state === 'menu' && S.T.id !== TRACKS[tr].id) startDemo(tr);
     lobby.track = tr;
     lobby.laps = st.laps ?? 3;
-    trackInfo($('lobby-tinfo'), tr);
+    setPicker(pickLobby, tr, { disabled: !online.isHost });
     $$('#lobby-laps button').forEach((b) => {
       b.classList.toggle('on', Number(b.dataset.v) === lobby.laps);
       b.disabled = !online.isHost;
@@ -1523,7 +1762,6 @@ function makeMotor(ac, pan) {
   src.start();
   return { o1, o2, f, g, sg, bp };
 }
-const GEARS = [0, 170, 330, 490, 650, 820, 2000];
 let actx = null;
 function audioOn() {
   if (motors.length) return;
@@ -1545,8 +1783,7 @@ function engineSound() {
       return;
     }
     const sp = c.speed;
-    let gi = 0;
-    while (gi < GEARS.length - 2 && sp > GEARS[gi + 1]) gi++;
+    const gi = gearOf(sp);
     const rpm = clamp((sp - GEARS[gi]) / (GEARS[gi + 1] - GEARS[gi]), 0, 1);
     const rev = S.state === 'count' && c.inp.gas ? 0.6 + Math.random() * 0.1 : 0;
     const base = 48 + (0.35 + 0.65 * Math.max(rpm, rev)) * (70 + gi * 12) + (c.boosting ? 30 : 0);
@@ -1567,6 +1804,7 @@ function applyPrefs() {
   $$('[data-t]').forEach((n) => (n.textContent = t(n.dataset.t)));
   $('mode-local').hidden = !!G.prefs.touch;
   $('keys-hint').innerHTML = G.prefs.touch ? esc(t('howTouch')) : t('keys');
+  $('home-count').textContent = t('count', { n: TRACKS.length });
   painter.glow = G.prefs.glow !== false;
   painter.motion = !G.prefs.reducedMotion;
   painter.flush();
@@ -1607,4 +1845,4 @@ if (code) {
 } else if (ensureOnline().resume()) show('online');
 G.gameplay(false);
 G.ready();
-if (/[?&]debug\b/.test(location.search)) window.__drift = { S, startRace, painter, standings };
+if (/[?&]debug\b/.test(location.search)) window.__drift = { S, startRace, painter, standings, TRACKS, dbg };

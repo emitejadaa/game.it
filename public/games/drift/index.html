@@ -17,8 +17,8 @@
     <template id="hud-tpl">
       <div class="pv">
         <div class="top">
-          <div class="box"><small data-t="lap"></small><b class="h-lap">1/3</b></div>
-          <div class="box c"><small class="h-time-l" data-t="time"></small><b class="h-time">0:00.00</b></div>
+          <div class="box"><small data-t="lap"></small><b class="h-lap">1/3</b><em class="h-best"></em></div>
+          <div class="box c"><small class="h-time-l" data-t="time"></small><b class="h-time">0:00.00</b><em class="h-lapt"></em></div>
           <div class="box pos"><small data-t="pos"></small><b class="h-pos">1°</b></div>
           <div class="box c pts" hidden><small data-t="driftPts"></small><b class="h-pts">0</b></div>
         </div>
@@ -26,13 +26,15 @@
         <div class="warn" data-t="wrongWay"></div>
         <div class="combo"><b class="c-pts">0</b><span class="c-mult">DRIFT ×1</span><em class="c-near" data-t="near"></em></div>
         <div class="pop"></div>
-        <div class="nitro"><small>NITRO</small><div><i></i></div></div>
+        <div class="nitro"><small>NITRO <span class="h-nitro">0%</span></small><div><i></i><s></s><s></s><s></s></div></div>
         <div class="speed">
           <svg viewBox="0 0 100 100">
             <path d="M18 78 A40 40 0 1 1 82 78" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="6" stroke-linecap="round" />
+            <path d="M18 78 A40 40 0 1 1 82 78" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="3" pathLength="100" stroke-dasharray="0.6 9.4" transform="translate(50 50) scale(1.14) translate(-50 -50)" />
             <path class="gauge" d="M18 78 A40 40 0 1 1 82 78" fill="none" stroke="url(#gg)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" />
           </svg>
           <b><span class="h-speed">0</span><small>KM/H</small></b>
+          <i class="h-gear">1</i>
         </div>
       </div>
     </template>
@@ -63,31 +65,33 @@
       <div class="card">
         <div class="logo"><span>DRIFT</span><em>NEON</em></div>
         <p class="sub" data-t="tagline"></p>
+        <p class="count" id="home-count"></p>
         <div class="modes">
-          <button class="mode" data-mode="race"><b data-t="race"></b><small data-t="raceSub"></small></button>
-          <button class="mode" data-mode="trial"><b data-t="trial"></b><small data-t="trialSub"></small></button>
-          <button class="mode" data-mode="drift"><b data-t="driftMode"></b><small data-t="driftSub"></small></button>
-          <button class="mode" data-mode="local" id="mode-local"><b data-t="local"></b><small data-t="localSub"></small></button>
-          <button class="mode" data-mode="online"><b data-t="online"></b><small data-t="onlineSub"></small></button>
+          <button class="mode m-race" data-mode="race"><i class="ic"><svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h12l-2 4 2 4H5" /></svg></i><span><b data-t="race"></b><small data-t="raceSub"></small></span><em class="arr">›</em></button>
+          <button class="mode m-trial" data-mode="trial"><i class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l3 2M9 2h6" /></svg></i><span><b data-t="trial"></b><small data-t="trialSub"></small></span><em class="arr">›</em></button>
+          <button class="mode m-drift" data-mode="drift"><i class="ic"><svg viewBox="0 0 24 24"><path d="M4 18c4 0 5-3 8-6s5-6 8-6" /><path d="M4 13c2 0 3-1 4-2M12 20c2-1 3-2 4-4" /></svg></i><span><b data-t="driftMode"></b><small data-t="driftSub"></small></span><em class="arr">›</em></button>
+          <button class="mode m-local" data-mode="local" id="mode-local"><i class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="4" /><path d="M7 11v3M5.5 12.5h3M15 12h.01M18 13h.01" /></svg></i><span><b data-t="local"></b><small data-t="localSub"></small></span><em class="arr">›</em></button>
+          <button class="mode m-online" data-mode="online"><i class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></svg></i><span><b data-t="online"></b><small data-t="onlineSub"></small></span><em class="arr">›</em></button>
         </div>
         <p class="keys" id="keys-hint"></p>
       </div>
     </section>
 
     <section class="screen" id="s-setup">
-      <div class="card wide">
+      <div class="card wide setup">
         <h2 class="orb title" id="setup-title"></h2>
-        <div class="tracks" id="tracks"></div>
-        <div class="tinfo" id="tinfo"></div>
-        <div class="opts">
-          <div class="opt" id="o-laps"><span class="lbl" data-t="laps"></span><div class="seg" data-o="laps"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="5">5</button></div></div>
-          <div class="opt" id="o-rivals"><span class="lbl" data-t="rivals"></span><div class="seg" data-o="rivals"><button data-v="0">0</button><button data-v="1">1</button><button data-v="3">3</button><button data-v="5">5</button></div></div>
-          <div class="opt" id="o-level"><span class="lbl" data-t="level"></span><div class="seg" data-o="level"><button data-v="1" data-t="lv1"></button><button data-v="2" data-t="lv2"></button><button data-v="3" data-t="lv3"></button></div></div>
-          <div class="opt" id="o-time"><span class="lbl" data-t="duration"></span><div class="seg" data-o="time"><button data-v="60">60 s</button><button data-v="90">90 s</button><button data-v="120">120 s</button></div></div>
+        <div class="picker" id="picker"></div>
+        <div class="side">
+          <div class="opts">
+            <div class="opt" id="o-laps"><span class="lbl" data-t="laps"></span><div class="seg" data-o="laps"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="5">5</button></div></div>
+            <div class="opt" id="o-rivals"><span class="lbl" data-t="rivals"></span><div class="seg" data-o="rivals"><button data-v="0">0</button><button data-v="1">1</button><button data-v="3">3</button><button data-v="5">5</button></div></div>
+            <div class="opt" id="o-level"><span class="lbl" data-t="level"></span><div class="seg" data-o="level"><button data-v="1" data-t="lv1"></button><button data-v="2" data-t="lv2"></button><button data-v="3" data-t="lv3"></button></div></div>
+            <div class="opt" id="o-time"><span class="lbl" data-t="duration"></span><div class="seg" data-o="time"><button data-v="60">60 s</button><button data-v="90">90 s</button><button data-v="120">120 s</button></div></div>
+          </div>
+          <p class="sub small" id="setup-note"></p>
+          <button class="go" id="setup-go" data-t="go"></button>
+          <button class="link" data-back data-t="back"></button>
         </div>
-        <p class="sub small" id="setup-note"></p>
-        <button class="go" id="setup-go" data-t="go"></button>
-        <button class="link" data-back data-t="back"></button>
       </div>
     </section>
 
@@ -108,8 +112,7 @@
         <div class="code" id="lobby-code">-----</div>
         <button class="go alt" id="lobby-share" data-t="copyLink"></button>
         <ul class="plist" id="lobby-players"></ul>
-        <div class="tracks" id="lobby-tracks"></div>
-        <div class="tinfo" id="lobby-tinfo"></div>
+        <div class="picker" id="lobby-picker"></div>
         <div class="opt" id="lobby-laps-o"><span class="lbl" data-t="laps"></span><div class="seg" id="lobby-laps"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="5">5</button></div></div>
         <button class="go" id="lobby-start" data-t="start"></button>
         <p class="status" id="lobby-status"></p>
@@ -120,15 +123,18 @@
     <section class="screen" id="s-pause">
       <div class="card">
         <h2 class="orb title" data-t="paused"></h2>
+        <p class="sub" id="p-info"></p>
         <button class="go" id="p-resume" data-t="resume"></button>
         <button class="go alt" id="p-restart" data-t="restart"></button>
         <button class="link" id="p-quit" data-t="menu"></button>
+        <p class="keys" id="p-keys"></p>
       </div>
     </section>
 
     <section class="screen" id="s-results">
       <div class="card">
         <h2 class="orb title" id="res-title"></h2>
+        <p class="rtrack" id="res-track"></p>
         <div class="big" id="res-big"></div>
         <p class="sub" id="res-sub"></p>
         <div class="stats" id="res-stats"></div>
