@@ -4,7 +4,7 @@
  * servidor simula y el cliente reproduce la trayectoria.
  */
 import { HOLES, COURSES } from '../shared/holes.js';
-import { simulate, shotDuration, SAMPLE_HZ } from '../shared/physics.js';
+import { simulate, simulatePush, findContact, shotDuration, SAMPLE_HZ } from '../shared/physics.js';
 import { Match, COLORS } from '../shared/match.js';
 import { Renderer } from './render.js';
 import { Net } from './net.js';
@@ -209,6 +209,8 @@ const S = {
   pausedAt: 0,
   paused: false,
   anim: null,
+  pushes: new Map(), // pelotas empujadas por obstáculos móviles (se animan a la vez que el tiro)
+  pushCheck: 0, // hasta qué tiempo del hoyo ya se revisó que nadie toque las pelotas quietas
   busy: false,
   waitingShot: false,
   disp: new Map(), // posiciones visibles de las pelotas
@@ -425,6 +427,9 @@ function onNet(msg) {
       S.waitingShot = false;
       run(() => playShot(msg.id, msg.res));
       break;
+    case 'push':
+      if (S.match && msg.hole === S.match.holeIdx) startPush(msg.id, msg.res);
+      break;
     case 'outcome':
       run(() => showOutcome(msg));
       break;
@@ -509,6 +514,8 @@ async function enterHole() {
   S.holeShown = m.holeIdx;
   if (S.mode !== 'online') S.holeBase = performance.now();
   R.setHole(m.hole);
+  S.pushes.clear();
+  S.pushCheck = 0;
   for (const p of m.players) S.disp.set(p.id, { ...p.ball });
   S.fxBall.clear();
   S.trail.clear();
@@ -545,8 +552,13 @@ function playShot(id, res) {
 }
 
 function stepAnim(now) {
-  const a = S.anim;
-  if (!a) return;
+  if (S.anim && advance(S.anim, now)) S.anim = null;
+  for (const [id, a] of S.pushes) if (advance(a, now)) S.pushes.delete(id);
+}
+
+/** Avanza la animación de un tiro o de un empujón. Devuelve true cuando terminó. */
+function advance(a, now) {
+  if (now < a.start) return false; // empujón programado para dentro de un momento
   const { res } = a;
   const n = res.path.length / 2;
   const f = Math.min(n - 1, ((now - a.start) / 1000) * SAMPLE_HZ);
@@ -555,9 +567,11 @@ function stepAnim(now) {
   const j = Math.min(n - 1, i + 1);
   const x = res.path[i * 2] + (res.path[j * 2] - res.path[i * 2]) * k;
   const y = res.path[i * 2 + 1] + (res.path[j * 2 + 1] - res.path[i * 2 + 1]) * k;
-  const fb = S.fxBall.get(a.id);
+  let fb = S.fxBall.get(a.id);
+  if (!fb) S.fxBall.set(a.id, (fb = { hidden: false, scale: 1 }));
   if (!fb.hidden) S.disp.set(a.id, { x, y });
-  const tr = S.trail.get(a.id);
+  let tr = S.trail.get(a.id);
+  if (!tr) S.trail.set(a.id, (tr = []));
   tr.push([x, y]);
   if (tr.length > 14) tr.shift();
 
@@ -606,22 +620,64 @@ function stepAnim(now) {
   if (fb.sinkAt) fb.scale = Math.max(0, 1 - (now - fb.sinkAt) / 280);
 
   if (now - a.start >= a.dur) {
-    S.anim = null;
     S.trail.set(a.id, []);
     const done = async () => {
       if (res.water) {
-        banner(t('water'), t('waterSub'), '#3ec1ff', true);
+        if (!res.push) banner(t('water'), t('waterSub'), '#3ec1ff', true);
         await wait(700);
         S.disp.set(a.id, { x: res.x, y: res.y });
         fb.hidden = false;
         fb.popAt = performance.now();
       } else S.disp.set(a.id, { x: res.x, y: res.y });
+      if (res.push) return updateHud();
       await wait(res.holed ? 350 : 150);
       S.busy = false;
       updateHud();
       a.resolve();
     };
     done();
+    return true;
+  }
+  return false;
+}
+
+/** Un obstáculo móvil empujó una pelota: se anima a partir del momento del contacto. */
+function startPush(id, res) {
+  const lag = (res.t0 - holeT()) * 1000;
+  S.pushes.set(id, { id, res, start: performance.now() + lag, dur: shotDuration(res), next: 0 });
+  S.fxBall.set(id, { hidden: false, scale: 1 });
+}
+
+/** Sin conexión: los obstáculos empujan las pelotas quietas (en cualquier turno). */
+function localPushes() {
+  const m = S.match;
+  if (S.mode === 'online' || !m || m.state !== 'playing' || S.paused || !m.hole.movers.length) return;
+  const t1 = holeT();
+  const t0 = Math.min(S.pushCheck, t1);
+  S.pushCheck = t1;
+  for (const p of m.players) {
+    if (p.done || p.active === false || S.anim?.id === p.id || S.pushes.has(p.id)) continue;
+    const tc = findContact(m.hole, p.ball, t0, t1);
+    if (tc < 0) continue;
+    const res = simulatePush(m.hole, p.ball, tc);
+    const outcome = m.applyPush(p.id, res);
+    startPush(p.id, res);
+    if (outcome) {
+      run(() => showOutcome(outcome));
+      run(async () => {
+        if (S.match !== m) return;
+        if (m.state === 'between') {
+          showCard(false);
+          await wait(3200);
+          if (S.match !== m) return;
+          m.nextHole();
+          await enterHole();
+        } else if (m.state === 'finished') {
+          await wait(600);
+          finish(m.standings());
+        } else updateHud();
+      });
+    }
   }
 }
 
@@ -664,7 +720,7 @@ function banner(text, sub, color, sad = false) {
 // ================= HUD =================
 function canAim() {
   const m = S.match;
-  if (!m || S.busy || S.anim || S.paused || current() || m.state !== 'playing' || !m.turn || S.waitingShot) return false;
+  if (!m || S.busy || S.anim || S.paused || current() || m.state !== 'playing' || !m.turn || S.waitingShot || S.pushes.has(m.turn)) return false;
   return S.mode === 'online' ? m.turn === S.myId : true;
 }
 
@@ -793,6 +849,7 @@ function quitToMenu() {
   S.match = null;
   S.mode = null;
   S.anim = null;
+  S.pushes.clear();
   S.busy = false;
   S.seq = Promise.resolve();
   R.confetti = [];
@@ -917,9 +974,10 @@ function frame(now) {
     R.frame({ t: now / 1000, now, balls: [], aim: null });
     return;
   }
+  localPushes();
   stepAnim(now);
   const balls = m.players
-    .filter((p) => p.active !== false && !(p.done && !(S.anim?.id === p.id)))
+    .filter((p) => p.active !== false && !(p.done && !(S.anim?.id === p.id) && !S.pushes.has(p.id)))
     .map((p) => {
       const pos = S.disp.get(p.id) || p.ball;
       const fb = S.fxBall.get(p.id) || {};
@@ -928,7 +986,7 @@ function frame(now) {
         const k = Math.min(1, (now - fb.popAt) / 300);
         scale = k < 1 ? Math.sin(k * Math.PI * 0.5) * 1.15 : 1;
       }
-      return { x: pos.x, y: pos.y, color: p.color, turn: p.id === m.turn && !S.busy && !S.anim, hidden: fb.hidden, scale, trail: S.trail.get(p.id) };
+      return { x: pos.x, y: pos.y, color: p.color, turn: p.id === m.turn && !S.busy && !S.anim && !S.pushes.has(p.id), hidden: fb.hidden, scale, trail: S.trail.get(p.id) };
     });
   // la pelota que se está moviendo se dibuja arriba
   balls.sort((a, b) => (a.trail?.length || 0) - (b.trail?.length || 0));
@@ -1001,3 +1059,4 @@ if (roomParam) {
 G.progress(1);
 document.fonts.ready.then(() => G.ready());
 setTimeout(() => G.ready(), 1500);
+if (/[?&]debug\b/.test(location.search)) window.__golf = { S };
