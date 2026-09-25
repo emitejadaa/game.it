@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop y Clashball): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta y Garabato): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -153,5 +153,82 @@ paso fijo de 60 ticks/s, jugador radio 15 / aceleración 0,1 (0,07 con la patada
 pelota radio 10 / amortiguación 0,99, patada de fuerza 5 a menos de 4 px, saque con barrera en el círculo, gol de oro.
 Online: el servidor simula y manda el estado 30 veces por segundo; cada cliente manda sus teclas solo cuando cambian,
 predice su jugador y corrige con las confirmaciones del servidor (se nota como si jugara en local).
+
+### Ajedrez
+
+Reglas completas en `public/games/chess/shared/rules.js` (enroque, al paso, coronación, jaque mate, ahogado, material
+insuficiente, 50 jugadas y triple repetición; verificado con perft). La compu (`shared/engine.js`, alfa-beta con
+tabla de transposición y búsqueda de quietud) corre en un worker (`ai.js`) con 5 niveles. Online, el servidor valida
+cada jugada con el mismo archivo y lleva el reloj con incremento; la primera jugada de cada lado tiene 30 s o la
+partida se anula. Pista con anuncio opcional (la primera de cada partida es gratis; sin anuncios, todas son gratis).
+
+### Ameba (arena .io)
+
+El mundo (`public/games/ameba/shared/world.js`: comida, división, expulsión de masa, esporas, unión de células)
+y los bots (`shared/bots.js`) corren igual en el servidor y sin conexión, a 25 pasos/s con grilla espacial.
+Online, cada jugador recibe solo lo que tiene cerca más la comida que reapareció; el cliente interpola los
+estados con un retraso que se ajusta al jitter. Juego rápido (se une a la arena pública con más gente o crea una)
+o sala privada con código; los bots completan hasta 18. Revivir con anuncio solo sin conexión.
+
+### Serpentina (arena .io)
+
+Mismo esquema que Ameba (`public/games/serpentina/shared/`): el mundo corre igual en el servidor y sin conexión.
+El cuerpo de cada serpiente es el rastro de la cabeza muestreado a distancia fija (`grow`), con posiciones y masa
+redondeadas a un decimal: `shared/sync.js` manda el cuerpo entero la primera vez que una serpiente entra en vista y
+después solo la cabeza, y el cliente reconstruye exactamente el mismo cuerpo. La comida se sincroniza por
+casilleros (carga completa al entrar en vista, después solo altas y bajas).
+
+### Billar (bola 8)
+
+Física propia en `public/games/billar/shared/physics.js`: paso fijo de 1/600 s con deslizamiento y rodadura
+(efecto arriba, abajo y lateral), choques elásticos, bandas con mandíbulas y troneras. Solo usa + − × ÷ √, así que es
+determinista: online el cliente manda el golpe exacto (velocidad y giro iniciales), el servidor lo valida, lo simula
+y aplica las reglas (`shared/rules.js`), y los dos navegadores animan el mismo tiro y terminan igual. La mesa se
+dibuja con three.js desde arriba y solo se vuelve a renderizar cuando algo cambia. La compu (`shared/ai.js`, en un
+worker) prueba tiros simulándolos y juega de seguridad si no hay nada claro.
+
+### Garabato (dibujar y adivinar)
+
+Online de 2 a 10: por turnos uno elige entre tres palabras y la dibuja; los demás escriben en el chat. Acertar da más
+puntos cuanto antes (con un plus al primero) y el que dibuja suma una parte de lo que ganan los demás. Con el tiempo se
+revelan letras; si una respuesta está a una letra, solo esa persona ve "¡casi!", y los que ya adivinaron charlan entre
+ellos sin arruinar la palabra. El servidor (`server/games/garabato.js`) lleva turnos, tiempos y puntos y reenvía el
+dibujo como operaciones chicas (trazos, relleno, deshacer, borrar); quien entra tarde o se reconecta recibe el dibujo
+en curso. Hoja fija de 1000×750 para que el relleno con balde dé igual en todos los navegadores. Salas públicas
+(aparecen en la lista y en "Partida rápida") o privadas, con palabras propias. Listas de palabras propias en
+`public/games/garabato/shared/words.js` (español e inglés).
+
+### Mecha Corta (palabras)
+
+Juego de palabras con bomba: el que la tiene ve una sílaba y escribe una palabra que la contenga (existente y sin
+repetir) antes de que explote; la mecha dura un tiempo al azar que nadie ve y explotar cuesta una vida. Usar todas las
+letras del abecedario (menos las raras) da una vida extra y todos ven lo que escribe el de turno, letra por letra.
+Idiomas español e inglés con diccionarios de `an-array-of-spanish-words` y `an-array-of-english-words` (MIT, ver
+`public/games/mecha/dict/LICENSE.txt`), guardados ordenados y con codificación de prefijo (≈2,4 MB y 1,2 MB sin
+comprimir) y buscados con búsqueda binaria; se regeneran con `node tools/mecha-dict.mjs`. La partida
+(`shared/game.js`) corre igual en el navegador (compu o práctica) y en el servidor (online hasta 12, con compu opcional),
+que valida las palabras y no revela cuánto le queda a la mecha.
+
+### Chispa (cartas)
+
+Juego de cartas de colores con nombre, diseño y cartas propias (4 colores de neón con una forma cada uno para quien no
+distingue colores). Las reglas están en `public/games/chispa/shared/rules.js` y la mesa (rondas, puntos, turnos de la
+compu, tiempo por turno y lo que ve cada jugador) en `shared/table.js`: el mismo código corre en el navegador contra la
+compu y en el servidor online, que baraja, valida cada jugada y a cada jugador le manda solo su mano. Se avisa
+"¡Última!" con una carta; si otro te agarra antes de que juegue el siguiente, robás 2. Opcional: acumular +2/+4.
+Online de 2 a 6 (el anfitrión puede sumar compu); si alguien se desconecta juega solo hasta que vuelve.
+
+### Drift Neon
+
+Física arcade propia en `public/games/drift/shared/car.js` (paso fijo de 1/120 s): el volante define una velocidad de
+giro que el auto alcanza con inercia y el agarre gira la velocidad hacia la trompa sin crear energía. Para derrapar se
+tira del freno de mano doblando (o se frena/acelera fuerte en plena curva); el acelerador sostiene el derrape, el
+contravolante lo cierra y pasado cierto ángulo es trompo. Nueve pistas largas (`tracks.js`): tres con puntos de control
+y seis trazadas con rectas y curvas de radio exacto (`shared/turtle.js`, que cierra el circuito solo), todas validadas
+para que ningún tramo se pise con otro. La compu (`shared/ai.js`) usa la misma física: sigue una línea de carrera
+calculada, frena antes de las curvas, usa freno de mano en las horquillas y nitro en las rectas (tres niveles).
+Modos: carrera contra hasta 5 autos de la compu, contrarreloj contra el fantasma de tu mejor recorrido de la sesión
+(con parciales), desafío de drift, 2 jugadores en pantalla dividida y online de hasta 6 (el servidor valida los
+tiempos con el largo de cada pista). El fondo se dibuja en mosaicos cacheados, así solo se redibuja lo que se mueve.
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

@@ -34,8 +34,8 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Archivos con hash (/assets/*) y fuentes: inmutables, caché primero.
-  if (url.pathname.startsWith('/assets/') || url.hostname === 'fonts.gstatic.com') {
+  // Archivos con hash (/assets/*), fuentes y diccionarios grandes: caché primero.
+  if (url.pathname.startsWith('/assets/') || url.hostname === 'fonts.gstatic.com' || url.pathname.includes('/dict/')) {
     e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((r) => put(req, r))));
     return;
   }

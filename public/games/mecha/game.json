@@ -1,0 +1,19 @@
+{
+  "id": "mecha",
+  "title": { "es": "Mecha Corta", "en": "Short Fuse" },
+  "description": {
+    "es": "Una bomba pasa de mano en mano: escribí una palabra con la sílaba antes de que explote. Todos ven lo que tipeás. Contra la compu, en práctica u online de a muchos.",
+    "en": "A bomb goes around: type a word with the syllable before it blows up. Everyone sees you typing. Versus CPU, practice or online with friends."
+  },
+  "categories": ["palabras", "online", "multijugador", "casual"],
+  "tags": ["palabras", "words", "bomba", "bomb", "sílabas", "syllables", "tipeo", "typing", "diccionario", "party", "fiesta", "español", "english"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom + css",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 12, "cpu": true, "story": false },
+  "order": 17
+}

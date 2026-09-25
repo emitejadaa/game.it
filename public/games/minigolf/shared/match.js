@@ -80,6 +80,23 @@ export class Match {
     return outcome;
   }
 
+  /**
+   * Un obstáculo móvil empujó la pelota de un jugador (en cualquier turno): no suma golpes.
+   * Si la metió en el hoyo, el jugador termina el hoyo con los golpes que llevaba (mínimo 1).
+   */
+  applyPush(id, res) {
+    const p = this.player(id);
+    if (!p || p.done || this.state !== 'playing') return null;
+    p.ball = { x: res.x, y: res.y };
+    if (!res.holed) return null;
+    p.strokes = Math.max(1, p.strokes);
+    p.done = true;
+    const outcome = { id, strokes: p.strokes, rel: p.strokes - this.par, label: label(p.strokes, this.par), push: true };
+    if (this.turn === id) this.advance();
+    else if (this.players.every((q) => q.done || !q.active)) this.finishHole();
+    return outcome;
+  }
+
   /** Turno perdido (tiempo agotado): suma un golpe sin mover la pelota. */
   skip(id, penalty = 1) {
     const p = this.player(id);

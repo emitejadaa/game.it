@@ -1,14 +1,21 @@
 import { raceGame } from './_race.js';
+import { TRACKS, build, minLapMs } from '../../public/games/drift/tracks.js';
 
-// tiempo mínimo físicamente posible por vuelta (largo de la pista / velocidad máxima con nitro), en ms
-const MIN_LAP = [5000, 6000, 8000];
+// tiempo mínimo razonable por vuelta de cada pista (largo / velocidad máxima con nitro), en ms
+const MIN_LAP = TRACKS.map((tr) => minLapMs(build(tr)));
+const LAPS = [1, 2, 3, 5];
 
 export default raceGame({
+  maxPlayers: 6,
   defaults: { track: 0, laps: 3 },
-  settings: (cur, s) => ({
-    track: [0, 1, 2].includes(Number(s.track)) ? Number(s.track) : cur.track,
-    laps: Math.max(1, Math.min(5, Number(s.laps) || cur.laps)),
-  }),
+  settings: (cur, s) => {
+    const track = Number(s.track);
+    const laps = Number(s.laps);
+    return {
+      track: Number.isInteger(track) && track >= 0 && track < TRACKS.length ? track : cur.track,
+      laps: LAPS.includes(laps) ? laps : cur.laps,
+    };
+  },
   onStart(room, d) {
     d.pub = { track: room.settings.track, laps: room.settings.laps };
   },

@@ -139,8 +139,109 @@ function collideCircle(b, cx, cy, r) {
   return out;
 }
 
+// ---------- obstáculos móviles: contacto y escape ----------
+const pointInPoly = (x, y, poly) => {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i];
+    const [xj, yj] = poly[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+};
+
+/** Distancia del centro de la pelota al rectángulo del obstáculo (negativa si está adentro). */
+function rectDistance(pts, x, y) {
+  let best = Infinity;
+  for (let k = 0; k < 4; k++) {
+    const [ax, ay] = pts[k];
+    const [bx, by] = pts[(k + 1) % 4];
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len2 = dx * dx + dy * dy || 1;
+    let u = ((x - ax) * dx + (y - ay) * dy) / len2;
+    u = u < 0 ? 0 : u > 1 ? 1 : u;
+    best = Math.min(best, Math.hypot(x - (ax + dx * u), y - (ay + dy * u)));
+  }
+  return pointInPoly(x, y, pts) ? -best : best;
+}
+
+/** ¿Hay lugar para la pelota acá? (dentro de la cancha, fuera de paredes y obstáculos) */
+function freeSpot(hole, segs, x, y, t) {
+  if (!pointInPoly(x, y, hole.outline)) return false;
+  for (const b of hole.blocks) if (pointInPoly(x, y, b)) return false;
+  for (const s of segs) {
+    const dx = s[2] - s[0];
+    const dy = s[3] - s[1];
+    const len2 = dx * dx + dy * dy || 1;
+    let u = ((x - s[0]) * dx + (y - s[1]) * dy) / len2;
+    u = u < 0 ? 0 : u > 1 ? 1 : u;
+    if (Math.hypot(x - (s[0] + dx * u), y - (s[1] + dy * u)) < BALL_R - 0.5) return false;
+  }
+  for (const m of hole.movers) if (rectDistance(moverState(m, t).pts, x, y) < BALL_R - 0.5) return false;
+  return true;
+}
+
+/**
+ * Si la pelota quedó metida en un obstáculo móvil (por ejemplo aplastada contra una pared),
+ * la saca por el lado libre más cercano y la deja moviéndose con el obstáculo.
+ */
+function escapeMovers(hole, segs, b, t) {
+  for (const m of hole.movers) {
+    const st = moverState(m, t);
+    if (rectDistance(st.pts, b.x, b.y) >= BALL_R - 1.5) continue;
+    let best = null;
+    for (let k = 0; k < 4; k++) {
+      const [ax, ay] = st.pts[k];
+      const [bx, by] = st.pts[(k + 1) % 4];
+      const dx = bx - ax;
+      const dy = by - ay;
+      const len = Math.hypot(dx, dy) || 1;
+      // normal hacia afuera del rectángulo
+      let nx = dy / len;
+      let ny = -dx / len;
+      const mx = (ax + bx) / 2 - st.cx;
+      const my = (ay + by) / 2 - st.cy;
+      if (nx * mx + ny * my < 0) {
+        nx = -nx;
+        ny = -ny;
+      }
+      // proyección del centro sobre el borde, más el radio
+      let u = ((b.x - ax) * dx + (b.y - ay) * dy) / (len * len);
+      u = u < 0 ? 0 : u > 1 ? 1 : u;
+      const x = ax + dx * u + nx * (BALL_R + 0.6);
+      const y = ay + dy * u + ny * (BALL_R + 0.6);
+      const cost = Math.hypot(x - b.x, y - b.y);
+      const ok = freeSpot(hole, segs, x, y, t);
+      if (!best || (ok && !best.ok) || (ok === best.ok && cost < best.cost)) best = { x, y, ok, cost };
+    }
+    if (!best) continue;
+    b.x = best.x;
+    b.y = best.y;
+    const [vx, vy] = st.vel(b.x, b.y);
+    b.vx = vx;
+    b.vy = vy;
+  }
+}
+
+/** Índice del obstáculo móvil que toca a la pelota en el tiempo t (o -1). */
+export { rectDistance, pointInPoly };
+
+export function moverContact(hole, ball, t) {
+  for (let i = 0; i < hole.movers.length; i++) if (rectDistance(moverState(hole.movers[i], t).pts, ball.x, ball.y) < BALL_R - 0.25) return i;
+  return -1;
+}
+
+/** Primer momento en [t0, t1] en que un obstáculo móvil toca a la pelota quieta (o -1). */
+export function findContact(hole, ball, t0, t1, dt = 1 / 120) {
+  if (!hole.movers.length || !ball) return -1;
+  for (let t = t0; t <= t1 + 1e-9; t += dt) if (moverContact(hole, ball, t) >= 0) return t;
+  return -1;
+}
+
 // ---------- simulación ----------
 /**
+ * Un golpe.
  * @param hole   definición del hoyo
  * @param start  {x, y} posición de la pelota
  * @param angle  dirección del golpe (radianes)
@@ -148,9 +249,27 @@ function collideCircle(b, cx, cy, r) {
  * @param t0     tiempo del hoyo (s) en el que se golpea: define dónde están los obstáculos móviles
  */
 export function simulate(hole, start, angle, power, t0 = 0) {
-  const segs = staticSegments(hole);
   const p = Math.max(0.03, Math.min(1, power));
-  const b = { x: start.x, y: start.y, vx: Math.cos(angle) * MAX_SPEED * p, vy: Math.sin(angle) * MAX_SPEED * p };
+  return run(hole, start, Math.cos(angle) * MAX_SPEED * p, Math.sin(angle) * MAX_SPEED * p, t0, false);
+}
+
+/**
+ * Un obstáculo móvil empuja una pelota quieta en el tiempo t (no cuenta como golpe).
+ * Si la tira al agua, vuelve a la salida sin penalidad.
+ */
+export function simulatePush(hole, start, t) {
+  const res = run(hole, start, 0, 0, t, true);
+  if (res.water) {
+    res.x = hole.tee[0];
+    res.y = hole.tee[1];
+  }
+  res.push = true;
+  return res;
+}
+
+function run(hole, start, vx0, vy0, t0, push) {
+  const segs = staticSegments(hole);
+  const b = { x: start.x, y: start.y, vx: vx0, vy: vy0 };
   const path = [round(b.x), round(b.y)];
   const events = [];
   const [cupX, cupY] = hole.cup;
@@ -230,10 +349,7 @@ export function simulate(hole, start, angle, power, t0 = 0) {
     b.x += b.vx * DT;
     b.y += b.vy * DT;
 
-    // colisiones
-    let hit = 0;
-    for (const s of segs) hit = Math.max(hit, collideSegment(b, s[0], s[1], s[2], s[3], 0.72));
-    if (hit > 40) ev('wall', { v: Math.round(hit) });
+    // colisiones: obstáculos móviles, paredes (mandan siempre) y rebotadores
     for (let mi = 0; mi < hole.movers.length; mi++) {
       const st = moverState(hole.movers[mi], t);
       let mh = 0;
@@ -244,12 +360,17 @@ export function simulate(hole, start, angle, power, t0 = 0) {
       }
       if (mh > 30) ev('mover', { m: mi, v: Math.round(mh) });
     }
+    let hit = 0;
+    for (const s of segs) hit = Math.max(hit, collideSegment(b, s[0], s[1], s[2], s[3], 0.72));
+    if (hit > 40) ev('wall', { v: Math.round(hit) });
+    // si quedó aplastada entre un obstáculo y una pared, sale por el lado libre
+    if (hole.movers.length) escapeMovers(hole, segs, b, t);
     for (let bi = 0; bi < hole.bumpers.length; bi++) {
       const [cx, cy, r] = hole.bumpers[bi];
       if (collideCircle(b, cx, cy, r)) ev('bumper', { b: bi });
     }
-    // seguridad: si algo lo empujó afuera, lo devuelve al inicio del tiro
-    if (!Number.isFinite(b.x) || !Number.isFinite(b.y)) {
+    // seguridad: si algo la dejó en un lugar imposible, vuelve al inicio del tiro
+    if (!Number.isFinite(b.x) || !Number.isFinite(b.y) || !pointInPoly(b.x, b.y, hole.outline)) {
       result = { x: start.x, y: start.y };
       break;
     }
@@ -273,9 +394,11 @@ export function simulate(hole, start, angle, power, t0 = 0) {
       }
 
     speed = Math.hypot(b.vx, b.vy);
-    still = speed < 6 ? still + DT : 0;
+    // mientras un obstáculo la sigue tocando, no se da por quieta
+    const touching = hole.movers.length && moverContact(hole, b, t) >= 0;
+    still = speed < 6 && !touching ? still + DT : 0;
     if ((step + 1) % STEPS_PER_SAMPLE === 0) path.push(round(b.x), round(b.y));
-    if (still > 0.25 || (speed < 3 && fx === 0 && fy === 0)) break;
+    if (step > (push ? 4 : 0) && !touching && (still > 0.25 || (speed < 3 && fx === 0 && fy === 0))) break;
   }
   if (!result) result = { x: round(b.x), y: round(b.y) };
   if (path[path.length - 2] !== round(result.x) || path[path.length - 1] !== round(result.y)) path.push(round(b.x), round(b.y));

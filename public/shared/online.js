@@ -32,6 +32,8 @@ const TXT = {
     closed_empty: 'La sala se cerró.',
     kicked: 'El anfitrión te sacó de la sala.',
     opponent_left: 'Tu rival se fue de la sala.',
+    bad_place: 'La blanca no puede ir ahí.',
+    need_call: 'Elegí la tronera para la 8.',
     wakeup: 'Despertando el servidor (puede tardar unos segundos)…',
   },
   en: {
@@ -53,6 +55,8 @@ const TXT = {
     closed_empty: 'The room was closed.',
     kicked: 'The host removed you from the room.',
     opponent_left: 'Your opponent left the room.',
+    bad_place: 'The cue ball can’t go there.',
+    need_call: 'Choose a pocket for the 8.',
     wakeup: 'Waking the server up (may take a few seconds)…',
   },
 };

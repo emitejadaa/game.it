@@ -1,0 +1,19 @@
+{
+  "id": "chispa",
+  "title": "Chispa",
+  "description": {
+    "es": "Cartas de colores de neón: jugá por color, número o símbolo, tirá +2, +4 y comodines, y avisá ¡Última! antes de que te agarren. Contra la compu u online.",
+    "en": "Neon color cards: match by color, number or symbol, throw +2, +4 and wilds, and call LAST! before you get caught. Versus CPU or online."
+  },
+  "categories": ["cartas", "clasicos", "online", "multijugador", "casual"],
+  "tags": ["cartas", "cards", "colores", "colors", "comodín", "wild", "+4", "última", "familia", "party", "2 a 6 jugadores"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom + css",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 6, "cpu": true, "story": false },
+  "order": 16
+}

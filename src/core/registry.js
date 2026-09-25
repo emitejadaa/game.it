@@ -10,6 +10,8 @@ export const CATEGORIES = [
   'deporte',
   'carreras',
   'estrategia',
+  'cartas',
+  'palabras',
   'idle',
   'historia',
   'online',
