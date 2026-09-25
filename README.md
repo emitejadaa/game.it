@@ -30,30 +30,7 @@ Todos llevan la etiqueta "Publicidad" y los banners se pueden ocultar (24 h). Nu
 mientras se juega ni durante un partido online en curso. Stack no muestra banners (se toca en cualquier parte de la
 pantalla y habría clics sin querer). Con `?ads=preview` se ven todos los espacios simulados, sin pedir anuncios.
 
-### Paso a paso para que funcionen
-
-1. **Dominio propio.** AdSense no aprueba subdominios de hosting (`*.onrender.com`, `*.vercel.app`…). Comprar un
-   dominio y en Render → sitio estático → *Settings* → *Custom Domains* agregarlo y crear en el DNS el registro que
-   indica Render. Después, en el servicio del servidor online, sumar el dominio nuevo a `ALLOWED_ORIGINS`
-   (por ejemplo `https://tudominio.com,https://www.tudominio.com`), o los juegos online no van a conectar.
-2. **Agregar el sitio en AdSense** (*Sitios* → *Agregar sitio*, con el dominio sin `www`). El script del `<head>`,
-   la etiqueta `google-adsense-account` y `public/ads.txt` ya están publicados: elegir cualquiera de los tres métodos
-   y tocar *Verificar*. Pedir la revisión; puede tardar de días a un par de semanas.
-3. **Mientras tanto**: completar *Pagos* (datos fiscales y de pago; al llegar a US$10 Google envía un PIN por correo
-   postal para verificar la dirección).
-4. **Privacidad y mensajes** → crear el mensaje de consentimiento para Europa/Reino Unido/Suiza (obligatorio para
-   mostrar anuncios allí) y, si querés, el de regulaciones de EE. UU.
-5. **Apagar los anuncios automáticos**: *Anuncios* → *Por sitio* → editar el sitio → desactivar *Anuncios automáticos*
-   (los superpuestos —anclados y viñetas— taparían los juegos). Los espacios ya están ubicados a mano.
-6. **Crear los dos bloques** en *Anuncios* → *Por bloque de anuncios* → *Anuncios de display* (tipo adaptable):
-   "game.it menú" y "game.it juegos". Copiar el número de `data-ad-slot` de cada uno en `src/ads.config.js`
-   (`slots.menuBottom` y `slots.gameBreak`) y hacer push.
-7. **Recompensas y pantalla completa (opcional)**: con la cuenta ya aprobada, pedir acceso a **AdSense H5 Games Ads**
-   (formulario en https://adsense.google.com/start/h5-beta/). Mientras no esté aprobado, las ofertas con recompensa
-   simplemente no aparecen. Para probarlas, agregar temporalmente `data-adbreak-test="on"` al script de AdSense en
-   `index.html` (sacarlo al terminar). Para activar los de pantalla completa: `games.interstitials: true`.
-8. **Controlar**: en *Sitios* el estado del sitio y de `ads.txt` tiene que decir "Preparado"/"Autorizado"; en
-   *Informes* aparecen las impresiones al día siguiente. Nunca hacer clic en tus propios anuncios.
+**Paso a paso para configurar AdSense (dominio, verificación, pagos, bloques, H5 Games Ads): [ANUNCIOS.md](ANUNCIOS.md).**
 
 ## Cómo está armado
 
