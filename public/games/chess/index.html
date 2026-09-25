@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Ajedrez · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <!-- Piezas propias: cuerpo = fill, contorno = stroke, detalles = currentColor -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <path id="base" d="M22 90H78Q82 90 82 86V84Q82 80 78 80H22Q18 80 18 84V86Q18 90 22 90Z" />
+        <symbol id="pp" viewBox="0 0 100 100">
+          <path d="M41 50C41 62 36 72 30 80H70C64 72 59 62 59 50Z" />
+          <path d="M35.5 47a14.5 4.8 0 1 0 29 0a14.5 4.8 0 1 0-29 0Z" />
+          <circle cx="50" cy="30" r="12.5" />
+          <use href="#base" />
+        </symbol>
+        <symbol id="pr" viewBox="0 0 100 100">
+          <path d="M35 44H65L63.5 73L69 80H31L36.5 73Z" />
+          <path d="M28 21H38V28H45V21H55V28H62V21H72V37L66 44H34L28 37Z" />
+          <path d="M36.5 73H63.5M30 37H70" fill="none" stroke="currentColor" stroke-width="2.4" />
+          <use href="#base" />
+        </symbol>
+        <symbol id="pn" viewBox="0 0 100 100">
+          <path d="M33 80C32 70 37 62 46 55C42 55.5 37.5 57.5 33 59.5C29 62 24 61.5 21.5 58L18.5 53C16.8 49.8 17.8 46.8 20.5 44.8L36.5 29.5C37.6 24.4 39.8 20 43 15.5L46.2 21.6L49.5 14.5C52.3 17.4 54.2 20.4 55.4 23C67.5 26.3 77 39 77 54C77 66 74 74 71.5 80Z" />
+          <circle cx="37.5" cy="36" r="2.9" fill="currentColor" stroke="none" />
+          <circle cx="22.8" cy="51.5" r="1.7" fill="currentColor" stroke="none" />
+          <path d="M58 28.5C66 34 70.5 44 70.5 57" fill="none" stroke="currentColor" stroke-width="2.4" />
+          <use href="#base" />
+        </symbol>
+        <symbol id="pb" viewBox="0 0 100 100">
+          <path d="M42 64C40.5 70 35.5 75.5 31 80H69C64.5 75.5 59.5 70 58 64Z" />
+          <path d="M37.5 63.5a12.5 4.5 0 1 0 25 0a12.5 4.5 0 1 0-25 0Z" />
+          <path d="M50 22C39 30 34 39 34 47C34 55 40.5 59.5 50 59.5C59.5 59.5 66 55 66 47C66 39 61 30 50 22Z" />
+          <circle cx="50" cy="16.5" r="5.2" />
+          <path d="M55.5 33L45.5 45.5" fill="none" stroke="currentColor" stroke-width="3" />
+          <use href="#base" />
+        </symbol>
+        <symbol id="pq" viewBox="0 0 100 100">
+          <path d="M36.5 65C38 71 34.5 76.5 30 80H70C65.5 76.5 62 71 63.5 65Z" />
+          <path d="M31 65L22 34L35 50L36 26L43 46L50 21.5L57 46L64 26L65 50L78 34L69 65Z" />
+          <path d="M31 65.2a19 4.6 0 1 0 38 0a19 4.6 0 1 0-38 0Z" />
+          <circle cx="22" cy="31.5" r="4.4" />
+          <circle cx="36" cy="23.5" r="4.4" />
+          <circle cx="50" cy="18.5" r="4.6" />
+          <circle cx="64" cy="23.5" r="4.4" />
+          <circle cx="78" cy="31.5" r="4.4" />
+          <use href="#base" />
+        </symbol>
+        <symbol id="pk" viewBox="0 0 100 100">
+          <path d="M36.5 66C38 72 34.5 77 30 80H70C65.5 77 62 72 63.5 66Z" />
+          <path d="M32.5 66C21.5 56.5 21 42 32.5 39.8C41 38.2 46.2 45 50 52C53.8 45 59 38.2 67.5 39.8C79 42 78.5 56.5 67.5 66Z" />
+          <path d="M42.5 44C42.5 36.5 46 32.5 50 30.5C54 32.5 57.5 36.5 57.5 44C57.5 48 54.5 51.5 50 55C45.5 51.5 42.5 48 42.5 44Z" />
+          <path d="M47 9H53V15H59V21H53V30.5H47V21H41V15H47Z" />
+          <path d="M32 66.2a18 4.5 0 1 0 36 0a18 4.5 0 1 0-36 0Z" />
+          <use href="#base" />
+        </symbol>
+      </defs>
+    </svg>
+
+    <!-- ============ Inicio ============ -->
+    <section class="screen on" id="s-home">
+      <div class="col home">
+        <div class="logo" aria-hidden="true">
+          <svg class="lp w" viewBox="0 0 100 100"><use href="#pn" /></svg>
+          <svg class="lp b" viewBox="0 0 100 100"><use href="#pk" /></svg>
+        </div>
+        <h1 data-t="title"></h1>
+        <p class="sub" data-t="tagline"></p>
+        <nav class="menu">
+          <button class="item" data-go="cpu"><b data-t="vsCpu"></b><small data-t="vsCpuSub"></small></button>
+          <button class="item" data-go="local"><b data-t="local"></b><small data-t="localSub"></small></button>
+          <button class="item" data-go="online"><b data-t="online"></b><small data-t="onlineSub"></small></button>
+        </nav>
+        <div class="themes" id="themes" role="radiogroup"></div>
+      </div>
+    </section>
+
+    <!-- ============ Contra la compu ============ -->
+    <section class="screen" id="s-cpu">
+      <div class="col card">
+        <h2 data-t="vsCpu"></h2>
+        <span class="lbl" data-t="level"></span>
+        <div class="levels" id="cpu-level"></div>
+        <span class="lbl" data-t="side"></span>
+        <div class="seg" id="cpu-side">
+          <button data-v="w"><svg class="mini w" viewBox="0 0 100 100"><use href="#pk" /></svg><span data-t="white"></span></button>
+          <button data-v="r"><span class="duo"><svg class="mini w" viewBox="0 0 100 100"><use href="#pk" /></svg><svg class="mini b" viewBox="0 0 100 100"><use href="#pk" /></svg></span><span data-t="random"></span></button>
+          <button data-v="b"><svg class="mini b" viewBox="0 0 100 100"><use href="#pk" /></svg><span data-t="black"></span></button>
+        </div>
+        <button class="btn primary" id="cpu-go" data-t="play"></button>
+        <button class="back" data-go="home" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- ============ Dos jugadores ============ -->
+    <section class="screen" id="s-local">
+      <div class="col card">
+        <h2 data-t="local"></h2>
+        <span class="lbl" data-t="clock"></span>
+        <div class="seg wrap" id="local-tc"></div>
+        <label class="check"><input type="checkbox" id="local-flip" /><span data-t="autoFlip"></span></label>
+        <button class="btn primary" id="local-go" data-t="play"></button>
+        <button class="back" data-go="home" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- ============ Online ============ -->
+    <section class="screen" id="s-online">
+      <div class="col card">
+        <h2 data-t="online"></h2>
+        <span class="lbl" data-t="yourName"></span>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+        <button class="btn primary" id="on-create" data-t="create"></button>
+        <p class="sub" data-t="orJoin"></p>
+        <form class="row" id="on-join" autocomplete="off"><input class="field code" id="on-code" maxlength="5" placeholder="ABCDE" /><button class="btn" data-t="join"></button></form>
+        <p class="status" id="on-status"></p>
+        <button class="back" data-go="home" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- ============ Sala ============ -->
+    <section class="screen" id="s-lobby">
+      <div class="col card">
+        <p class="sub" data-t="shareCode"></p>
+        <button class="bigcode" id="lobby-code" title="">-----</button>
+        <button class="btn" id="lobby-share" data-t="copyLink"></button>
+        <ul class="plist" id="lobby-players"></ul>
+        <span class="lbl" data-t="clock"></span>
+        <div class="seg wrap" id="lobby-tc"></div>
+        <button class="btn primary" id="lobby-start" data-t="start"></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="back" id="lobby-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <!-- ============ Partida ============ -->
+    <section class="screen" id="s-game">
+      <div class="table" id="table">
+        <div class="pcard top" id="pc-top"></div>
+        <div class="board-wrap" id="board-wrap">
+          <div class="board" id="board">
+            <div class="coords" id="coords"></div>
+            <div class="marks" id="marks"></div>
+            <div class="pieces" id="pieces"></div>
+            <div class="promo" id="promo" hidden></div>
+          </div>
+          <button class="live-pill" id="live-pill" hidden data-t="backToLive"></button>
+          <div class="over" id="over" hidden>
+            <div class="over-card">
+              <p class="over-kicker" id="over-kicker"></p>
+              <h2 id="over-title"></h2>
+              <p class="over-sub" id="over-sub"></p>
+              <div class="over-actions">
+                <button class="btn primary" id="over-again"></button>
+                <button class="btn" id="over-review" data-t="review"></button>
+                <button class="btn ghost" id="over-menu" data-t="menu"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pcard bottom" id="pc-bottom"></div>
+        <aside class="side" id="side">
+          <div class="moves" id="moves"></div>
+          <div class="nav">
+            <button id="nav-first" aria-label="Inicio"><svg viewBox="0 0 24 24"><path d="M7 5v14M18 5l-8 7 8 7" /></svg></button>
+            <button id="nav-prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></button>
+            <button id="nav-next" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg></button>
+            <button id="nav-last" aria-label="Final"><svg viewBox="0 0 24 24"><path d="M17 5v14M6 5l8 7-8 7" /></svg></button>
+            <button id="nav-exit" class="exit" aria-label="Salir"><svg viewBox="0 0 24 24"><path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10" /></svg></button>
+          </div>
+          <div class="tools" id="tools"></div>
+        </aside>
+      </div>
+      <div class="toast" id="toast"></div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

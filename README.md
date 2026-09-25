@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop y Clashball): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball y Ajedrez): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -176,5 +176,13 @@ paso fijo de 60 ticks/s, jugador radio 15 / aceleración 0,1 (0,07 con la patada
 pelota radio 10 / amortiguación 0,99, patada de fuerza 5 a menos de 4 px, saque con barrera en el círculo, gol de oro.
 Online: el servidor simula y manda el estado 30 veces por segundo; cada cliente manda sus teclas solo cuando cambian,
 predice su jugador y corrige con las confirmaciones del servidor (se nota como si jugara en local).
+
+### Ajedrez
+
+Reglas completas en `public/games/chess/shared/rules.js` (enroque, al paso, coronación, jaque mate, ahogado, material
+insuficiente, 50 jugadas y triple repetición; verificado con perft). La compu (`shared/engine.js`, alfa-beta con
+tabla de transposición y búsqueda de quietud) corre en un worker (`ai.js`) con 5 niveles. Online, el servidor valida
+cada jugada con el mismo archivo y lleva el reloj con incremento; la primera jugada de cada lado tiene 30 s o la
+partida se anula. Pista con anuncio opcional (la primera de cada partida es gratis; sin anuncios, todas son gratis).
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

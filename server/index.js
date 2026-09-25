@@ -21,8 +21,9 @@ import connect4 from './games/connect4.js';
 import drift from './games/drift.js';
 import doodle from './games/doodle.js';
 import clashball from './games/clashball.js';
+import chess from './games/chess.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess };
 /** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
 const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
 

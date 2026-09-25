@@ -1,0 +1,19 @@
+{
+  "id": "chess",
+  "title": { "es": "Ajedrez", "en": "Chess" },
+  "description": {
+    "es": "Ajedrez completo contra la compu (5 niveles), de a dos con reloj u online con código de sala. Pistas, deshacer y repaso de jugadas.",
+    "en": "Full chess versus the CPU (5 levels), two players with a clock or online with a room code. Hints, undo and move review."
+  },
+  "categories": ["estrategia", "clasicos", "online", "multijugador"],
+  "tags": ["ajedrez", "chess", "jaque", "mate", "tablero", "board", "reloj", "clock", "2 jugadores", "ia"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom + web worker",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 2, "localPlayers": 2, "cpu": true, "story": false },
+  "order": 12
+}
