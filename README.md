@@ -32,6 +32,25 @@ pantalla y habría clics sin querer). Con `?ads=preview` se ven todos los espaci
 
 **Paso a paso para configurar AdSense (dominio, verificación, pagos, bloques, H5 Games Ads): [ANUNCIOS.md](ANUNCIOS.md).**
 
+## Reportar un problema (sin cuentas)
+
+Botón en la barra de arriba y en la barra de cada juego (ahí viene elegido ese juego y el juego se pausa).
+Pasos: correo → código de 6 dígitos → reporte (dónde, tipo, qué pasó, cada cuánto pasa, datos técnicos y aviso cuando
+se resuelva). El correo verificado queda recordado 7 días en el dispositivo y el borrador no se pierde al cerrar el panel
+o al ir a buscar el código al correo.
+
+- **Configuración:** `src/report.config.js`. Con `endpoint` vacío funciona en **modo demo**: todo pasa en el navegador,
+  no se envían correos (el código aparece en pantalla) y los reportes quedan en `localStorage` (`gameit:report:demo`).
+  Cuando esté el servidor: `endpoint: '/api/reports'`.
+- **Contrato de la API** (lo que tiene que implementar el servidor, con sus códigos de error): `src/core/report-api.js`.
+- **Antiabuso en la web:** campo trampa para bots, tiempo que tardó en escribirse, largo mínimo y máximo, espera para
+  reenviar el código y captcha invisible opcional (Cloudflare Turnstile, `turnstileSiteKey`). Los límites que cuentan
+  (por correo, por IP y por día, correos bloqueados o temporales) los aplica el servidor.
+- **Datos técnicos** (se pueden apagar y ver antes de enviar): versión publicada (commit), dispositivo, navegador,
+  pantalla, preferencias y los últimos errores de JavaScript del portal y del juego (el SDK los informa solo).
+- **Probar la demo:** un correo que empiece con `bloqueado@` está bloqueado, los de dominios temporales
+  (mailinator.com…) se rechazan y se pueden mandar 5 reportes por día.
+
 ## Cómo está armado
 
 
@@ -47,6 +66,9 @@ src/
   ui/search.js          panel de búsqueda que baja desde arriba, con categorías
   ui/prefs-panel.js     popup de preferencias (esquina superior derecha)
   ui/player.js          reproductor: iframe aislado + puente con el SDK
+  ui/report-panel.js    "Reportar un problema": correo → código → reporte
+  core/report-api.js    API de reportes: contrato con el servidor + servidor simulado (modo demo)
+  core/diagnostics.js   datos técnicos y errores recientes que acompañan a un reporte
   styles/               tokens (colores, curvas de animación), menú, paneles
 public/
   sdk/gameit.js         SDK que usa cada juego
@@ -138,7 +160,8 @@ El SDK además:
 - dibuja el contador de FPS si el usuario lo activó;
 - traduce teclas con `GameIt.dir(event)` → `'up' | 'down' | 'left' | 'right'` según flechas/WASD;
 - elige textos con `GameIt.t({ es, en })`;
-- funciona también con el juego abierto suelto (`/games/<id>/`): lee las preferencias guardadas y `exit()` vuelve a `/`.
+- funciona también con el juego abierto suelto (`/games/<id>/`): lee las preferencias guardadas y `exit()` vuelve a `/`;
+- avisa solo al portal los errores de JavaScript del juego (como mucho 20 por partida), que se adjuntan a los reportes.
 
 **Juegos con build propio** (React, Phaser con npm, Unity, Godot): compilar con base relativa (`./`) o con base `/games/<id>/` y copiar la salida a `public/games/<id>/`.
 **Juegos online:** el cliente vive acá; el servidor (WebSocket, API) puede estar en otro dominio. Se declara en `features` y el juego maneja su conexión.

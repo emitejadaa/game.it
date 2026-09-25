@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { execSync } from 'node:child_process';
 
 const GAMES_DIR = resolve(import.meta.dirname, 'public/games');
 const VIRTUAL_ID = 'virtual:games';
@@ -50,7 +51,19 @@ function gamesRegistry() {
   };
 }
 
+/** Versión publicada (commit + fecha): viaja con cada reporte de problema para saber qué build lo tuvo. */
+function buildId() {
+  let commit = process.env.RENDER_GIT_COMMIT || process.env.VERCEL_GIT_COMMIT_SHA || '';
+  if (!commit) {
+    try {
+      commit = execSync('git rev-parse HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    } catch {}
+  }
+  return { commit: commit.slice(0, 7), date: new Date().toISOString().slice(0, 10) };
+}
+
 export default defineConfig({
   plugins: [gamesRegistry()],
+  define: { __BUILD__: JSON.stringify(buildId()) },
   build: { target: 'es2022' },
 });

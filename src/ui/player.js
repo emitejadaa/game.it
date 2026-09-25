@@ -7,6 +7,7 @@ import * as loader from './loader.js';
 import * as prefs from '../core/prefs.js';
 import { pick, t } from '../core/i18n.js';
 import * as gameAds from './game-ads.js';
+import * as diagnostics from '../core/diagnostics.js';
 
 const player = document.getElementById('player');
 const stage = document.getElementById('player-stage');
@@ -21,7 +22,7 @@ let origin = '';
 let idleTimer = 0;
 let pendingReady = null;
 let creep = 0;
-let hooks = { onExit: () => {} };
+let hooks = { onExit: () => {}, canResume: () => true };
 
 export const isActive = () => !!current;
 export const game = () => current;
@@ -67,6 +68,9 @@ function onMessage(e) {
     case 'ad':
       gameAds.message(d);
       break;
+    case 'log':
+      diagnostics.record(current.id, d); // errores del juego, para adjuntar a un reporte
+      break;
   }
 }
 
@@ -76,7 +80,7 @@ export function init(h) {
   document.getElementById('btn-exit').addEventListener('click', () => hooks.onExit());
   bar.addEventListener('pointermove', markActive);
   prefs.subscribe((_, r) => send('prefs', { prefs: r }));
-  document.addEventListener('visibilitychange', () => current && (document.hidden ? pause() : resume()));
+  document.addEventListener('visibilitychange', () => current && (document.hidden ? pause() : hooks.canResume() && resume()));
 }
 
 /** Abre un juego. Resuelve cuando ya se ve (la pantalla de carga se retiró). */

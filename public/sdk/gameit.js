@@ -18,6 +18,8 @@
  *
  * Funciona igual si el juego se abre suelto (fuera del portal): lee las preferencias
  * guardadas en este dispositivo y exit() navega a "/".
+ * Los errores de JavaScript del juego se avisan solos al portal (como mucho 20 por partida):
+ * si el jugador reporta un problema, se adjuntan a los datos técnicos.
  * Documentación completa: README.md → "Integrar un juego".
  */
 (function () {
@@ -145,6 +147,31 @@
   // otra pestaña/ventana cambió las preferencias (modo suelto)
   window.addEventListener('storage', function (e) {
     if (e.key === 'gameit:prefs:resolved' && !embedded) setPrefs(readLocal());
+  });
+
+  // ---------- errores del juego: el portal los adjunta a "Reportar un problema" si el jugador quiere ----------
+  var logged = 0;
+  function logError(message, source, line, col, stack) {
+    if (!embedded || logged >= 20) return;
+    logged++;
+    post('log', {
+      level: 'error',
+      message: String(message || '').slice(0, 300),
+      source: String(source || '').slice(0, 300),
+      line: +line || 0,
+      col: +col || 0,
+      stack: String(stack || '').slice(0, 1200),
+    });
+  }
+  window.addEventListener('error', function (e) {
+    var el = e.target;
+    // con captura también llegan los archivos que no cargaron (imágenes, audio, scripts)
+    if (el && el !== window && el.tagName) return logError('failed to load ' + el.tagName.toLowerCase(), el.src || el.href, 0, 0, '');
+    logError(e.message, e.filename, e.lineno, e.colno, e.error && e.error.stack);
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e.reason;
+    logError('unhandled rejection: ' + ((r && r.message) || r), '', 0, 0, r && r.stack);
   });
 
   // ---------- actividad (para atenuar la barra del portal cuando no se usa) ----------

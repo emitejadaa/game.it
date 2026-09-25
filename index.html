@@ -44,6 +44,9 @@
             <svg viewBox="0 0 24 24" class="i-lens"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
             <kbd>/</kbd>
           </button>
+          <button class="icon-btn" id="btn-report" data-i18n-title="report.open" aria-controls="report" aria-expanded="false">
+            <svg viewBox="0 0 24 24" class="i-report"><path d="M5 4.5h14a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1h-8.5L6 20v-4H5a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1z" /><path d="M12 7.6v3.8" /><circle cx="12" cy="13.6" r="0.9" fill="currentColor" stroke="none" /></svg>
+          </button>
           <button class="icon-btn" id="btn-prefs" data-i18n-title="prefs.open" aria-controls="prefs" aria-expanded="false">
             <svg viewBox="0 0 24 24" class="i-gear"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" /></svg>
           </button>
@@ -89,14 +92,21 @@
 
       <aside class="prefs" id="prefs" role="dialog" aria-hidden="true" data-i18n-label="prefs.title"></aside>
 
+      <section class="report" id="report" role="dialog" aria-hidden="true" aria-labelledby="report-title" tabindex="-1"></section>
+
       <section class="player" id="player" aria-hidden="true">
         <div class="player-bar">
           <button class="pill-btn" id="btn-exit">
             <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg><span data-i18n="player.exit"></span>
           </button>
-          <button class="icon-btn small" id="btn-player-prefs" data-i18n-title="prefs.open">
-            <svg viewBox="0 0 24 24" class="i-gear"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" /></svg>
-          </button>
+          <div class="player-actions">
+            <button class="icon-btn small" id="btn-player-report" data-i18n-title="report.open" aria-controls="report" aria-expanded="false">
+              <svg viewBox="0 0 24 24" class="i-report"><path d="M5 4.5h14a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1h-8.5L6 20v-4H5a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1z" /><path d="M12 7.6v3.8" /><circle cx="12" cy="13.6" r="0.9" fill="currentColor" stroke="none" /></svg>
+            </button>
+            <button class="icon-btn small" id="btn-player-prefs" data-i18n-title="prefs.open">
+              <svg viewBox="0 0 24 24" class="i-gear"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" /></svg>
+            </button>
+          </div>
         </div>
         <div class="player-stage" id="player-stage"></div>
         <aside class="game-ad" id="game-ad" hidden data-i18n-label="ads.label">

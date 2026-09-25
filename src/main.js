@@ -1,6 +1,7 @@
 import './styles/base.css';
 import './styles/menu.css';
 import './styles/panels.css';
+import './styles/report.css';
 
 import * as prefs from './core/prefs.js';
 import { setLang, t, translateDom } from './core/i18n.js';
@@ -11,6 +12,8 @@ import * as loader from './ui/loader.js';
 import { render, fitNames, enableSpotlight } from './ui/cards.js';
 import * as search from './ui/search.js';
 import * as prefsPanel from './ui/prefs-panel.js';
+import * as report from './ui/report-panel.js';
+import * as diagnostics from './core/diagnostics.js';
 import * as player from './ui/player.js';
 import * as ads from './ui/ads.js';
 import * as gameAds from './ui/game-ads.js';
@@ -38,12 +41,14 @@ function applyLang() {
   setLang(prefs.get().lang);
   translateDom();
   prefsPanel.rerender();
+  report.rerender();
   search.renderChips();
   renderMenu({ animate: false });
 }
 
 // ---------- Navegación (#play/<id>) ----------
 let enteredFromMenu = false;
+let lastPlayed = null; // para que "Reportar un problema" venga con el último juego elegido
 
 async function route() {
   const m = location.hash.match(/^#play\/([\w-]+)(\?[^#]*)?/);
@@ -63,10 +68,13 @@ async function route() {
     if (player.game()?.id === g.id) return;
     search.close();
     prefsPanel.close();
+    report.close();
     track(g.id);
+    lastPlayed = g.id;
     await player.launch(g, m[2] || '');
   } else if (player.isActive()) {
     prefsPanel.close();
+    report.close();
     await player.close(() => renderMenu());
     ads.show();
   }
@@ -97,7 +105,7 @@ document.addEventListener('click', (e) => {
 // ---------- Teclado ----------
 document.addEventListener('keydown', (e) => {
   if (player.isActive()) {
-    if (e.key === 'Escape' && prefsPanel.isOpen()) prefsPanel.close();
+    if (e.key === 'Escape') prefsPanel.isOpen() ? prefsPanel.close() : report.close();
     return;
   }
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
@@ -107,6 +115,7 @@ document.addEventListener('keydown', (e) => {
     search.open();
   } else if (e.key === 'Escape') {
     if (prefsPanel.isOpen()) prefsPanel.close();
+    else if (report.isOpen()) report.close();
     else search.close();
   }
 });
@@ -158,6 +167,7 @@ function preload(onStep) {
 }
 
 async function boot() {
+  diagnostics.listen();
   prefs.init();
   setLang(prefs.get().lang);
   translateDom();
@@ -166,17 +176,36 @@ async function boot() {
   await preload((p) => loader.progress(p * 0.9));
 
   search.init({
-    onToggle: (open) => open && prefsPanel.close(),
+    onToggle: (open) => {
+      if (!open) return;
+      prefsPanel.close();
+      report.close();
+    },
   });
   prefsPanel.init({
     onToggle: (open) => {
-      if (open) search.close();
+      if (open) {
+        search.close();
+        report.close();
+      }
       if (player.isActive()) open ? player.pause() : player.resume();
     },
     onLangChange: applyLang,
     isInGame: player.isActive,
   });
-  player.init({ onExit: exitGame });
+  report.init({
+    onToggle: (open) => {
+      if (open) {
+        search.close();
+        prefsPanel.close();
+      }
+      if (player.isActive()) open ? player.pause() : player.resume();
+    },
+    isInGame: player.isActive,
+    gameId: () => player.game()?.id || lastPlayed,
+  });
+  // con un panel abierto el juego sigue en pausa aunque se vuelva a la pestaña (p. ej. después de buscar el código en el correo)
+  player.init({ onExit: exitGame, canResume: () => !prefsPanel.isOpen() && !report.isOpen() });
   ads.init();
   gameAds.init();
   enableSpotlight(document.body);
@@ -186,8 +215,13 @@ async function boot() {
   });
   enableBackground();
 
-  // Al tocar el iframe de un juego la ventana pierde el foco: se cierra el popup.
-  addEventListener('blur', () => player.isActive() && prefsPanel.close());
+  // Al tocar el iframe de un juego la ventana pierde el foco: se cierra el popup. El reporte solo
+  // se cierra si el foco pasó al juego (no al cambiar de pestaña para buscar el código).
+  addEventListener('blur', () => {
+    if (!player.isActive()) return;
+    prefsPanel.close();
+    setTimeout(() => document.activeElement?.tagName === 'IFRAME' && report.close());
+  });
 
   let lastW = innerWidth;
   let rt = 0;
