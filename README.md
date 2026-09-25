@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball y Ajedrez): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez y Ameba): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -184,5 +184,13 @@ insuficiente, 50 jugadas y triple repetición; verificado con perft). La compu (
 tabla de transposición y búsqueda de quietud) corre en un worker (`ai.js`) con 5 niveles. Online, el servidor valida
 cada jugada con el mismo archivo y lleva el reloj con incremento; la primera jugada de cada lado tiene 30 s o la
 partida se anula. Pista con anuncio opcional (la primera de cada partida es gratis; sin anuncios, todas son gratis).
+
+### Ameba (arena .io)
+
+El mundo (`public/games/ameba/shared/world.js`: comida, división, expulsión de masa, esporas, unión de células)
+y los bots (`shared/bots.js`) corren igual en el servidor y sin conexión, a 25 pasos/s con grilla espacial.
+Online, cada jugador recibe solo lo que tiene cerca más la comida que reapareció; el cliente interpola los
+estados con un retraso que se ajusta al jitter. Juego rápido (se une a la arena pública con más gente o crea una)
+o sala privada con código; los bots completan hasta 18. Revivir con anuncio solo sin conexión.
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

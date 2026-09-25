@@ -1,0 +1,19 @@
+{
+  "id": "ameba",
+  "title": { "es": "Ameba", "en": "Amoeba" },
+  "description": {
+    "es": "Comé, crecé y dividite para cazar en una arena estilo .io. Online con gente y bots, sala privada o sin conexión.",
+    "en": "Eat, grow and split to hunt in an .io-style arena. Online with people and bots, private room or offline."
+  },
+  "categories": ["arcade", "accion", "online", "multijugador", "casual"],
+  "tags": ["io", "agar", "celula", "cell", "blob", "comer", "eat", "crecer", "grow", "arena", "bots", "masa"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 16, "bots": true, "story": false },
+  "order": 13
+}
