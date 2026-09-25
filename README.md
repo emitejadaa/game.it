@@ -210,4 +210,17 @@ y aplica las reglas (`shared/rules.js`), y los dos navegadores animan el mismo t
 dibuja con three.js desde arriba y solo se vuelve a renderizar cuando algo cambia. La compu (`shared/ai.js`, en un
 worker) prueba tiros simulándolos y juega de seguridad si no hay nada claro.
 
+### Drift Neon
+
+Física arcade propia en `public/games/drift/shared/car.js` (paso fijo de 1/120 s): el volante define una velocidad de
+giro que el auto alcanza con inercia y el agarre gira la velocidad hacia la trompa sin crear energía. Para derrapar se
+tira del freno de mano doblando (o se frena/acelera fuerte en plena curva); el acelerador sostiene el derrape, el
+contravolante lo cierra y pasado cierto ángulo es trompo. Nueve pistas largas (`tracks.js`): tres con puntos de control
+y seis trazadas con rectas y curvas de radio exacto (`shared/turtle.js`, que cierra el circuito solo), todas validadas
+para que ningún tramo se pise con otro. La compu (`shared/ai.js`) usa la misma física: sigue una línea de carrera
+calculada, frena antes de las curvas, usa freno de mano en las horquillas y nitro en las rectas (tres niveles).
+Modos: carrera contra hasta 5 autos de la compu, contrarreloj contra el fantasma de tu mejor recorrido de la sesión
+(con parciales), desafío de drift, 2 jugadores en pantalla dividida y online de hasta 6 (el servidor valida los
+tiempos con el largo de cada pista). El fondo se dibuja en mosaicos cacheados, así solo se redibuja lo que se mueve.
+
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.
