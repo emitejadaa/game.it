@@ -23,8 +23,9 @@ import doodle from './games/doodle.js';
 import clashball from './games/clashball.js';
 import chess from './games/chess.js';
 import ameba from './games/ameba.js';
+import serpentina from './games/serpentina.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina };
 /** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
 const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
 

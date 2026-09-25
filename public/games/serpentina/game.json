@@ -1,0 +1,19 @@
+{
+  "id": "serpentina",
+  "title": { "es": "Serpentina", "en": "Serpentine" },
+  "description": {
+    "es": "Guiá tu serpiente de neón, comé orbes, acelerá y hacé que las demás choquen contra vos. Arena online con gente y bots, sala privada o sin conexión.",
+    "en": "Steer your neon snake, eat orbs, boost and make the others crash into you. Online arena with people and bots, private room or offline."
+  },
+  "categories": ["arcade", "accion", "online", "multijugador", "casual"],
+  "tags": ["io", "slither", "snake", "serpiente", "viborita", "gusano", "worm", "neon", "turbo", "boost", "arena", "bots"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 16, "bots": true, "story": false },
+  "order": 14
+}

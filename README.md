@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez y Ameba): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba y Serpentina): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -192,5 +192,13 @@ y los bots (`shared/bots.js`) corren igual en el servidor y sin conexión, a 25 
 Online, cada jugador recibe solo lo que tiene cerca más la comida que reapareció; el cliente interpola los
 estados con un retraso que se ajusta al jitter. Juego rápido (se une a la arena pública con más gente o crea una)
 o sala privada con código; los bots completan hasta 18. Revivir con anuncio solo sin conexión.
+
+### Serpentina (arena .io)
+
+Mismo esquema que Ameba (`public/games/serpentina/shared/`): el mundo corre igual en el servidor y sin conexión.
+El cuerpo de cada serpiente es el rastro de la cabeza muestreado a distancia fija (`grow`), con posiciones y masa
+redondeadas a un decimal: `shared/sync.js` manda el cuerpo entero la primera vez que una serpiente entra en vista y
+después solo la cabeza, y el cliente reconstruye exactamente el mismo cuerpo. La comida se sincroniza por
+casilleros (carga completa al entrar en vista, después solo altas y bajas).
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.
