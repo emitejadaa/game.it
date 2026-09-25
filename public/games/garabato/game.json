@@ -1,0 +1,19 @@
+{
+  "id": "garabato",
+  "title": { "es": "Garabato", "en": "Squiggle" },
+  "description": {
+    "es": "Dibujá y adiviná online: por turnos uno dibuja y los demás escriben la respuesta. Cuanto antes adivinás, más puntos. Salas públicas o privadas, con palabras propias.",
+    "en": "Draw and guess online: one player draws while the others type their guesses. The sooner you guess, the more points. Public or private rooms, with custom words."
+  },
+  "categories": ["palabras", "online", "multijugador", "casual"],
+  "tags": ["dibujar", "draw", "adivinar", "guess", "pictionary", "pizarra", "party", "fiesta", "amigos", "chat"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 10, "story": false },
+  "order": 18
+}

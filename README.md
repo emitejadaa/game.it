@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa y Mecha Corta): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta y Garabato): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -209,6 +209,17 @@ determinista: online el cliente manda el golpe exacto (velocidad y giro iniciale
 y aplica las reglas (`shared/rules.js`), y los dos navegadores animan el mismo tiro y terminan igual. La mesa se
 dibuja con three.js desde arriba y solo se vuelve a renderizar cuando algo cambia. La compu (`shared/ai.js`, en un
 worker) prueba tiros simulándolos y juega de seguridad si no hay nada claro.
+
+### Garabato (dibujar y adivinar)
+
+Online de 2 a 10: por turnos uno elige entre tres palabras y la dibuja; los demás escriben en el chat. Acertar da más
+puntos cuanto antes (con un plus al primero) y el que dibuja suma una parte de lo que ganan los demás. Con el tiempo se
+revelan letras; si una respuesta está a una letra, solo esa persona ve "¡casi!", y los que ya adivinaron charlan entre
+ellos sin arruinar la palabra. El servidor (`server/games/garabato.js`) lleva turnos, tiempos y puntos y reenvía el
+dibujo como operaciones chicas (trazos, relleno, deshacer, borrar); quien entra tarde o se reconecta recibe el dibujo
+en curso. Hoja fija de 1000×750 para que el relleno con balde dé igual en todos los navegadores. Salas públicas
+(aparecen en la lista y en "Partida rápida") o privadas, con palabras propias. Listas de palabras propias en
+`public/games/garabato/shared/words.js` (español e inglés).
 
 ### Mecha Corta (palabras)
 
