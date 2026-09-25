@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Billar · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <canvas id="gl"></canvas>
+    <canvas id="ov"></canvas>
+
+    <!-- ============ HUD ============ -->
+    <div class="hud" id="hud" hidden>
+      <div class="players">
+        <div class="pl" id="pl0"><i class="av"></i><div class="who"><b class="nm"></b><span class="grp"></span></div><svg class="ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" /></svg></div>
+        <div class="vs">VS</div>
+        <div class="pl right" id="pl1"><i class="av"></i><div class="who"><b class="nm"></b><span class="grp"></span></div><svg class="ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" /></svg></div>
+      </div>
+      <p class="msg" id="msg"></p>
+      <div class="power" id="power"><div class="track"><i class="fill" id="power-fill"></i><b class="knob" id="power-knob"></b></div><small data-t="power"></small></div>
+      <div class="fine" id="fine" aria-label="Ajuste fino"><i></i></div>
+      <button class="spin-btn" id="spin-btn" aria-label="Efecto"><span class="cb"><i id="spin-dot"></i></span><small data-t="spin"></small></button>
+      <button class="hud-btn" id="btn-menu" aria-label="Menú"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" /></svg></button>
+    </div>
+
+    <!-- efecto -->
+    <div class="spin-pop" id="spin-pop" hidden>
+      <div class="spin-card">
+        <b data-t="spinTitle"></b>
+        <div class="bigball" id="bigball"><i id="bigdot"></i></div>
+        <p class="sub" data-t="spinHelp"></p>
+        <div class="row"><button class="btn ghost" id="spin-reset" data-t="center"></button><button class="btn primary" id="spin-ok" data-t="ok"></button></div>
+      </div>
+    </div>
+
+    <!-- ============ Inicio ============ -->
+    <section class="screen on" id="s-home">
+      <div class="panel">
+        <div class="logo" aria-hidden="true"><i class="b1"><span>1</span></i><i class="b8"><span>8</span></i><i class="b9"><span>9</span></i></div>
+        <h1 data-t="title"></h1>
+        <p class="sub" data-t="tagline"></p>
+        <nav class="menu">
+          <button class="item" data-go="cpu"><b data-t="vsCpu"></b><small data-t="vsCpuSub"></small></button>
+          <button class="item" data-go="local"><b data-t="local"></b><small data-t="localSub"></small></button>
+          <button class="item" data-go="online"><b data-t="online"></b><small data-t="onlineSub"></small></button>
+        </nav>
+        <div class="felts" id="felts"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="s-cpu">
+      <div class="panel">
+        <h2 data-t="vsCpu"></h2>
+        <span class="lbl" data-t="level"></span>
+        <div class="seg" id="cpu-level"></div>
+        <button class="btn primary" id="cpu-go" data-t="play"></button>
+        <button class="back" data-go="home" data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-online">
+      <div class="panel">
+        <h2 data-t="online"></h2>
+        <span class="lbl" data-t="yourName"></span>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+        <button class="btn primary" id="on-create" data-t="create"></button>
+        <p class="sub" data-t="orJoin"></p>
+        <form class="row" id="on-join" autocomplete="off"><input class="field code" id="on-code" maxlength="5" placeholder="ABCDE" /><button class="btn" data-t="join"></button></form>
+        <p class="status" id="on-status"></p>
+        <button class="back" data-go="home" data-t="back"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-lobby">
+      <div class="panel">
+        <p class="sub" data-t="shareCode"></p>
+        <button class="bigcode" id="lobby-code">-----</button>
+        <button class="btn" id="lobby-share" data-t="copyLink"></button>
+        <ul class="plist" id="lobby-players"></ul>
+        <button class="btn primary" id="lobby-start" data-t="start"></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="back" id="lobby-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-pause">
+      <div class="panel">
+        <h2 data-t="menu"></h2>
+        <button class="btn primary" id="pz-resume" data-t="resume"></button>
+        <button class="btn" id="pz-rules" data-t="rules"></button>
+        <button class="btn ghost" id="pz-quit" data-t="quit"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-rules">
+      <div class="panel rules">
+        <h2 data-t="rules"></h2>
+        <ul id="rules-list"></ul>
+        <button class="btn primary" id="rules-ok" data-t="ok"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-over">
+      <div class="panel">
+        <p class="kicker" id="over-kicker"></p>
+        <h2 id="over-title"></h2>
+        <p class="sub" id="over-sub"></p>
+        <button class="btn primary" id="over-again"></button>
+        <button class="btn ghost" id="over-menu" data-t="menuBtn"></button>
+      </div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

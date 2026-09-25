@@ -20,7 +20,7 @@ button { cursor: pointer; }
 body.playing #cv { cursor: crosshair; }
 
 /* ---------------- pantallas ---------------- */
-.screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 60px 16px 20px; overflow-y: auto; background: color-mix(in oklab, var(--bg) 42%, transparent); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: opacity 0.35s var(--ease), visibility 0s linear 0.35s; z-index: 10; touch-action: auto; }
+.screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 60px 16px 20px; overflow-y: auto; background: color-mix(in oklab, var(--bg) 62%, transparent); opacity: 0; visibility: hidden; transition: opacity 0.35s var(--ease), visibility 0s linear 0.35s; z-index: 10; touch-action: auto; }
 .screen.on { opacity: 1; visibility: visible; transition: opacity 0.35s var(--ease); }
 .panel { width: min(400px, 100%); display: grid; gap: 11px; text-align: center; background: var(--glass); border: 1px solid var(--line); border-radius: 26px; padding: 24px 20px; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.7); transform: translateY(14px) scale(0.98); transition: transform 0.5s var(--spring); }
 .screen.on .panel { transform: none; }

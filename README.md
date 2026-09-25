@@ -11,7 +11,7 @@ npm run preview  # prueba el build
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba y Serpentina): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina y Billar): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -200,5 +200,14 @@ El cuerpo de cada serpiente es el rastro de la cabeza muestreado a distancia fij
 redondeadas a un decimal: `shared/sync.js` manda el cuerpo entero la primera vez que una serpiente entra en vista y
 después solo la cabeza, y el cliente reconstruye exactamente el mismo cuerpo. La comida se sincroniza por
 casilleros (carga completa al entrar en vista, después solo altas y bajas).
+
+### Billar (bola 8)
+
+Física propia en `public/games/billar/shared/physics.js`: paso fijo de 1/600 s con deslizamiento y rodadura
+(efecto arriba, abajo y lateral), choques elásticos, bandas con mandíbulas y troneras. Solo usa + − × ÷ √, así que es
+determinista: online el cliente manda el golpe exacto (velocidad y giro iniciales), el servidor lo valida, lo simula
+y aplica las reglas (`shared/rules.js`), y los dos navegadores animan el mismo tiro y terminan igual. La mesa se
+dibuja con three.js desde arriba y solo se vuelve a renderizar cuando algo cambia. La compu (`shared/ai.js`, en un
+worker) prueba tiros simulándolos y juega de seguridad si no hay nada claro.
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

@@ -1,0 +1,19 @@
+{
+  "id": "billar",
+  "title": { "es": "Billar", "en": "Billiards" },
+  "description": {
+    "es": "Bola 8 en una mesa 3D con física real: efecto, retroceso y bandas. Contra la compu, de a dos u online.",
+    "en": "8-ball on a 3D table with real physics: spin, draw and banks. Versus CPU, two players or online."
+  },
+  "categories": ["deporte", "clasicos", "online", "multijugador", "estrategia"],
+  "tags": ["pool", "billar", "bola 8", "8 ball", "snooker", "taco", "cue", "mesa", "3d", "física", "2 jugadores"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "three.js + web worker",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 2, "localPlayers": 2, "cpu": true, "story": false },
+  "order": 15
+}
