@@ -1,0 +1,20 @@
+{
+  "id": "padel",
+  "title": { "es": "La Cabra · Pádel", "en": "La Cabra · Padel" },
+  "description": {
+    "es": "Pádel 2 contra 2 en la pista, con cristal, malla, bandeja, víbora y remates por 3. Jugá contra la compu o en línea con amigos (los lugares vacíos los juegan bots). Tres escenarios: pabellón, exterior y club.",
+    "en": "2 vs 2 padel on court with glass walls, fences, bandejas, víboras and smashes out of the court. Play the CPU or online with friends (bots fill empty spots). Three venues: arena, outdoor and club."
+  },
+  "categories": ["deporte", "online", "multijugador"],
+  "tags": ["padel", "pádel", "tenis", "raqueta", "pala", "2v2", "deporte", "cabra", "bots"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 4, "story": false },
+  "credits": "Basado en LA CABRA · Pádel de LucasPar08 (github.com/LucasPar08/la-cabra-padel)",
+  "order": 20
+}

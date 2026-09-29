@@ -31,7 +31,7 @@ Hay una plantilla lista en [`templates/juego-base/`](templates/juego-base/) y `n
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato y Teléfono Loco): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco y La Cabra · Pádel): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -231,6 +231,19 @@ así nada se pierde si se acaba el tiempo o se corta la conexión; si alguien no
 anfitrión o solos), con los dibujos repitiéndose trazo a trazo, reacciones y la opción de guardar cada álbum como una
 imagen. Opciones: tiempos de dibujo y de escritura, largo de las cadenas, idioma de las frases y sala pública o
 privada. Frases en `public/games/telefono/shared/prompts.js`; la hoja y el balde en `paper.js`.
+
+### La Cabra · Pádel
+
+Adaptación del partido de [LA CABRA · Pádel](https://github.com/LucasPar08/la-cabra-padel) de LucasPar08: solo el partido
+(sin carrera ni modo historia), con los tres escenarios (pabellón, exterior y club), la cámara de tele o desde arriba y
+las opciones de dificultad, estilo de los rivales, juegos por set (3, 4 o 6), 1 set o al mejor de 3, lado (revés o
+drive), asistencia, golpe automático, mano, tamaño de los botones y colores. El motor (`public/games/padel/shared/engine.js`:
+paso fijo de 1/120 s, cristal y malla, salidas por 3 y por 4, punto de oro, tie-break, la IA de pareja y rivales) es el
+mismo en el navegador y en el servidor. Contra la compu, vos y tu pareja contra dos rivales. Online de 2 a 4
+(`server/games/padel.js`): se arman los equipos en la sala, los lugares vacíos los juega la compu, el servidor simula a
+60 ticks/s y manda el estado 30 veces por segundo con los golpes y botes como eventos; el cliente dibuja con 70 ms de
+retraso e interpola. Si alguien se va o se corta, un bot sigue en su lugar hasta que vuelve. Nombres de jugadores y
+equipos inventados.
 
 ### Mecha Corta (palabras)
 

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>La Cabra · Pádel · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <canvas id="lienzo"></canvas>
+
+    <!-- en la pista -->
+    <section id="juego" hidden>
+      <div id="hud" class="marcador">
+        <div class="fila yo"><span class="saca" id="sacaYo"></span><span class="nom" id="nomYo"></span><span class="sets" id="setsYo"></span><span class="jg" id="jgYo">0</span><span class="pt" id="ptYo">0</span></div>
+        <div class="fila el"><span class="saca" id="sacaEl"></span><span class="nom" id="nomEl"></span><span class="sets" id="setsEl"></span><span class="jg" id="jgEl">0</span><span class="pt" id="ptEl">0</span></div>
+      </div>
+      <div id="rotulo"></div>
+      <div id="aviso"></div>
+      <div id="ayuda" hidden></div>
+      <div id="controles">
+        <div id="joy"><div id="joyKnob"></div></div>
+        <button class="accion" data-accion="dejada" id="bDejada"><i>🪶</i><span data-t="dejada"></span></button>
+        <button class="accion" data-accion="globo" id="bGlobo"><i>☂️</i><span data-t="globo"></span></button>
+        <button class="accion" data-accion="remate" id="bRemate"><i>💥</i><span data-t="remate"></span></button>
+        <button class="accion" data-accion="golpe" id="bGolpe"><i>🎾</i><span data-t="golpe"></span></button>
+      </div>
+      <div id="teclas"></div>
+      <button id="bPausa" aria-label="pausa">II</button>
+    </section>
+
+    <!-- portada -->
+    <section class="screen on" id="s-home">
+      <div class="card">
+        <div class="logo"><small>LA CABRA</small><b>PÁDEL</b></div>
+        <p class="sub" data-t="tagline"></p>
+        <button class="btn" data-go="setup"><span data-t="vsCpu"></span><small data-t="vsCpuSub"></small></button>
+        <button class="btn alt" data-go="online"><span data-t="online"></span><small data-t="onlineSub"></small></button>
+        <div class="row2"><button class="link" data-go="ajustes" data-t="ajustes"></button><button class="link" data-go="guia" data-t="como"></button></div>
+      </div>
+    </section>
+
+    <!-- partido contra la compu -->
+    <section class="screen" id="s-setup">
+      <div class="card wide">
+        <h2 data-t="vsCpu"></h2>
+        <div class="opts">
+          <div class="opt full"><span class="lbl" data-t="escenario"></span><div class="escenas" data-o="escena"></div></div>
+          <div class="opt"><span class="lbl" data-t="dificultad"></span><div class="seg" data-o="dif"><button data-v="facil" data-t="facil"></button><button data-v="normal" data-t="normal"></button><button data-v="dificil" data-t="dificil"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="rivales"></span><div class="seg wrap" data-o="arq"></div></div>
+          <div class="opt"><span class="lbl" data-t="juegos"></span><div class="seg" data-o="juegos"><button data-v="3">3</button><button data-v="4">4</button><button data-v="6">6</button></div></div>
+          <div class="opt"><span class="lbl" data-t="sets"></span><div class="seg" data-o="sets"><button data-v="1" data-t="set1"></button><button data-v="3" data-t="set3"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="posicion"></span><div class="seg" data-o="posicion"><button data-v="reves" data-t="reves"></button><button data-v="drive" data-t="drive"></button></div></div>
+        </div>
+        <p class="note" id="setup-note"></p>
+        <button class="btn" id="b-jugar" data-t="jugar"></button>
+        <button class="link" data-go="home" data-t="volver"></button>
+      </div>
+    </section>
+
+    <!-- ajustes -->
+    <section class="screen" id="s-ajustes">
+      <div class="card wide">
+        <h2 data-t="ajustes"></h2>
+        <div class="opts">
+          <div class="opt"><span class="lbl" data-t="camara"></span><div class="seg" data-p="vista"><button data-v="tv" data-t="camTv"></button><button data-v="arriba" data-t="camArriba"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="asistencia"></span><div class="seg" data-p="asistencia"><button data-v="1" data-t="si"></button><button data-v="0" data-t="no"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="golpeAuto"></span><div class="seg" data-p="golpeAuto"><button data-v="1" data-t="si"></button><button data-v="0" data-t="no"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="botones"></span><div class="seg" data-p="tamBotones"><button data-v="0.85">S</button><button data-v="1">M</button><button data-v="1.2">L</button></div></div>
+          <div class="opt"><span class="lbl" data-t="mano"></span><div class="seg" data-p="zurdo"><button data-v="0" data-t="diestro"></button><button data-v="1" data-t="zurdo"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="joyLado"></span><div class="seg" data-p="joyDer"><button data-v="0" data-t="izquierda"></button><button data-v="1" data-t="derecha"></button></div></div>
+          <div class="opt full"><span class="lbl" data-t="camiseta"></span><div class="muestras" data-c="camiseta"></div></div>
+          <div class="opt full"><span class="lbl" data-t="pala"></span><div class="muestras" data-c="pala"></div></div>
+        </div>
+        <p class="note" data-t="ajustesNota"></p>
+        <button class="btn" data-go="home" data-t="listo"></button>
+      </div>
+    </section>
+
+    <!-- cómo se juega -->
+    <section class="screen" id="s-guia">
+      <div class="card wide">
+        <h2 data-t="como"></h2>
+        <div class="guia" id="guia"></div>
+        <button class="btn" data-go="home" data-t="volver"></button>
+      </div>
+    </section>
+
+    <!-- en línea -->
+    <section class="screen" id="s-online">
+      <div class="card">
+        <h2 data-t="online"></h2>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+        <button class="btn" id="on-create" data-t="crear"></button>
+        <div class="row"><input class="field code-in" id="on-code" maxlength="5" autocomplete="off" placeholder="ABCDE" /><button class="btn alt" id="on-join" data-t="unirse"></button></div>
+        <p class="status" id="on-status"></p>
+        <button class="link" data-go="home" data-t="volver"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-lobby">
+      <div class="card wide">
+        <span class="lbl center" data-t="compartiCodigo"></span>
+        <div class="code" id="lobby-code">-----</div>
+        <button class="btn alt" id="lobby-share" data-t="copiarLink"></button>
+        <div class="equipos" id="lobby-equipos"></div>
+        <p class="note" data-t="botsNota"></p>
+        <div class="opts" id="lobby-opts">
+          <div class="opt full"><span class="lbl" data-t="escenario"></span><div class="escenas" data-l="escena"></div></div>
+          <div class="opt"><span class="lbl" data-t="nivelBots"></span><div class="seg" data-l="dif"><button data-v="facil" data-t="facil"></button><button data-v="normal" data-t="normal"></button><button data-v="dificil" data-t="dificil"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="juegos"></span><div class="seg" data-l="juegos"><button data-v="3">3</button><button data-v="4">4</button><button data-v="6">6</button></div></div>
+          <div class="opt"><span class="lbl" data-t="sets"></span><div class="seg" data-l="sets"><button data-v="1" data-t="set1"></button><button data-v="3" data-t="set3"></button></div></div>
+        </div>
+        <button class="btn" id="lobby-start" data-t="empezar"></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="link" id="lobby-leave" data-t="salirSala"></button>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-pausa">
+      <div class="card">
+        <h2 data-t="pausa"></h2>
+        <p class="sub" id="pausa-info"></p>
+        <button class="btn" id="p-seguir" data-t="seguir"></button>
+        <button class="btn alt" id="p-reiniciar" data-t="reiniciar"></button>
+        <button class="link" id="p-salir" data-t="menu"></button>
+        <div class="guia mini" id="pausa-guia"></div>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-fin">
+      <div class="card">
+        <h2 class="big" id="fin-titulo"></h2>
+        <div class="resultado" id="fin-sets"></div>
+        <div class="stats" id="fin-stats"></div>
+        <button class="btn" id="fin-otra" data-t="revancha"></button>
+        <button class="btn alt" id="fin-sala" data-t="volverSala" hidden></button>
+        <p class="note" id="fin-nota"></p>
+        <div class="row2"><button class="link" id="fin-cambiar" data-t="cambiar"></button><button class="link" id="fin-menu" data-t="menu"></button></div>
+      </div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
