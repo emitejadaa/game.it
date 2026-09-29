@@ -118,7 +118,12 @@ function makeApi(room) {
         name,
         setTimeout(() => {
           room.timers.delete(name);
-          if (rooms.get(room.code) === room) fn();
+          if (rooms.get(room.code) !== room) return;
+          try {
+            fn();
+          } catch (e) {
+            log('error', room.game, room.code, 'timer', name, e?.stack || e);
+          }
         }, Math.max(0, ms)),
       );
     },
@@ -420,7 +425,12 @@ wss.on('connection', (ws, req) => {
   ws.on('pong', () => (ws.alive = true));
   ws.on('message', (data, isBinary) => {
     if (isBinary) return ws.close(1003, 'binary');
-    onMessage(ws, data.toString());
+    try {
+      onMessage(ws, data.toString());
+    } catch (e) {
+      // un error en el módulo de un juego no tira abajo las demás salas
+      log('error', ws.room?.game, ws.room?.code, e?.stack || e);
+    }
   });
   ws.on('close', () => {
     const n = (ipConns.get(ws.ip) || 1) - 1;
