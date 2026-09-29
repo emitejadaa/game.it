@@ -50,8 +50,6 @@ Todos llevan la etiqueta "Publicidad" y los banners se pueden ocultar (24 h). Nu
 mientras se juega ni durante un partido online en curso. Stack no muestra banners (se toca en cualquier parte de la
 pantalla y habría clics sin querer). Con `?ads=preview` se ven todos los espacios simulados, sin pedir anuncios.
 
-**Paso a paso para configurar AdSense (dominio, verificación, pagos, bloques, H5 Games Ads): [ANUNCIOS.md](ANUNCIOS.md).**
-
 ## Cómo está armado
 
 
