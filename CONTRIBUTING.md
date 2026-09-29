@@ -2,7 +2,9 @@
 
 game.it es un portal de juegos web: cada juego vive en su carpeta `public/games/<id>/` y el portal lo abre en
 un iframe. Para sumar un juego no hace falta permiso de escritura en el repositorio: hacés un **fork**, subís tu
-juego ahí y abrís un **pull request**. El dueño lo revisa, lo mergea y se publica solo.
+juego ahí y abrís un **pull request**. Después se revisa, se prueba y, si está todo bien, se publica solo.
+
+En resumen: **cumplí los requisitos (sección 1) y seguí los pasos (sección 2)**. Nada más.
 
 ---
 
@@ -115,8 +117,9 @@ Necesitás una cuenta de GitHub, [Git](https://git-scm.com/) y [Node.js 20 o má
 8. **Abrí el pull request.** En tu fork aparece el botón **Compare & pull request**. Destino: `emitejadaa/game.it`,
    rama `main`. Completá la lista que aparece, **dejá tildado "Allow edits by maintainers"** y tocá **Create pull
    request**.
-9. **Esperá la revisión.** GitHub corre la revisión automática ("Revisar juegos"). Si pide cambios, hacelos en la
-   misma rama y volvé a hacer `git push`: el pull request se actualiza solo.
+9. **Esperá la revisión.** GitHub corre la revisión automática ("Revisar juegos") y después se revisa a mano.
+   Si piden cambios, hacelos en la misma rama y volvé a hacer `git push`: el pull request se actualiza solo.
+   Cuando se aprueba, se mergea y el juego aparece en el portal en unos minutos.
 
 Para el próximo juego o para actualizar uno, primero traé lo último del repositorio original:
 
@@ -130,22 +133,6 @@ git checkout -b juego/otro-juego
 
 ## 3. Si tu juego ya está en otro repositorio
 
-La forma más simple sigue siendo el pull request (paso 2), copiando tus archivos a `public/games/<id>/`. Si
-preferís pasar el link de tu repositorio para que se integre desde ahí, tiene que ser **público**. Si es privado,
-no alcanza con agregar a alguien como colaborador: tenés que instalar la app de GitHub de Claude en tu cuenta
-(<https://github.com/apps/claude>, elegir ese repositorio) o hacer un fork a la cuenta del dueño del portal.
-
----
-
-## 4. Para el dueño del repositorio
-
-- **No hace falta darles permisos.** El repositorio es público: cualquiera puede hacer fork y pull request, y solo
-  vos podés mergear. No los agregues como colaboradores (en un repositorio personal eso les da permiso de
-  escritura).
-- La primera vez que alguien abre un pull request, GitHub puede pedirte **"Approve and run workflows"** para
-  correr la revisión automática: aprobalo después de mirar que el cambio sea solo su juego.
-- Para revisarlo y publicarlo, en una sesión de Claude Code con este repositorio pedí: **"revisá y mergeá el PR
-  #N de game.it"**. Se revisa el código y la seguridad, se prueba en computadora y celular, se arreglan los
-  detalles (por eso el "Allow edits by maintainers") y se mergea a `main`. Render publica solo.
-- Opcional: en **Settings → Rules → Rulesets** podés proteger `main` contra borrado y force push sin cambiar nada
-  más.
+Lo más simple sigue siendo el pull request (paso 2): copiás tus archivos (o tu build) a `public/games/<id>/`.
+Si en cambio querés pasar el link de tu repositorio para que lo integren desde ahí, el repositorio tiene que ser
+**público** y respetar los requisitos de la sección 1.

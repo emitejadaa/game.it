@@ -9,6 +9,26 @@ npm run build    # sitio estático en dist/ (se puede subir a Vercel, Netlify, G
 npm run preview  # prueba el build
 ```
 
+## ¿Querés sumar tu juego?
+
+No hace falta permiso de escritura: hacés un fork, agregás tu juego y abrís un pull request. **Todo el proceso está en
+[CONTRIBUTING.md](CONTRIBUTING.md).** Lo que tiene que cumplir el juego, en corto:
+
+1. Corre en el navegador (HTML/JS, canvas, WebGL, Phaser, three.js, export web de Godot/Unity…), sin instalar nada.
+2. Vive en `public/games/<id>/` con `index.html`, `game.json` y una miniatura 16:10, y usa **rutas relativas**.
+3. Usa el SDK (`/sdk/gameit.js`): `GameIt.ready()`, `GameIt.gameplay(true/false)` y pausa con `onPause`/`onResume`.
+4. Textos en español e inglés.
+5. Funciona en celular (desde 360 px) y en computadora, sin scroll y dejando libres los 56 px de arriba.
+6. Va fluido (60 fps) y es liviano (idealmente menos de 15 MB).
+7. Respeta volumen, "reducir movimiento" y teclado (flechas/WASD) del portal; el sonido arranca con el primer toque.
+8. Código, dibujos y sonidos propios o con licencia libre; nada de marcas ni personajes de otros.
+9. Sin cuentas, anuncios propios ni trackers; lo que guarde, con el prefijo `gameit:<id>:`.
+10. Online opcional, con el servidor del portal (`server/games/<id>.js`).
+
+Hay una plantilla lista en [`templates/juego-base/`](templates/juego-base/) y `npm run check -- <id>` dice qué falta.
+
+## Publicación
+
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
 - Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato y Teléfono Loco): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
@@ -68,9 +88,8 @@ public/
 
 ## Integrar un juego
 
-> **¿Sos parte del equipo y querés sumar un juego?** Seguí la guía paso a paso en
-> [`docs/INTEGRAR-UN-JUEGO.md`](docs/INTEGRAR-UN-JUEGO.md) (requisitos, plantilla en `templates/juego-base/`,
-> fork y pull request). `npm run check` revisa que el juego se pueda integrar.
+> **¿Querés sumar un juego al portal?** Seguí [CONTRIBUTING.md](CONTRIBUTING.md) (requisitos, plantilla, fork y pull
+> request). Lo que sigue es la referencia técnica.
 
 1. Crear `public/games/<id>/` con el juego ya compilado (su `index.html` y archivos).
 2. Agregar `public/games/<id>/game.json`:
