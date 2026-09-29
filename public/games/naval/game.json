@@ -1,0 +1,19 @@
+{
+  "id": "naval",
+  "title": { "es": "Batalla Naval", "en": "Sea Battle" },
+  "description": {
+    "es": "Escondé tu flota y hundí la del rival antes de que encuentre la tuya. Contra la compu en tres niveles u online 1 contra 1, con sonar, bomba y torpedo, modo salva y mares de 8×8 a 12×12.",
+    "en": "Hide your fleet and sink theirs before they find yours. Against the CPU on three levels or online 1 vs 1, with sonar, bomb and torpedo, salvo mode and 8×8 to 12×12 seas."
+  },
+  "categories": ["estrategia", "clasicos", "online", "multijugador"],
+  "tags": ["batalla naval", "barcos", "flota", "sea battle", "hundir la flota", "2 jugadores", "tablero"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 2, "story": false },
+  "order": 21
+}

@@ -31,7 +31,7 @@ Hay una plantilla lista en [`templates/juego-base/`](templates/juego-base/) y `n
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco y La Cabra · Pádel): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel y Batalla Naval): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -244,6 +244,19 @@ mismo en el navegador y en el servidor. Contra la compu, vos y tu pareja contra 
 60 ticks/s y manda el estado 30 veces por segundo con los golpes y botes como eventos; el cliente dibuja con 70 ms de
 retraso e interpola. Si alguien se va o se corta, un bot sigue en su lugar hasta que vuelve. Nombres de jugadores y
 equipos inventados.
+
+### Batalla Naval
+
+Contra la compu u online 1 contra 1. Reglas en `public/games/naval/shared/rules.js` (las mismas en el navegador y en
+el servidor): mares de 8×8, 10×10 o 12×12 con flotas de 4, 5 o 7 barcos, barcos que se tocan o no (si no, al hundir
+uno se marca el agua de alrededor), tiro extra al acertar, modo salva (tantos disparos como barcos a flote) y armas
+especiales de un solo uso: sonar (muestra los barcos de un 3×3), bomba (5 casillas en cruz) y torpedo (recorre una
+fila o columna y explota en el primer barco). La compu (`shared/ia.js`) tiene tres niveles: al azar con algo de
+seguimiento, caza en damero siguiendo la línea de los tocados, y mapa de probabilidad de todas las posiciones
+posibles de los barcos que quedan, usando las armas cuando convienen. Online (`server/games/naval.js`) la flota de
+cada uno nunca sale del servidor hasta el final; cada turno tiene tiempo (20, 30 o 60 s; si se acaba, tiro al azar),
+se alterna quién empieza y se puede reaccionar con emojis. Todo se dibuja en canvas (barcos vistos desde arriba,
+fuego, humo, piques, sonar y torpedos) y en celulares vertical el mar que recibe el disparo se agranda.
 
 ### Mecha Corta (palabras)
 

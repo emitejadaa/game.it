@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Batalla Naval · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&family=Saira+Stencil+One&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <canvas id="lienzo"></canvas>
+
+    <!-- en la mesa de mando -->
+    <section id="juego" hidden>
+      <div id="banner"><span id="turno"></span><span id="reloj" hidden></span></div>
+      <button id="bMenu" aria-label="menú">II</button>
+      <div id="aviso"></div>
+      <p id="pista"></p>
+      <!-- colocar la flota -->
+      <div class="barra" id="barra-colocar">
+        <button class="accion" id="b-azar"><i>🎲</i><span data-t="azar"></span></button>
+        <button class="accion" id="b-girar"><i>↻</i><span data-t="girar"></span></button>
+        <button class="fuego" id="b-listo" data-t="listo"></button>
+      </div>
+      <!-- batalla -->
+      <div class="barra" id="barra-batalla">
+        <div class="armas" id="armas">
+          <button class="arma" data-arma="tiro"><i>🎯</i><span data-t="canon"></span></button>
+          <button class="arma" data-arma="sonar"><i>📡</i><span data-t="sonar"></span></button>
+          <button class="arma" data-arma="bomba"><i>💣</i><span data-t="bomba"></span></button>
+          <button class="arma" data-arma="torpedo"><i>🚀</i><span data-t="torpedo"></span><b class="rumbo" id="rumbo"></b></button>
+        </div>
+        <button class="fuego" id="b-fuego" data-t="fuego" hidden></button>
+      </div>
+      <div id="reacciones" hidden>
+        <button id="b-react" aria-label="reacciones">😀</button>
+        <div id="react-menu" hidden></div>
+      </div>
+      <div id="burbujas"></div>
+      <button class="volverFin" id="b-verFin" hidden data-t="verResultado"></button>
+    </section>
+
+    <!-- portada -->
+    <section class="screen on" id="s-home">
+      <div class="card">
+        <div class="logo" aria-label="Batalla Naval"><span class="radar"><i></i></span><b data-t="titulo1"></b><small data-t="titulo2"></small></div>
+        <p class="sub" data-t="tagline"></p>
+        <button class="btn" data-go="setup"><span data-t="vsCpu"></span><small data-t="vsCpuSub"></small></button>
+        <button class="btn alt" data-go="online"><span data-t="online"></span><small data-t="onlineSub"></small></button>
+        <button class="link" data-go="guia" data-t="como"></button>
+      </div>
+    </section>
+
+    <!-- contra la compu -->
+    <section class="screen" id="s-setup">
+      <div class="card wide">
+        <h2 data-t="vsCpu"></h2>
+        <div class="opts" id="setup-opts">
+          <div class="opt"><span class="lbl" data-t="dificultad"></span><div class="seg" data-o="dif"><button data-v="facil" data-t="facil"></button><button data-v="normal" data-t="normal"></button><button data-v="dificil" data-t="dificil"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="mar"></span><div class="seg" data-o="mar"><button data-v="chico">8×8</button><button data-v="clasico">10×10</button><button data-v="grande">12×12</button></div></div>
+          <div class="opt"><span class="lbl" data-t="modo"></span><div class="seg" data-o="modo"><button data-v="clasico" data-t="clasico"></button><button data-v="salva" data-t="salva"></button></div></div>
+          <div class="opt solo-clasico"><span class="lbl" data-t="extra"></span><div class="seg" data-o="extra"><button data-v="1" data-t="si"></button><button data-v="0" data-t="no"></button></div></div>
+          <div class="opt solo-clasico"><span class="lbl" data-t="armasEsp"></span><div class="seg" data-o="armas"><button data-v="1" data-t="si"></button><button data-v="0" data-t="no"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="pegados"></span><div class="seg" data-o="tocar"><button data-v="0" data-t="noTocan"></button><button data-v="1" data-t="siTocan"></button></div></div>
+        </div>
+        <p class="note" id="setup-nota"></p>
+        <button class="btn" id="b-jugar" data-t="jugar"></button>
+        <button class="link" data-go="home" data-t="volver"></button>
+      </div>
+    </section>
+
+    <!-- cómo se juega -->
+    <section class="screen" id="s-guia">
+      <div class="card wide">
+        <h2 data-t="como"></h2>
+        <div class="guia" id="guia"></div>
+        <button class="btn" data-go="home" data-t="volver"></button>
+      </div>
+    </section>
+
+    <!-- online -->
+    <section class="screen" id="s-online">
+      <div class="card">
+        <h2 data-t="online"></h2>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" />
+        <button class="btn" id="on-create" data-t="crear"></button>
+        <div class="row"><input class="field code-in" id="on-code" maxlength="5" autocomplete="off" placeholder="ABCDE" /><button class="btn alt" id="on-join" data-t="unirse"></button></div>
+        <p class="status" id="on-status"></p>
+        <button class="link" data-go="home" data-t="volver"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="s-lobby">
+      <div class="card wide">
+        <span class="lbl center" data-t="compartiCodigo"></span>
+        <div class="code" id="lobby-code">-----</div>
+        <button class="btn alt" id="lobby-share" data-t="copiarLink"></button>
+        <div class="duelo" id="lobby-jugadores"></div>
+        <div class="opts" id="lobby-opts">
+          <div class="opt"><span class="lbl" data-t="mar"></span><div class="seg" data-l="mar"><button data-v="chico">8×8</button><button data-v="clasico">10×10</button><button data-v="grande">12×12</button></div></div>
+          <div class="opt"><span class="lbl" data-t="modo"></span><div class="seg" data-l="modo"><button data-v="clasico" data-t="clasico"></button><button data-v="salva" data-t="salva"></button></div></div>
+          <div class="opt solo-clasico"><span class="lbl" data-t="extra"></span><div class="seg" data-l="extra"><button data-v="1" data-t="si"></button><button data-v="0" data-t="no"></button></div></div>
+          <div class="opt solo-clasico"><span class="lbl" data-t="armasEsp"></span><div class="seg" data-l="armas"><button data-v="1" data-t="si"></button><button data-v="0" data-t="no"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="pegados"></span><div class="seg" data-l="tocar"><button data-v="0" data-t="noTocan"></button><button data-v="1" data-t="siTocan"></button></div></div>
+          <div class="opt"><span class="lbl" data-t="tiempo"></span><div class="seg" data-l="tiempo"><button data-v="20">20 s</button><button data-v="30">30 s</button><button data-v="60">60 s</button></div></div>
+        </div>
+        <p class="note" id="lobby-nota"></p>
+        <button class="btn" id="lobby-start" data-t="empezar"></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="link" id="lobby-leave" data-t="salirSala"></button>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-pausa">
+      <div class="card">
+        <h2 data-t="pausa"></h2>
+        <p class="sub" id="pausa-info"></p>
+        <button class="btn" id="p-seguir" data-t="seguir"></button>
+        <button class="btn alt" id="p-rendirse" data-t="rendirse"></button>
+        <button class="link" id="p-salir" data-t="menu"></button>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-fin">
+      <div class="card">
+        <h2 class="big" id="fin-titulo"></h2>
+        <p class="sub" id="fin-sub"></p>
+        <table class="stats" id="fin-stats"></table>
+        <button class="btn" id="fin-otra" data-t="revancha"></button>
+        <button class="btn alt" id="fin-sala" data-t="volverSala" hidden></button>
+        <p class="note" id="fin-nota"></p>
+        <div class="row2"><button class="link" id="fin-ver" data-t="verTableros"></button><button class="link" id="fin-cambiar" data-t="cambiar"></button><button class="link" id="fin-menu" data-t="menu"></button></div>
+      </div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
