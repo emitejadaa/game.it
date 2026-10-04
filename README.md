@@ -31,7 +31,7 @@ Hay una plantilla lista en [`templates/juego-base/`](templates/juego-base/) y `n
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel y Batalla Naval): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel, Batalla Naval y Voleyball): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -174,6 +174,24 @@ paso fijo de 60 ticks/s, jugador radio 15 / aceleración 0,1 (0,07 con la patada
 pelota radio 10 / amortiguación 0,99, patada de fuerza 5 a menos de 4 px, saque con barrera en el círculo, gol de oro.
 Online: el servidor simula y manda el estado 30 veces por segundo; cada cliente manda sus teclas solo cuando cambian,
 predice su jugador y corrige con las confirmaciones del servidor (se nota como si jugara en local).
+
+### Voleyball (tiempo real)
+
+Vóley de costado como los servidores de vóley de HaxBall, armado sobre Clashball: los jugadores son discos que flotan y se
+mueven con la misma física de HaxBall (`shared/physics.js`, 60 ticks/s) y no pueden pasar al otro lado de la red (abajo
+la red, arriba una barrera invisible). La pelota cae con gravedad, atraviesa a los jugadores y solo se le pega con la
+patada (Espacio/X): sale desde el centro del jugador hacia la pelota, así que desde abajo sube y desde arriba es un
+remate. Rebota en las paredes de los costados y en la red; arriba no hay techo (si sale del mapa, una flecha en el borde
+la sigue). Reglas en `public/games/voleyball/shared/match.js` (las mismas en el navegador y en el servidor): es punto
+cuando la pelota toca el piso, punto por jugada, saca el equipo que hizo el punto (si recupera el saque, rota quién saca),
+3 toques por equipo (el saque cuenta como el primero y el bloqueo no cuenta), ganar por 2 opcional y tiempo con punto de
+oro. Modos Clásico, Playa (pelota que flota) y Turbo; canchas Chica, Clásica y Grande. Los bots (`shared/ai.js`) simulan
+la trayectoria con la misma física, eligen quién va y buscan dónde pararse respecto de la pelota para que el golpe salga
+como quieren (recepción alta hacia la red, armado y remate desde arriba, bloqueo en la red y defensa abajo; 3 niveles).
+Si un equipo queda vacío (práctica), saca una máquina. Online igual que Clashball (`server/games/voleyball.js`): el
+servidor simula, manda el estado 30 veces por segundo con los golpes, piques y puntos como eventos y el cliente predice
+su jugador; salas públicas, bots, espectadores y chat con el relato de cada punto (remate, bombazo, ace, bloqueo, punto de
+17 toques…).
 
 ### Ajedrez
 
