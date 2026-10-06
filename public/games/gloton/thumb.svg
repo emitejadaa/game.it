@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="320" height="200" fill="#07070a"/>
+  <g fill="none" stroke="#00f0ff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#g)">
+    <path d="M16 14 H304 V186 H16 Z"/>
+    <path d="M52 54 H112 M136 54 H196 M220 54 H268 M40 100 H96 M120 100 H200 M224 100 H280 M52 146 H112 M136 146 H196 M220 146 H268"/>
+  </g>
+  <g fill="none" stroke="#07070a" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 14 H304 V186 H16 Z"/>
+    <path d="M52 54 H112 M136 54 H196 M220 54 H268 M40 100 H96 M120 100 H200 M224 100 H280 M52 146 H112 M136 146 H196 M220 146 H268"/>
+  </g>
+  <g fill="#eaeaf0" opacity=".75">
+    <circle cx="110" cy="77" r="3"/><circle cx="134" cy="77" r="3"/><circle cx="158" cy="77" r="3"/><circle cx="182" cy="77" r="3"/><circle cx="206" cy="77" r="3"/><circle cx="230" cy="77" r="3"/>
+    <circle cx="76" cy="123" r="3"/><circle cx="100" cy="123" r="3"/><circle cx="124" cy="123" r="3"/>
+  </g>
+  <circle cx="264" cy="77" r="7" fill="#eaeaf0" filter="url(#g)"/>
+  <g filter="url(#g)">
+    <path d="M85 77 A15 15 0 1 0 85 77.01" fill="none" stroke="#b6ff00" stroke-width="9" stroke-linecap="round" stroke-dasharray="70 100" transform="rotate(20 70 77)"/>
+    <circle cx="73" cy="77" r="4.5" fill="#b6ff00"/>
+  </g>
+  <g filter="url(#g)">
+    <path d="M222 123 l9 -15 h18 l9 15 l-9 15 h-18 z" fill="#ff2bd6"/>
+    <path d="M233 140 l4 8 l4 -8 M251 140 l4 8 l4 -8" fill="#ff2bd6"/>
+  </g>
+  <ellipse cx="240" cy="123" rx="8" ry="6.5" fill="#fff"/><circle cx="237" cy="123.5" r="3.2" fill="#1c2cff"/>
+  <path filter="url(#g)" d="M160 108 l4.2 8.6 9.4 1.4 -6.8 6.6 1.6 9.4 -8.4 -4.4 -8.4 4.4 1.6 -9.4 -6.8 -6.6 9.4 -1.4 z" fill="#ffb800"/>
+</svg>

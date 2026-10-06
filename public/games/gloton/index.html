@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-    <title>Pac-Man · game.it</title>
+    <title>Glotón Neón · game.it</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -11,10 +11,10 @@
     <style>
       :root {
         --ease: cubic-bezier(0.22, 1, 0.36, 1);
-        --pac: #ffe600;
+        --muncher: var(--gi-lime, #b6ff00);
       }
       :root[data-gi-theme='light'] {
-        --pac: #e3a400;
+        --muncher: var(--gi-lime, #4c9400);
       }
       * {
         box-sizing: border-box;
@@ -91,8 +91,9 @@
         width: 14px;
         height: 14px;
         border-radius: 50%;
-        background: conic-gradient(from 120deg, transparent 0 60deg, var(--pac) 60deg);
-        transform: rotate(-30deg);
+        border: 3px solid var(--muncher);
+        border-right-color: transparent;
+        transform: rotate(-20deg);
       }
       .hud .pause {
         width: 30px;
@@ -237,10 +238,10 @@
         font-size: clamp(40px, 10vw, 72px);
         font-weight: 700;
         letter-spacing: -0.04em;
-        color: var(--pac);
+        color: var(--muncher);
       }
       :root[data-gi-glow='on'] .logo {
-        text-shadow: 0 0 28px color-mix(in oklab, var(--pac) 55%, transparent);
+        text-shadow: 0 0 28px color-mix(in oklab, var(--muncher) 55%, transparent);
       }
       h2 {
         font-size: 26px;

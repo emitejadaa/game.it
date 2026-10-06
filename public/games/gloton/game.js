@@ -1,17 +1,17 @@
-/* Pac-Man — game.it
+/* Glotón Neón — game.it
  * Canvas 2D sin dependencias. Movimiento continuo con sub-pasos (fluido a cualquier tasa de refresco),
- * laberinto pre-renderizado (el costo por cuadro es mínimo) e IA clásica de los cuatro fantasmas.
+ * laberinto pre-renderizado (el costo por cuadro es mínimo) y cuatro centinelas con estilos de persecución distintos.
  */
 const G = window.GameIt;
 
 // ================= Textos =================
 const TXT = {
-  title: { es: 'PAC-MAN', en: 'PAC-MAN' },
+  title: { es: 'GLOTÓN NEÓN', en: 'NEON MUNCHER' },
   start: { es: 'Presioná cualquier tecla o tocá para jugar', en: 'Press any key or tap to play' },
   hintKeys: { es: 'moverse', en: 'move' },
   hintPause: { es: 'pausa', en: 'pause' },
   hintSwipe: { es: 'deslizá para moverte', en: 'swipe to move' },
-  ready: { es: '¡LISTO!', en: 'READY!' },
+  ready: { es: '¡PREPARATE!', en: 'GET READY!' },
   pause: { es: 'PAUSA', en: 'PAUSED' },
   resume: { es: 'Continuar', en: 'Resume' },
   restart: { es: 'Reiniciar', en: 'Restart' },
@@ -26,36 +26,38 @@ const TXT = {
 const tr = (k) => G.t(TXT[k]);
 
 // ================= Laberinto =================
+// Laberinto propio (28×31, simétrico): grilla de ladrillos con corredores de una casilla. La casa de los
+// centinelas está en el centro (puerta "--"), el túnel cruza la fila 14 y el jugador sale de la fila 23.
 const LAYOUT = [
   '############################',
-  '#............##............#',
-  '#.####.#####.##.#####.####.#',
-  '#o####.#####.##.#####.####o#',
-  '#.####.#####.##.#####.####.#',
   '#..........................#',
-  '#.####.##.########.##.####.#',
-  '#.####.##.########.##.####.#',
-  '#......##....##....##......#',
-  '######.##### ## #####.######',
-  '     #.##### ## #####.#     ',
-  '     #.##          ##.#     ',
-  '     #.## ###--### ##.#     ',
-  '######.## #      # ##.######',
-  '      .   #      #   .      ',
-  '######.## #      # ##.######',
-  '     #.## ######## ##.#     ',
-  '     #.##          ##.#     ',
-  '     #.## ######## ##.#     ',
-  '######.## ######## ##.######',
-  '#............##............#',
-  '#.####.#####.##.#####.####.#',
-  '#.####.#####.##.#####.####.#',
-  '#o..##.......  .......##..o#',
-  '###.##.##.########.##.##.###',
-  '###.##.##.########.##.##.###',
-  '#......##....##....##......#',
-  '#.##########.##.##########.#',
-  '#.##########.##.##########.#',
+  '#.###.###.########.###.###.#',
+  '#.###.###.########.###.###.#',
+  '#o........................o#',
+  '#.##.###.###.##.###.###.##.#',
+  '#.##.###.###.##.###.###.##.#',
+  '#..........................#',
+  '####.####.########.####.####',
+  '####.####.########.####.####',
+  '####.####.########.####.####',
+  '####.####          ####.####',
+  '####.#### ###--### ####.####',
+  '####.#### #      # ####.####',
+  '    .     #      #     .    ',
+  '####.#### #      # ####.####',
+  '####.#### ######## ####.####',
+  '####.####          ####.####',
+  '####.####.########.####.####',
+  '####.####.########.####.####',
+  '#..........................#',
+  '#.##.###.###.##.###.###.##.#',
+  '#.##.###.###.##.###.###.##.#',
+  '#............  ............#',
+  '#.###.###.########.###.###.#',
+  '#.###.###.########.###.###.#',
+  '#o........................o#',
+  '#.##.###.###.##.###.###.##.#',
+  '#.##.###.###.##.###.###.##.#',
   '#..........................#',
   '############################',
 ];
@@ -97,7 +99,7 @@ function cell(x, y) {
   return cells[y * W + x];
 }
 const isOpen = (x, y) => cell(x, y) === OPEN;
-const inTunnel = (x, y) => Math.round(y) === TUNNEL_Y && (x < 5.5 || x > 21.5);
+const inTunnel = (x, y) => Math.round(y) === TUNNEL_Y && (x < 3.5 || x > 24.5);
 
 const DIRS = { up: [0, -1], left: [-1, 0], down: [0, 1], right: [1, 0] };
 const DIR_ORDER = ['up', 'left', 'down', 'right'];
@@ -117,18 +119,19 @@ const FRIGHT_TIME = [6, 5, 4, 3, 2, 5, 2, 2, 1, 5, 2, 1, 1, 3, 1, 1, 0, 1];
 const frightTime = (level) => FRIGHT_TIME[Math.min(level - 1, FRIGHT_TIME.length - 1)];
 const MODES = (level) =>
   level === 1 ? [7, 20, 7, 20, 5, 20, 5, Infinity] : level <= 4 ? [7, 20, 7, 20, 5, 1033, 0.02, Infinity] : [5, 20, 5, 20, 5, 1037, 0.02, Infinity];
-const FRUITS = [
-  ['cherry', 100],
-  ['strawberry', 300],
-  ['orange', 500],
-  ['orange', 500],
-  ['apple', 700],
-  ['apple', 700],
-  ['melon', 1000],
-  ['melon', 1000],
-  ['key', 2000],
+// Bonus que aparece dos veces por nivel debajo de la casa: gemas de neón (tipo, puntos).
+const BONUS = [
+  ['ring', 100],
+  ['diamond', 300],
+  ['star', 500],
+  ['star', 500],
+  ['bolt', 700],
+  ['bolt', 700],
+  ['hex', 1000],
+  ['hex', 1000],
+  ['crown', 2000],
 ];
-const fruitFor = (level) => FRUITS[Math.min(level - 1, FRUITS.length - 1)];
+const bonusFor = (level) => BONUS[Math.min(level - 1, BONUS.length - 1)];
 
 // ================= Estado =================
 const S = {
@@ -150,7 +153,8 @@ const S = {
   sinceDot: 0,
   houseDots: 0,
   diedThisLevel: false,
-  fruit: null,
+  bonus: null,
+  dotsTotal: 1,
   popups: [],
   sparks: [],
   userPaused: false,
@@ -161,10 +165,11 @@ const S = {
 const pac = { x: 13.5, y: 23, dir: 'left', next: null, moving: false, phase: 0, deathT: 0 };
 
 const GHOSTS = [
-  { name: 'blinky', color: 'red', home: [13.5, 14], start: [13.5, 11], corner: [25, -3], limit: [0, 0, 0] },
-  { name: 'pinky', color: 'pink', home: [13.5, 14], start: [13.5, 14], corner: [2, -3], limit: [0, 0, 0] },
-  { name: 'inky', color: 'cyan', home: [11.5, 14], start: [11.5, 14], corner: [27, 31], limit: [30, 0, 0] },
-  { name: 'clyde', color: 'orange', home: [15.5, 14], start: [15.5, 14], corner: [0, 31], limit: [60, 50, 0] },
+  // cazador: va directo a vos · emboscador: apunta adelante · astuto: cierra el paso usando al cazador · tímido: ataca de lejos y huye de cerca
+  { name: 'cazador', color: 'red', home: [13.5, 14], start: [13.5, 11], corner: [25, -3], limit: [0, 0, 0] },
+  { name: 'emboscador', color: 'magenta', home: [13.5, 14], start: [13.5, 14], corner: [2, -3], limit: [0, 0, 0] },
+  { name: 'astuto', color: 'violet', home: [11.5, 14], start: [11.5, 14], corner: [27, 31], limit: [30, 0, 0] },
+  { name: 'timido', color: 'amber', home: [15.5, 14], start: [15.5, 14], corner: [0, 31], limit: [60, 50, 0] },
 ].map((g) => ({ ...g, x: 0, y: 0, dir: 'left', mode: 'house', frightened: false, reverse: false, path: null, bob: 0 }));
 
 // ================= Canvas =================
@@ -187,12 +192,13 @@ function palette() {
     dot: dark ? 'rgba(234,234,240,.72)' : 'rgba(21,21,28,.6)',
     power: c.fg,
     door: c.magenta,
-    pac: dark ? '#ffe600' : '#e3a400',
+    pac: c.lime,
     red: c.red,
-    pink: dark ? '#ff7ad9' : '#e04fb8',
+    magenta: c.magenta,
+    violet: c.violet,
     cyan: c.cyan,
-    orange: c.amber,
-    frightened: dark ? '#3d5afe' : '#2f45d8',
+    amber: c.amber,
+    frightened: dark ? '#3d7bff' : '#2f55d8',
     flash: dark ? '#f4f4ff' : '#9aa0b8',
     eye: '#ffffff',
     pupil: dark ? '#1c2cff' : '#1422b8',
@@ -364,8 +370,10 @@ const Sound = {
     o.stop(t + dur + 0.02);
   },
   eat() {
+    // dos notas (quinta justa) que se alternan: un "blip" corto y agudo
     this.waka = !this.waka;
-    this.waka ? this.tone(520, 260, 0.08, { type: 'triangle', vol: 0.35 }) : this.tone(260, 520, 0.08, { type: 'triangle', vol: 0.35 });
+    const f = this.waka ? 660 : 990;
+    this.tone(f, f * 1.08, 0.06, { type: 'sine', vol: 0.32 });
   },
   power() {
     this.tone(180, 720, 0.25, { type: 'sawtooth', vol: 0.15 });
@@ -373,21 +381,20 @@ const Sound = {
   ghost() {
     this.tone(220, 1400, 0.28, { vol: 0.2 });
   },
-  fruit() {
-    this.tone(700, 1400, 0.1, { type: 'triangle', vol: 0.3 });
-    this.tone(900, 1800, 0.12, { type: 'triangle', vol: 0.3, at: 0.1 });
+  bonus() {
+    [784, 988, 1319].forEach((f, i) => this.tone(f, f * 1.02, 0.09, { type: 'sine', vol: 0.3, at: i * 0.07 }));
   },
   life() {
     [880, 1109, 1319].forEach((f, i) => this.tone(f, f, 0.12, { type: 'triangle', vol: 0.3, at: i * 0.1 }));
   },
   death() {
-    this.tone(900, 120, 1.1, { type: 'sawtooth', vol: 0.18, at: 0.5 });
-    this.tone(300, 60, 0.15, { vol: 0.2, at: 1.65 });
-    this.tone(300, 60, 0.15, { vol: 0.2, at: 1.85 });
+    this.tone(700, 90, 1.1, { type: 'triangle', vol: 0.3, at: 0.5 });
+    this.tone(180, 40, 0.25, { type: 'sawtooth', vol: 0.16, at: 1.65 });
   },
   jingle() {
-    const n = [494, 988, 740, 622, 988, 740, 622, 0, 523, 1047, 784, 659, 1047, 784, 659, 0];
-    n.forEach((f, i) => f && this.tone(f, f, 0.1, { type: 'square', vol: 0.12, bus: 'music', at: i * 0.11 }));
+    // arpegio pentatónico ascendente que resuelve hacia abajo
+    const n = [392, 494, 587, 784, 0, 659, 784, 988, 1319, 0, 988, 784, 659, 494];
+    n.forEach((f, i) => f && this.tone(f, f, 0.11, { type: 'triangle', vol: 0.2, bus: 'music', at: i * 0.1 }));
   },
   /** Sirena continua de fondo: cambia según el estado (normal, asustados, ojos volviendo). */
   setSiren(kind) {
@@ -421,7 +428,7 @@ const Sound = {
         ? 190 + 70 * Math.abs(Math.sin(time * 14))
         : k === 'eyes'
           ? 700 + 300 * Math.abs(Math.sin(time * 12))
-          : 330 + 110 * (1 - S.dotsLeft / 244) + 90 * Math.sin(time * 5.2);
+          : 330 + 110 * (1 - S.dotsLeft / S.dotsTotal) + 90 * Math.sin(time * 5.2);
     this.siren.frequency.setTargetAtTime(f, this.ctx.currentTime, 0.02);
   },
   pause(v) {
@@ -435,9 +442,10 @@ function resetLevel() {
   S.dots.set(dotsInit);
   S.dotsLeft = 0;
   for (let i = 0; i < S.dots.length; i++) if (S.dots[i]) S.dotsLeft++;
+  S.dotsTotal = S.dotsLeft;
   S.dotsEaten = 0;
   S.diedThisLevel = false;
-  S.fruit = null;
+  S.bonus = null;
   buildLayers();
 }
 
@@ -445,8 +453,8 @@ function resetActors() {
   Object.assign(pac, { x: 13.5, y: 23, dir: 'left', next: null, moving: false, phase: 0, deathT: 0 });
   for (const g of GHOSTS) {
     Object.assign(g, { x: g.start[0], y: g.start[1], frightened: false, reverse: false, path: null, bob: Math.random() * 6 });
-    g.mode = g.name === 'blinky' ? 'active' : 'house';
-    g.dir = g.name === 'blinky' ? 'left' : g.name === 'inky' ? 'up' : 'down';
+    g.mode = g.name === 'cazador' ? 'active' : 'house';
+    g.dir = g.name === 'cazador' ? 'left' : g.name === 'astuto' ? 'up' : 'down';
   }
   S.modeIdx = 0;
   S.modeTime = MODES(S.level)[0];
@@ -573,9 +581,9 @@ function eatAt(x, y) {
     Sound.power();
     frighten();
   }
-  if (S.dotsEaten === 70 || S.dotsEaten === 170) {
-    const [kind, points] = fruitFor(S.level);
-    S.fruit = { kind, points, t: 9.5 };
+  if (S.dotsEaten === Math.round(S.dotsTotal * 0.3) || S.dotsEaten === Math.round(S.dotsTotal * 0.7)) {
+    const [kind, points] = bonusFor(S.level);
+    S.bonus = { kind, points, t: 9.5 };
   }
   if (S.dotsLeft === 0) setState('clear', 2.2);
 }
@@ -597,11 +605,11 @@ function ghostTarget(g) {
   const py = Math.round(pac.y);
   const [dx, dy] = DIRS[pac.dir];
   switch (g.name) {
-    case 'blinky':
+    case 'cazador':
       return [px, py];
-    case 'pinky':
-      return [px + dx * 4, py + dy * 4];
-    case 'inky': {
+    case 'emboscador':
+      return [px + dx * 3, py + dy * 3];
+    case 'astuto': {
       const b = GHOSTS[0];
       const ax = px + dx * 2;
       const ay = py + dy * 2;
@@ -609,7 +617,7 @@ function ghostTarget(g) {
     }
     default: {
       const d2 = (px - g.x) ** 2 + (py - g.y) ** 2;
-      return d2 > 64 ? [px, py] : g.corner;
+      return d2 > 49 ? [px, py] : g.corner;
     }
   }
 }
@@ -690,12 +698,12 @@ function release(g) {
 
 function updateGhosts(dt) {
   const sp = speeds(S.level);
-  // liberar fantasmas de la casa: por puntos comidos o si Pac-Man no come por un rato
+  // liberar centinelas de la casa: por puntos comidos o si el glotón no come por un rato
   const lvl = Math.min(S.level, 3) - 1;
   const waiting = GHOSTS.filter((g) => g.mode === 'house');
   if (waiting.length) {
     const next = waiting[0];
-    const limit = S.diedThisLevel ? { pinky: 7, inky: 17, clyde: 32 }[next.name] ?? 0 : next.limit[lvl];
+    const limit = S.diedThisLevel ? { emboscador: 7, astuto: 17, timido: 32 }[next.name] ?? 0 : next.limit[lvl];
     if (S.houseDots >= limit || S.sinceDot > (S.level < 5 ? 4 : 3)) {
       release(next);
       S.houseDots = 0;
@@ -754,11 +762,11 @@ function collide() {
       return;
     }
   }
-  if (S.fruit && Math.abs(pac.y - 17) < 0.5 && Math.abs(pac.x - 13.5) < 0.8) {
-    addScore(S.fruit.points);
-    popup(13.5, 17, S.fruit.points, colors.pink);
-    Sound.fruit();
-    S.fruit = null;
+  if (S.bonus && Math.abs(pac.y - 17) < 0.5 && Math.abs(pac.x - 13.5) < 0.8) {
+    addScore(S.bonus.points);
+    popup(13.5, 17, S.bonus.points, colors.magenta);
+    Sound.bonus();
+    S.bonus = null;
   }
 }
 
@@ -838,7 +846,7 @@ function update(dt) {
     }
   }
   S.sinceDot += dt;
-  if (S.fruit && (S.fruit.t -= dt) <= 0) S.fruit = null;
+  if (S.bonus && (S.bonus.t -= dt) <= 0) S.bonus = null;
 
   // sub-pasos: ningún actor avanza más de ~0.15 casillas por paso (colisiones precisas)
   const steps = Math.ceil(dt / (1 / 120));
@@ -865,36 +873,43 @@ function glow(color, amount = 0.55) {
 const noGlow = () => (ctx.shadowBlur = 0);
 const px = (v) => (v + 0.5) * T;
 
+/** El glotón: un aro de neón que se abre y se cierra hacia donde va, con un núcleo que hace de ojo. */
 function drawPac() {
   const x = px(pac.x);
   const y = px(pac.y);
-  const r = T * 0.72;
+  const r = T * 0.46;
   ctx.save();
   ctx.translate(x, y);
+  ctx.strokeStyle = colors.pac;
   ctx.fillStyle = colors.pac;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = T * 0.34;
   glow(colors.pac);
   if (S.state === 'dying') {
     const k = Math.max(0, Math.min(1, (pac.deathT - 0.5) / 1.15));
     if (k >= 1) return ctx.restore();
+    // el aro se abre del todo y se apaga
     ctx.rotate(-Math.PI / 2);
-    const a = 0.1 + k * Math.PI;
+    const a = 0.1 + k * (Math.PI - 0.25);
+    ctx.globalAlpha = 1 - k * 0.6;
     ctx.beginPath();
-    ctx.moveTo(0, 0);
     ctx.arc(0, 0, r, a, Math.PI * 2 - a);
-    ctx.closePath();
-    ctx.fill();
+    ctx.stroke();
     return ctx.restore();
   }
   ctx.rotate(ANGLE[pac.dir]);
-  const open = S.state === 'play' || S.state === 'dying' ? 0.04 + 0.26 * Math.PI * Math.abs(Math.sin(pac.phase)) : 0.25;
+  const open = S.state === 'play' || S.state === 'dying' ? 0.1 + 0.28 * Math.PI * Math.abs(Math.sin(pac.phase)) : 0.3;
   ctx.beginPath();
-  ctx.moveTo(-r * 0.2, 0);
   ctx.arc(0, 0, r, open, Math.PI * 2 - open);
-  ctx.closePath();
+  ctx.stroke();
+  noGlow();
+  ctx.beginPath();
+  ctx.arc(r * 0.12, 0, T * 0.13, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
 
+/** Los centinelas: drones hexagonales de un solo ojo con dos propulsores. Asustados se ven huecos y con una X. */
 function drawGhost(g) {
   const x = px(g.x);
   const y = px(g.y);
@@ -902,111 +917,145 @@ function drawGhost(g) {
   const eyesOnly = g.mode === 'eaten' || g.mode === 'entering';
   let body = colors[g.color];
   let scared = false;
+  let flashing = false;
   if (g.frightened && !eyesOnly) {
     scared = true;
-    const flashing = S.fright < 2 && Math.floor(S.fright * 5) % 2 === 0;
+    flashing = S.fright < 2 && Math.floor(S.fright * 5) % 2 === 0;
     body = flashing ? colors.flash : colors.frightened;
   }
   ctx.save();
   ctx.translate(x, y);
   if (!eyesOnly) {
+    const hex = () => {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3;
+        const vx = Math.cos(a) * r;
+        const vy = Math.sin(a) * r * 0.92;
+        i ? ctx.lineTo(vx, vy) : ctx.moveTo(vx, vy);
+      }
+      ctx.closePath();
+    };
+    ctx.lineJoin = 'round';
     ctx.fillStyle = body;
     glow(body, 0.45);
-    const top = -r * 0.15;
-    const bottom = r * 0.92;
-    const wave = Math.floor(S.time * 8) % 2;
-    ctx.beginPath();
-    ctx.arc(0, top, r, Math.PI, 0);
-    ctx.lineTo(r, bottom);
-    const n = 3;
-    const w = (r * 2) / n;
-    for (let i = 0; i < n; i++) {
-      const x0 = r - i * w;
-      const peak = (i + wave) % 2 ? bottom - r * 0.28 : bottom - r * 0.12;
-      ctx.lineTo(x0 - w / 2, peak);
-      ctx.lineTo(x0 - w, bottom);
+    // propulsores: dos llamitas que titilan debajo del casco
+    if (!scared) {
+      const flick = Math.floor(S.time * 12) % 2;
+      for (const s of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(s * r * 0.5 - r * 0.14, r * 0.8);
+        ctx.lineTo(s * r * 0.5 + r * 0.14, r * 0.8);
+        ctx.lineTo(s * r * 0.5, r * (1.12 + 0.14 * flick));
+        ctx.closePath();
+        ctx.fill();
+      }
     }
-    ctx.closePath();
-    ctx.fill();
+    hex();
+    if (scared) {
+      ctx.fillStyle = colors.bg;
+      ctx.fill();
+      ctx.strokeStyle = body;
+      ctx.lineWidth = Math.max(1.5, T * 0.16);
+      ctx.stroke();
+    } else ctx.fill();
     noGlow();
   }
   if (scared) {
-    ctx.fillStyle = S.fright < 2 && Math.floor(S.fright * 5) % 2 === 0 ? colors.red : '#ffd9e6';
-    const e = r * 0.16;
-    ctx.fillRect(-r * 0.38 - e / 2, -r * 0.3, e, e);
-    ctx.fillRect(r * 0.38 - e / 2, -r * 0.3, e, e);
-    ctx.strokeStyle = ctx.fillStyle;
-    ctx.lineWidth = Math.max(1, T * 0.1);
+    ctx.strokeStyle = flashing ? colors.red : '#ffd9e6';
+    ctx.lineWidth = Math.max(1.5, T * 0.14);
+    ctx.lineCap = 'round';
+    const e = r * 0.28;
     ctx.beginPath();
-    for (let i = 0; i <= 6; i++) ctx.lineTo(-r * 0.55 + (i * r * 1.1) / 6, r * 0.3 + (i % 2 ? -r * 0.12 : 0));
+    ctx.moveTo(-e, -e);
+    ctx.lineTo(e, e);
+    ctx.moveTo(e, -e);
+    ctx.lineTo(-e, e);
     ctx.stroke();
   } else {
+    // un solo ojo que mira hacia donde va
     const [dx, dy] = DIRS[g.dir];
-    for (const s of [-1, 1]) {
-      const ex = s * r * 0.36 + dx * r * 0.1;
-      const ey = -r * 0.22 + dy * r * 0.1;
-      ctx.fillStyle = colors.eye;
-      ctx.beginPath();
-      ctx.ellipse(ex, ey, r * 0.26, r * 0.32, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = colors.pupil;
-      ctx.beginPath();
-      ctx.arc(ex + dx * r * 0.13, ey + dy * r * 0.15, r * 0.14, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    ctx.fillStyle = colors.eye;
+    ctx.beginPath();
+    ctx.ellipse(dx * r * 0.08, dy * r * 0.06 - r * 0.02, r * 0.46, r * 0.36, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = colors.pupil;
+    ctx.beginPath();
+    ctx.arc(dx * r * 0.24, dy * r * 0.18 - r * 0.02, r * 0.19, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 }
 
-function drawFruit(kind, x, y) {
-  const r = T * 0.5;
+/** Bonus de neón: cada nivel trae una gema distinta. */
+function drawBonus(kind, x, y) {
+  const r = T * 0.52;
   ctx.save();
   ctx.translate(x, y);
-  const c = { cherry: colors.red, strawberry: colors.red, orange: colors.orange, apple: colors.red, melon: '#3ddc84', key: colors.cyan }[kind];
+  const c = { ring: colors.cyan, diamond: colors.magenta, star: colors.amber, bolt: colors.violet, hex: colors.red, crown: colors.amber }[kind];
   glow(c, 0.5);
   ctx.fillStyle = c;
-  ctx.strokeStyle = '#3ddc84';
-  ctx.lineWidth = Math.max(1, T * 0.1);
-  if (kind === 'cherry') {
+  ctx.strokeStyle = c;
+  ctx.lineWidth = Math.max(1.5, T * 0.16);
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  if (kind === 'ring') {
     ctx.beginPath();
-    ctx.arc(-r * 0.45, r * 0.35, r * 0.45, 0, Math.PI * 2);
-    ctx.arc(r * 0.5, r * 0.5, r * 0.45, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(-r * 0.4, 0);
-    ctx.quadraticCurveTo(0, -r, r * 0.7, -r * 0.9);
-    ctx.moveTo(r * 0.5, r * 0.1);
-    ctx.lineTo(r * 0.7, -r * 0.9);
+    ctx.arc(0, 0, r * 0.75, 0, Math.PI * 2);
     ctx.stroke();
-  } else if (kind === 'strawberry') {
     ctx.beginPath();
-    ctx.moveTo(-r * 0.8, -r * 0.4);
-    ctx.quadraticCurveTo(0, -r * 0.8, r * 0.8, -r * 0.4);
-    ctx.quadraticCurveTo(r * 0.6, r * 0.6, 0, r);
-    ctx.quadraticCurveTo(-r * 0.6, r * 0.6, -r * 0.8, -r * 0.4);
+    ctx.arc(0, 0, r * 0.22, 0, Math.PI * 2);
     ctx.fill();
+  } else if (kind === 'diamond') {
     ctx.beginPath();
-    ctx.moveTo(-r * 0.4, -r * 0.6);
-    ctx.lineTo(0, -r * 0.35);
-    ctx.lineTo(r * 0.4, -r * 0.6);
-    ctx.stroke();
-  } else if (kind === 'key') {
-    ctx.strokeStyle = c;
-    ctx.beginPath();
-    ctx.arc(0, -r * 0.45, r * 0.4, 0, Math.PI * 2);
-    ctx.moveTo(0, -r * 0.05);
+    ctx.moveTo(0, -r);
+    ctx.lineTo(r * 0.75, 0);
     ctx.lineTo(0, r);
-    ctx.moveTo(0, r * 0.55);
-    ctx.lineTo(r * 0.35, r * 0.55);
-    ctx.stroke();
-  } else {
-    ctx.beginPath();
-    ctx.arc(0, r * 0.1, r * 0.85, 0, Math.PI * 2);
+    ctx.lineTo(-r * 0.75, 0);
+    ctx.closePath();
     ctx.fill();
+  } else if (kind === 'star') {
     ctx.beginPath();
-    ctx.moveTo(0, -r * 0.7);
-    ctx.quadraticCurveTo(r * 0.3, -r * 1.1, r * 0.6, -r);
+    for (let i = 0; i < 10; i++) {
+      const rr = i % 2 ? r * 0.42 : r;
+      const a = -Math.PI / 2 + (i * Math.PI) / 5;
+      ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+    }
+    ctx.closePath();
+    ctx.fill();
+  } else if (kind === 'bolt') {
+    ctx.beginPath();
+    ctx.moveTo(r * 0.25, -r);
+    ctx.lineTo(-r * 0.55, r * 0.15);
+    ctx.lineTo(-r * 0.05, r * 0.15);
+    ctx.lineTo(-r * 0.25, r);
+    ctx.lineTo(r * 0.55, -r * 0.2);
+    ctx.lineTo(r * 0.05, -r * 0.2);
+    ctx.closePath();
+    ctx.fill();
+  } else if (kind === 'hex') {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI) / 3;
+      ctx.lineTo(Math.cos(a) * r * 0.85, Math.sin(a) * r * 0.85);
+    }
+    ctx.closePath();
     ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // corona
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.9, r * 0.6);
+    ctx.lineTo(-r * 0.9, -r * 0.4);
+    ctx.lineTo(-r * 0.4, r * 0.05);
+    ctx.lineTo(0, -r * 0.7);
+    ctx.lineTo(r * 0.4, r * 0.05);
+    ctx.lineTo(r * 0.9, -r * 0.4);
+    ctx.lineTo(r * 0.9, r * 0.6);
+    ctx.closePath();
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -1042,7 +1091,7 @@ function draw() {
       }
   noGlow();
 
-  if (S.fruit) drawFruit(S.fruit.kind, px(13.5), px(17));
+  if (S.bonus) drawBonus(S.bonus.kind, px(13.5), px(17));
 
   if (S.state !== 'clear' && S.state !== 'intro' && S.state !== 'over') {
     const hideGhosts = S.state === 'dying' && pac.deathT > 0.5;

@@ -1,0 +1,47 @@
+{
+  "id": "gloton",
+  "aliases": [
+    "pacman"
+  ],
+  "title": {
+    "es": "Glotón Neón",
+    "en": "Neon Muncher"
+  },
+  "description": {
+    "es": "Laberinto de neón: comé todos los puntos y escapá de los centinelas.",
+    "en": "Neon maze: eat every dot and dodge the sentinels."
+  },
+  "categories": [
+    "arcade",
+    "clasicos"
+  ],
+  "tags": [
+    "laberinto",
+    "maze",
+    "neon",
+    "puntos",
+    "dots",
+    "persecución",
+    "chase",
+    "retro"
+  ],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "orientation": "any",
+  "platforms": [
+    "desktop",
+    "mobile"
+  ],
+  "input": [
+    "keyboard",
+    "touch"
+  ],
+  "features": {
+    "online": false,
+    "multiplayer": false,
+    "story": false
+  },
+  "order": 1
+}
