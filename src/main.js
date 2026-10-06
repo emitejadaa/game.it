@@ -45,21 +45,30 @@ function applyLang() {
 // ---------- Navegación (#play/<id>) ----------
 let enteredFromMenu = false;
 
+/** Vuelve al menú mostrando un aviso en la pantalla de carga (enlace a un juego que no existe o que no corre acá). */
+async function menuWithNote(text, ms) {
+  history.replaceState(null, '', location.pathname + location.search);
+  enteredFromMenu = false;
+  if (player.isActive()) await player.close();
+  await loader.show('');
+  loader.setNote(text, true);
+  await new Promise((r) => setTimeout(r, ms));
+  renderMenu({ animate: false });
+  await loader.hide(0);
+  ads.show();
+}
+
 async function route() {
   const m = location.hash.match(/^#play\/([\w-]+)(\?[^#]*)?/);
-  const g = m && byId(m[1]);
-  if (g && !playable(g)) {
+  const g = m && byId(m[1].toLowerCase());
+  if (m && !g) {
+    // enlace viejo, con un error de tipeo o a un juego oculto
+    await menuWithNote(t('menu.notFound'), 1800);
+  } else if (g && !playable(g)) {
     // enlace directo a un juego que no corre en este dispositivo
-    history.replaceState(null, '', location.pathname + location.search);
-    enteredFromMenu = false;
-    if (player.isActive()) await player.close();
-    await loader.show('');
-    loader.setNote(t(g.platforms.includes('mobile') ? 'menu.onlyMobile' : 'menu.onlyDesktop'), true);
-    await new Promise((r) => setTimeout(r, 2200));
-    renderMenu({ animate: false });
-    await loader.hide(0);
-    ads.show();
+    await menuWithNote(t(g.platforms.includes('mobile') ? 'menu.onlyMobile' : 'menu.onlyDesktop'), 2200);
   } else if (g) {
+    if (m[1] !== g.id) history.replaceState(null, '', `${location.pathname}${location.search}#play/${g.id}${m[2] || ''}`); // alias o mayúsculas → id actual
     if (player.game()?.id === g.id) return;
     search.close();
     prefsPanel.close();
@@ -157,7 +166,7 @@ function preload(onStep) {
   return Promise.all(tasks);
 }
 
-async function boot() {
+async function start() {
   prefs.init();
   setLang(prefs.get().lang);
   translateDom();
@@ -215,6 +224,21 @@ async function boot() {
 
   if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+}
+
+/** Arranque con red de seguridad: si algo falla, el loader se retira y se ve al menos el menú. */
+async function boot() {
+  try {
+    await start();
+  } catch (e) {
+    console.error('[game.it] error al arrancar', e);
+    app.hidden = false;
+    app.classList.add('ready');
+    try {
+      renderMenu({ animate: false });
+    } catch {}
+    if (!player.isActive()) await loader.hide(0);
   }
 }
 
