@@ -18,6 +18,8 @@ const CHOOSE_MS = 15e3;
 const REVEAL_MS = 6500;
 const MAX_OPS = 4000;
 const MAX_POINTS = 80000;
+const MAX_FILLS = 40; // un relleno repinta toda la hoja en cada visor: sin tope se podía congelar las pestañas ajenas
+const FILL_GAP_MS = 250;
 const CHAT_MS = 350;
 const COLORS = 18;
 const SIZES = 4;
@@ -254,6 +256,9 @@ function op(room, api, p, o) {
   if (o.k === 'f') {
     const { x, y, c } = o;
     if (![x, y, c].every(Number.isInteger) || x < 0 || x > 1000 || y < 0 || y > 750 || c < 0 || c >= COLORS) return false;
+    const now = Date.now();
+    if (now - (d.lastFill || 0) < FILL_GAP_MS || d.ops.filter((q) => q.k === 'f').length >= MAX_FILLS) return true; // se descarta sin castigo: el cliente ya aplica el mismo límite
+    d.lastFill = now;
     const f = { k: 'f', x, y, c };
     d.ops.push(f);
     api.broadcast({ t: 'op', o: f }, p.id);

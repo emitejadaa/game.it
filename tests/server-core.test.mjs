@@ -7,54 +7,14 @@
  */
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
-import { createRequire } from 'node:module';
-import { createServer } from 'node:net';
+import { startServer, connect as rawConnect, wait } from './helpers.mjs';
 
-const require = createRequire(new URL('../server/package.json', import.meta.url));
-const WebSocket = require('ws');
-const SERVER = new URL('../server/index.js', import.meta.url).pathname;
-
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const freePort = () =>
-  new Promise((res) => {
-    const s = createServer().listen(0, () => {
-      const { port } = s.address();
-      s.close(() => res(port));
-    });
-  });
-
-let proc;
-let port;
-let logs = '';
-
+let srv;
 before(async () => {
-  port = await freePort();
-  proc = spawn('node', [SERVER], {
-    env: { ...process.env, PORT: String(port), MAX_CONN_PER_IP: '3', HEARTBEAT_MS: '300', RECONNECT_GRACE_MS: '1200', ROOM_IDLE_MS: '1500', TRUST_PROXY_HOPS: '1' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  proc.stdout.on('data', (d) => (logs += d));
-  proc.stderr.on('data', (d) => (logs += d));
-  for (let i = 0; i < 50 && !/game\.it server en/.test(logs); i++) await wait(100);
-  assert.match(logs, /game\.it server en/, 'el servidor no arrancó');
+  srv = await startServer({ MAX_CONN_PER_IP: '3', HEARTBEAT_MS: '300', RECONNECT_GRACE_MS: '1200', ROOM_IDLE_MS: '1500', TRUST_PROXY_HOPS: '1' });
 });
-
-after(() => proc?.kill());
-
-/** Cliente de prueba: `xff` es lo que dice el proxy (la última entrada es la que agregó el proxy de confianza). */
-function connect(xff) {
-  return new Promise((resolve) => {
-    const ws = new WebSocket(`ws://127.0.0.1:${port}`, { headers: xff ? { 'x-forwarded-for': xff } : {} });
-    const c = { ws, msgs: [], open: false, status: 0 };
-    ws.on('message', (m) => c.msgs.push(JSON.parse(m)));
-    ws.on('open', () => resolve(Object.assign(c, { open: true })));
-    ws.on('unexpected-response', (_, res) => resolve(Object.assign(c, { status: res.statusCode })));
-    ws.on('error', () => resolve(c));
-    c.send = (m) => ws.send(JSON.stringify(m));
-    c.last = (t) => [...c.msgs].reverse().find((m) => m.t === t);
-  });
-}
+after(() => srv?.stop());
+const connect = (xff) => rawConnect(srv.port, xff);
 
 test('el anfitrión que se cae en el lobby no cierra la sala y conserva el rol al volver', async () => {
   const a = await connect('10.1.0.1');
@@ -143,5 +103,5 @@ test('jugar mantiene viva la sala aunque el módulo no renueve la actividad (ROO
 });
 
 test('el servidor no registra errores no controlados durante las pruebas', () => {
-  assert.doesNotMatch(logs, /\bfatal\b|TypeError|ReferenceError/);
+  assert.doesNotMatch(srv.logs(), /\bfatal\b|TypeError|ReferenceError/);
 });

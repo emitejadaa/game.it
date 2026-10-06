@@ -137,7 +137,14 @@ function makeApi(room) {
   return {
     broadcast: (msg, exceptId) => broadcast(room, msg, exceptId),
     send: (pid, msg) => send(room.players.get(pid)?.ws, msg),
+    /** Manda un texto JSON ya armado (para payloads grandes que se reparten a varios jugadores sin volver a serializarlos). */
+    sendRaw: (pid, text) => {
+      const ws = room.players.get(pid)?.ws;
+      if (ws && ws.readyState === 1) ws.send(text);
+    },
     sync: () => sync(room),
+    /** Cierra la sala (los clientes reciben { t: 'closed', reason }): para errores graves del módulo. */
+    close: (reason) => closeRoom(room, reason),
     touch: () => touch(room),
     players: () => [...room.players.values()],
     connected: (pid) => !!room.players.get(pid)?.connected,

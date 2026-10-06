@@ -75,7 +75,7 @@ function init(room, api, id) {
   api.send(id, { t: 'lb', l: d.w.leaderboard() });
 }
 
-function loop(room, api) {
+function tick(room, api) {
   const d = room.data;
   if (!d) return;
   const now = performance.now();
@@ -114,6 +114,20 @@ function loop(room, api) {
       api.send(person.id, { t: 's', k: w.tick, c: w.view(p), f, e });
     }
     if (w.tick % TPS === 0) api.broadcast({ t: 'lb', l: w.leaderboard() });
+  }
+}
+
+function loop(room, api) {
+  const d = room.data;
+  if (!d) return;
+  try {
+    tick(room, api);
+    d.fails = 0;
+  } catch (e) {
+    // un error no puede dejar la arena congelada: se reprograma. Si se repite, algo está roto y se cierra la sala.
+    console.error(new Date().toISOString(), 'error', 'ameba', room.code, 'loop', e?.stack || e);
+    d.fails = (d.fails || 0) + 1;
+    if (d.fails >= 5) return api.close('error');
   }
   const next = d.t0 + (d.ticks + 1) * TICK_MS - performance.now();
   api.setTimer('loop', Math.max(1, next), () => loop(room, api));
