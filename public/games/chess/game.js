@@ -1159,7 +1159,7 @@ function renderLobby(room) {
     .join('');
   const tc = room.settings?.tc || '5+0';
   $('lobby-tc').innerHTML = ONLINE_TCS.map((k) => `<button data-v="${k}" class="${tc === k ? 'on' : ''}" ${online.isHost ? '' : 'disabled'}>${esc(tcLabel(k))}</button>`).join('');
-  const full = room.players.length >= 2;
+  const full = room.players.filter((p) => p.connected).length >= 2; // un desconectado en gracia sigue en la lista pero no cuenta
   $('lobby-start').hidden = !online.isHost || !full;
   $('lobby-status').textContent = !full ? t('waiting') : online.isHost ? '' : t('waitingHost');
 }

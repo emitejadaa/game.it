@@ -813,7 +813,7 @@ function applyRoom(room) {
   }
   $('lobby-info').textContent = t('lobbyInfo', { n: room.players.length + bots, l: st.lang === 'en' ? 'English' : 'Español' });
   $('lobby-start').hidden = !online.isHost;
-  const need = room.players.length + bots < 2;
+  const need = room.players.filter((p) => p.connected).length + bots < 2;
   $('lobby-status').textContent = online.isHost ? (need ? t('needPlayers') : '') : t('waitingHost');
   $('lobby-status').style.color = online.isHost ? '' : 'var(--muted)';
   show('lobby');

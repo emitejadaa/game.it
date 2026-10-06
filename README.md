@@ -7,6 +7,8 @@ npm install
 npm run dev      # desarrollo en http://localhost:5173
 npm run build    # sitio estático en dist/ (se puede subir a Vercel, Netlify, GitHub Pages…)
 npm run preview  # prueba el build
+npm run check    # revisa los juegos (game.json, rutas, módulos online)
+npm test         # pruebas: núcleo de salas del servidor, juegos diarios, reglas compartidas (necesita `npm ci` también en server/)
 ```
 
 ## ¿Querés sumar tu juego?
@@ -32,7 +34,7 @@ Hay una plantilla lista en [`templates/juego-base/`](templates/juego-base/) y `n
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
 - Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel y Batalla Naval): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
-  Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
+  Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma). La IP de cada cliente (para los límites por IP) se detecta sola cuando hay un proxy delante (solo se confía en los encabezados si quien se conecta por TCP es una dirección interna); se puede fijar con `CLIENT_IP_HEADER` (p. ej. `cf-connecting-ip`) o `TRUST_PROXY_HOPS` (cuántos proxies agregan una entrada a `X-Forwarded-For`, contando desde la derecha). Límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
 ## Anuncios (Google AdSense)
@@ -292,5 +294,28 @@ Modos: carrera contra hasta 5 autos de la compu, contrarreloj contra el fantasma
 tiempos con el largo de cada pista). El selector muestra el mapa grande con sus datos (largo, curvas, recta más
 larga, dificultad, superficie y récord). El fondo se dibuja en mosaicos cacheados, así solo se redibuja lo que se
 mueve.
+
+## Juegos diarios
+
+Un desafío nuevo por día, igual para todos y a la misma hora: **cambia a las 00:00 de Argentina** (UTC−3 fijo). Cada juego
+guarda su día, sus estadísticas y su racha por idioma en `localStorage` (`gameit:<id>:…`) y deja un resumen en
+`gameit:daily:<id>` que el menú usa para mostrar "Nuevo" o "✓ racha N" en el estante **Desafíos de hoy** (los juegos con
+`"daily": { "epoch": "AAAA-MM-DD" }` en su `game.json`; `epoch` es el día del desafío n.º 1 y la categoría es `diarios`).
+
+Todo lo común está en `public/shared/` y se usa con rutas absolutas (`/shared/…`):
+
+| Módulo | Qué hace |
+| --- | --- |
+| `daily.js` | Día de Argentina, n.º de desafío, generador con semilla (`rng`), estado del día, estadísticas y racha, compartir. |
+| `daily-ui.js` + `daily.css` | Ventanas, avisos, estadísticas con histograma, resultado con cuenta regresiva y compartir, alto contraste para daltonismo. |
+| `guess-grid.js` | Motor de los juegos de adivinar en grilla (casillas que giran, teclado en pantalla y físico): Quinteto, Cuarteto, Dígitos, Ecuación y Cálculo solo aportan sus reglas y textos. |
+| `daily-shell.js` | `createDailyApp({ id, epoch, rows, t, load, build })`: cabecera, ayuda, estadísticas, resultado, modo práctica, cambio de idioma y de día a medianoche; el juego arma su pantalla en `build`. |
+| `math-expr.js` | Cuentas exactas con fracciones (sin `eval` ni decimales), validación de ecuaciones, forma canónica y generadores con semilla. |
+| `countries/` + `country-input.js` | 193 países con nombres es/en y alias, centros, distancia y rumbo, y el campo con autocompletado. |
+| `words5/` | Palabras de 5 letras: válidas (de los diccionarios de Mecha Corta) y respuestas curadas. |
+
+Datos generados con herramientas de `tools/daily/` (`words5.mjs`, `countries.mjs` desde Natural Earth y `flag-icons`, y las de cada juego);
+cada carpeta de datos tiene su `LEEME.txt` con las fuentes y licencias. Para sumar un diario nuevo, copiar `public/games/banderin/` (con
+`createDailyApp`) o `public/games/quinteto/` (con `createGuessGame`).
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

@@ -1051,7 +1051,7 @@ function applyRoom(room) {
     S.mode = null;
     $('lobby-code').textContent = room.code;
     $('lobby-players').innerHTML = room.players.map((p, i) => `<li><i style="background:${i ? '#1f4fd6' : '#f5b301'}"></i>${esc(p.name)}<small>${[p.id === net.myId ? t('you') : '', p.id === room.host ? t('host') : ''].filter(Boolean).join(' · ')}</small></li>`).join('');
-    const full = room.players.length >= 2;
+    const full = room.players.filter((p) => p.connected).length >= 2; // un desconectado en gracia sigue en la lista pero no cuenta
     $('lobby-start').hidden = !net.isHost || !full;
     $('lobby-status').textContent = !full ? t('waiting') : net.isHost ? '' : t('waitingHost');
     if (S.screen !== 'lobby') show('lobby');
