@@ -10,8 +10,8 @@ before(async () => {
 after(() => srv?.stop());
 
 test('Garabato: rellenos seguidos se descartan (máximo uno cada 250 ms) y el resto del dibujo pasa', async () => {
-  const a = await connect(srv.port, '10.7.0.1');
-  const b = await connect(srv.port, '10.7.0.2');
+  const a = await connect(srv.port, '203.0.7.1');
+  const b = await connect(srv.port, '203.0.7.2');
   a.send({ t: 'create', game: 'garabato', name: 'Ana' });
   await wait(150);
   b.send({ t: 'join', game: 'garabato', code: a.last('joined').code, name: 'Beto' });
@@ -38,5 +38,5 @@ test('Garabato: rellenos seguidos se descartan (máximo uno cada 250 ms) y el re
 });
 
 test('el servidor no registra errores no controlados', () => {
-  assert.doesNotMatch(srv.logs(), /\bfatal\b|TypeError|ReferenceError/);
+  assert.doesNotMatch(srv.logs(), /\bfatal\b|^\S+ error /m);
 });

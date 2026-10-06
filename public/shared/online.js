@@ -116,6 +116,8 @@ export class OnlineRoom {
     this.myId = null;
     this.room = null;
     this.key = `gameit:session:${game}`;
+    // salida a propósito desde el portal (botón Menú): se avisa al servidor para no dejar un "fantasma" en la sala
+    window.GameIt?.onLeave?.(() => this.wanted && this.leave());
   }
 
   get session() {

@@ -46,9 +46,10 @@ const CFG = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
-  // proxies de confianza delante del servidor (Render = 1): la IP del cliente es la N-ésima desde la derecha de X-Forwarded-For
-  proxyHops: num('TRUST_PROXY_HOPS', env('TRUST_PROXY', '1') === '1' ? 1 : 0),
-  ipHeader: env('CLIENT_IP_HEADER', '').toLowerCase(), // opcional, p. ej. cf-connecting-ip si todo pasa por Cloudflare
+  // IP del cliente (ver clientIp): por defecto es automática. Opcional: CLIENT_IP_HEADER (encabezado que escribe el proxy, p. ej.
+  // cf-connecting-ip) o TRUST_PROXY_HOPS (cantidad de proxies que agregan una entrada a X-Forwarded-For, contando desde la derecha).
+  proxyHops: num('TRUST_PROXY_HOPS', 0),
+  ipHeader: env('CLIENT_IP_HEADER', '').toLowerCase(),
   maxRooms: num('MAX_ROOMS', 300),
   maxConnPerIp: num('MAX_CONN_PER_IP', 6),
   roomsPerIpWindow: num('ROOMS_PER_IP', 6),
@@ -84,23 +85,45 @@ function normIp(ip) {
   return `${full.slice(0, 4).map((x) => x.toLowerCase().replace(/^0+(?=.)/, '')).join(':')}::/64`;
 }
 
+const unmap = (ip) => String(ip || '').trim().replace(/^::ffff:(?=\d+\.)/i, '');
+const PRIVATE_V4 = [/^10\./, /^127\./, /^0\./, /^169\.254\./, /^192\.168\./, /^172\.(1[6-9]|2\d|3[01])\./, /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./];
+/** ¿Es una dirección interna (privada, loopback, enlace local, CGNAT)? Esas nunca son un jugador de internet. */
+function isPrivate(ip) {
+  ip = unmap(ip);
+  if (isIP(ip) === 4) return PRIVATE_V4.some((r) => r.test(ip));
+  if (isIP(ip) === 6) return /^(::1?$|f[cd]|fe[89ab])/i.test(ip);
+  return true;
+}
+
 /**
- * IP del cliente para los límites. La primera entrada de X-Forwarded-For la escribe el propio cliente:
- * solo son confiables las que agregan los proxies, contando desde la derecha.
+ * IP del cliente para los límites (conexiones, salas y uniones por IP).
+ *  1. Si quien se conecta por TCP es una dirección pública, no hay un proxy nuestro delante: los encabezados los escribe el
+ *     propio cliente y no se les cree.
+ *  2. Detrás de un proxy (el par TCP es privado, como el balanceador de Render), en este orden: CLIENT_IP_HEADER si está;
+ *     TRUST_PROXY_HOPS si está (entrada N desde la derecha de X-Forwarded-For); cf-connecting-ip (Cloudflare lo pisa);
+ *     y si no, la primera dirección pública de X-Forwarded-For contando desde la derecha (se saltean los saltos internos).
+ *     La entrada de más a la izquierda la escribe el cliente, así que nunca se usa sola.
  */
 function clientIp(req) {
-  const direct = req.socket.remoteAddress || '?';
-  if (CFG.ipHeader) {
-    const v = String(req.headers[CFG.ipHeader] || '').trim();
-    if (isIP(v)) return normIp(v);
-  }
-  if (!CFG.proxyHops) return normIp(direct);
+  const peer = unmap(req.socket.remoteAddress || '?');
+  if (!isPrivate(peer)) return normIp(peer);
+  const header = (name) => {
+    const v = String(req.headers[name] || '').trim();
+    return isIP(v) ? v : '';
+  };
+  if (CFG.ipHeader && header(CFG.ipHeader)) return normIp(header(CFG.ipHeader));
   const list = String(req.headers['x-forwarded-for'] || '')
     .split(',')
-    .map((x) => x.trim())
+    .map(unmap)
     .filter(Boolean);
-  const ip = list.length >= CFG.proxyHops ? list[list.length - CFG.proxyHops] : '';
-  return normIp(isIP(ip) ? ip : direct);
+  if (CFG.proxyHops) {
+    const ip = list.length >= CFG.proxyHops ? list[list.length - CFG.proxyHops] : '';
+    if (isIP(ip)) return normIp(ip);
+  } else {
+    if (header('cf-connecting-ip')) return normIp(header('cf-connecting-ip'));
+    for (let i = list.length - 1; i >= 0; i--) if (isIP(list[i]) && !isPrivate(list[i])) return normIp(list[i]);
+  }
+  return normIp(peer);
 }
 
 function windowHit(map, ip, limit, windowMs) {
@@ -290,6 +313,12 @@ function joinRoom(ws, code, name, token, game) {
   }
   const mod = GAMES[room.game];
   if (room.state !== 'lobby' && !mod.lateJoin) return send(ws, { t: 'error', code: 'in_progress' });
+  if (room.players.size >= mod.maxPlayers && (room.state !== 'playing' || mod.lateJoin)) {
+    // alguien que se desconectó (y espera volver) no puede dejar afuera a quien quiere entrar: se libera el lugar del que hace más que se fue (nunca el del anfitrión)
+    const ghost = [...room.players.values()].filter((p) => !p.connected && p.id !== room.host).sort((a, b) => a.goneAt - b.goneAt)[0];
+    if (ghost) removePlayer(room, ghost.id);
+    if (rooms.get(room.code) !== room) return send(ws, { t: 'error', code: 'not_found' });
+  }
   if (room.players.size >= mod.maxPlayers) return send(ws, { t: 'error', code: 'room_full' });
   addPlayer(room, ws, name);
 }
@@ -386,11 +415,10 @@ function onMessage(ws, raw) {
       if (room.host !== ws.pid) return send(ws, { t: 'error', code: 'not_host' });
       if (room.state === 'playing') return;
       const mod = GAMES[room.game];
-      // quien se desconectó en el lobby y no volvió no ocupa lugar en la partida
+      // primero se valida con los que están conectados; solo si se va a empezar se saca a quien se desconectó y no volvió (no ocupa lugar en la partida)
+      if ([...room.players.values()].filter((p) => p.connected).length < (mod.minPlayers || 1)) return send(ws, { t: 'error', code: 'need_players' });
       for (const p of [...room.players.values()]) if (!p.connected) removePlayer(room, p.id);
       if (rooms.get(room.code) !== room) return;
-      const active = [...room.players.values()].filter((p) => p.connected);
-      if (active.length < (mod.minPlayers || 1)) return send(ws, { t: 'error', code: 'need_players' });
       if (mod.settings) room.settings = mod.settings(room.settings, msg.settings || msg);
       const why = mod.canStart?.(room);
       if (why) return send(ws, { t: 'error', code: why });
@@ -543,5 +571,13 @@ const onFatal = (kind) => (e) => {
 };
 process.on('uncaughtException', onFatal('uncaughtException'));
 process.on('unhandledRejection', onFatal('unhandledRejection'));
+
+const onListenError = (e) => {
+  // puerto ocupado o sin permiso: si el proceso siguiera vivo (el heartbeat lo mantiene) quedaría colgado sin escuchar
+  log('fatal', 'listen', e?.message || e);
+  process.exit(1);
+};
+http.on('error', onListenError);
+wss.on('error', onListenError);
 
 http.listen(CFG.port, () => log(`game.it server en :${CFG.port}`, `juegos: ${Object.keys(GAMES).join(', ')}`, CFG.origins.length ? `orígenes: ${CFG.origins.join(', ')}` : 'orígenes: todos'));

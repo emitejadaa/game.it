@@ -27,7 +27,7 @@
   var script = document.currentScript;
   var embedded = window.parent !== window;
   var parentOrigin = '*';
-  var subs = { prefs: [], pause: [], resume: [] };
+  var subs = { prefs: [], pause: [], resume: [], leave: [] };
   var paused = false;
   var readySent = false;
   var fpsEl = null;
@@ -132,6 +132,7 @@
       reqs[d.id](d.value);
       delete reqs[d.id];
     }
+    else if (d.type === 'leave') subs.leave.forEach(function (fn) { try { fn(); } catch (err) {} });
     else if (d.type === 'pause') setPaused(true);
     else if (d.type === 'resume') setPaused(false);
   });
@@ -196,6 +197,8 @@
       return function () { subs.prefs.splice(subs.prefs.indexOf(fn), 1); };
     },
     onPause: function (fn) { subs.pause.push(fn); },
+    /** El jugador sale del juego a propósito (botón Menú del portal): hay un instante para avisar al servidor que se va. */
+    onLeave: function (fn) { subs.leave.push(fn); },
     onResume: function (fn) { subs.resume.push(fn); },
     /** Progreso de carga 0..1 (opcional). */
     progress: function (p) { post('progress', { value: +p || 0 }); },

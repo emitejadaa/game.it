@@ -147,6 +147,8 @@ function teardown() {
 /** Cierra el juego pasando por la pantalla de carga. */
 export async function close(onReveal) {
   if (!current) return;
+  send('leave'); // el juego avisa al servidor que se va (si no, el anfitrión queda de "fantasma" hasta que vence la gracia de reconexión)
+  await new Promise((r) => setTimeout(r, 80));
   await loader.show('');
   teardown();
   await loader.hide(420, onReveal);
