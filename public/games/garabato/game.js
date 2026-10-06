@@ -284,7 +284,8 @@ function toCanvas(e) {
   return [Math.round(((e.clientX - r.left) / r.width) * W), Math.round(((e.clientY - r.top) / r.height) * H)];
 }
 const MAX_FILLS = 40;
-const FILL_GAP_MS = 250;
+// el cliente es más estricto que el servidor (250 ms): así un relleno que el cliente deja pasar nunca llega al servidor "demasiado pronto"
+const FILL_GAP_MS = 350;
 const clampPt = ([x, y]) => [Math.max(-10, Math.min(W + 10, x)), Math.max(-10, Math.min(H + 10, y))];
 cv.addEventListener('pointerdown', (e) => {
   if (!isDrawer()) return;
@@ -307,8 +308,8 @@ cv.addEventListener('pointerdown', (e) => {
     S.lastFill = nowF;
     const op = { k: 'f', x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)), c: S.color };
     S.ops.push(op);
+    online.send({ t: 'op', o: op }); // antes de aplicarlo: el relleno tarda en pintarse y el servidor mide cuándo llega
     apply(op);
-    online.send({ t: 'op', o: op });
     return;
   }
   cv.setPointerCapture(e.pointerId);

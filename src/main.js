@@ -61,8 +61,8 @@ async function menuWithNote(text, ms) {
 async function route() {
   const m = location.hash.match(/^#play\/([\w-]+)(\?[^#]*)?/);
   const g = m && byId(m[1].toLowerCase());
-  if (m && !g) {
-    // enlace viejo, con un error de tipeo o a un juego oculto
+  if (location.hash.startsWith('#play/') && !g) {
+    // enlace viejo, con un error de tipeo, sin id ("#play/") o a un juego oculto
     await menuWithNote(t('menu.notFound'), 1800);
   } else if (g && !playable(g)) {
     // enlace directo a un juego que no corre en este dispositivo
@@ -214,6 +214,7 @@ async function start() {
     renderMenu({ animate: false });
     app.classList.add('ready');
     await route();
+    if (loader.isVisible() && !player.isActive()) await loader.hide(0); // ninguna rama de route() retiró el loader: nunca queda tapando el menú
   } else {
     await loader.hide(900, () => {
       renderMenu();

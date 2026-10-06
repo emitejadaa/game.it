@@ -99,7 +99,7 @@ function cell(x, y) {
   return cells[y * W + x];
 }
 const isOpen = (x, y) => cell(x, y) === OPEN;
-const inTunnel = (x, y) => Math.round(y) === TUNNEL_Y && (x < 3.5 || x > 24.5);
+const inTunnel = (x, y) => Math.round(y) === TUNNEL_Y && (x < 3.5 || x > 23.5);
 
 const DIRS = { up: [0, -1], left: [-1, 0], down: [0, 1], right: [1, 0] };
 const DIR_ORDER = ['up', 'left', 'down', 'right'];
@@ -149,7 +149,7 @@ const S = {
   modeTime: 0,
   fright: 0,
   chain: 0,
-  freeze: 0, // pausa breve al comer un fantasma
+  freeze: 0, // pausa breve al comer un centinela
   sinceDot: 0,
   houseDots: 0,
   diedThisLevel: false,
@@ -203,6 +203,7 @@ function palette() {
     eye: '#ffffff',
     pupil: dark ? '#1c2cff' : '#1422b8',
     glow: p.glow,
+    dark,
   };
 }
 
@@ -291,7 +292,7 @@ function buildMaze(color) {
   g.strokeStyle = colors.bg;
   g.lineWidth = tube - line * 2;
   g.stroke(path);
-  // puerta de la casa de los fantasmas
+  // puerta de la casa de los centinelas
   g.strokeStyle = colors.door;
   g.lineWidth = line * 1.5;
   g.beginPath();
@@ -921,7 +922,7 @@ function drawGhost(g) {
   if (g.frightened && !eyesOnly) {
     scared = true;
     flashing = S.fright < 2 && Math.floor(S.fright * 5) % 2 === 0;
-    body = flashing ? colors.flash : colors.frightened;
+    body = flashing ? (colors.dark ? colors.flash : colors.fg) : colors.frightened;
   }
   ctx.save();
   ctx.translate(x, y);
@@ -962,7 +963,7 @@ function drawGhost(g) {
     noGlow();
   }
   if (scared) {
-    ctx.strokeStyle = flashing ? colors.red : '#ffd9e6';
+    ctx.strokeStyle = flashing ? colors.red : colors.dark ? '#ffd9e6' : colors.frightened;
     ctx.lineWidth = Math.max(1.5, T * 0.14);
     ctx.lineCap = 'round';
     const e = r * 0.28;

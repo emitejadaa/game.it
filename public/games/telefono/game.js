@@ -190,7 +190,8 @@ function toCanvas(e) {
   return [Math.round(((e.clientX - r.left) / r.width) * W), Math.round(((e.clientY - r.top) / r.height) * H)];
 }
 const MAX_FILLS = 40;
-const FILL_GAP_MS = 250;
+// el cliente es más estricto que el servidor (250 ms): así un relleno que el cliente deja pasar nunca llega al servidor "demasiado pronto"
+const FILL_GAP_MS = 350;
 const clampPt = ([x, y]) => [Math.max(-10, Math.min(W + 10, x)), Math.max(-10, Math.min(H + 10, y))];
 cv.addEventListener('pointerdown', (e) => {
   if (!canDraw()) return;
@@ -213,8 +214,8 @@ cv.addEventListener('pointerdown', (e) => {
     S.lastFill = nowF;
     const op = { k: 'f', x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)), c: S.color };
     S.ops.push(op);
+    online.send({ t: 'op', o: op }); // antes de aplicarlo: el relleno tarda en pintarse y el servidor mide cuándo llega
     apply(g, op);
-    online.send({ t: 'op', o: op });
     return;
   }
   cv.setPointerCapture(e.pointerId);
@@ -706,13 +707,18 @@ async function saveAlbum(items) {
   sfx('ui');
 }
 
-function leave() {
-  online?.leave();
+/** Sale de la sala (por voluntad propia, porque se cerró o porque te sacaron): sin esto, una sala nueva (partida 1) se ignoraba por ser "más vieja" que la anterior. */
+function resetSession() {
   S.room = null;
   S.tl = null;
-  newGame(0); // sin esto, una sala nueva (partida 1) se ignoraba por ser "más vieja" que la anterior
+  newGame(0);
   stopReplays();
   $('app').hidden = true;
+}
+
+function leave() {
+  online?.leave();
+  resetSession();
   show('home');
   refreshRooms();
 }
@@ -795,10 +801,7 @@ function onMessage(m) {
   }
   if (m.t === 'closed' || m.t === 'kicked') {
     $('h-status').textContent = netText(m.t === 'kicked' ? 'kicked' : `closed_${m.reason}`);
-    S.room = null;
-    S.tl = null;
-    $('app').hidden = true;
-    stopReplays();
+    resetSession();
     show('home');
   }
 }
