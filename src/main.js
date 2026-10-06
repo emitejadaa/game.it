@@ -4,7 +4,8 @@ import './styles/panels.css';
 
 import * as prefs from './core/prefs.js';
 import { setLang, t, translateDom } from './core/i18n.js';
-import { available, byId, playable } from './core/registry.js';
+import { available, byId, playable, dailyGames } from './core/registry.js';
+import * as daily from './core/daily.js';
 import * as device from './core/device.js';
 import { track, recent, recommend } from './core/recent.js';
 import * as loader from './ui/loader.js';
@@ -19,15 +20,25 @@ const app = document.getElementById('app');
 const $ = (id) => document.getElementById(id);
 
 // ---------- Menú ----------
+/** Insignia de la tarjeta de un juego diario: "Nuevo" si hoy no se jugó, "✓ racha N" si ya está hecho. */
+function dailyBadge(g) {
+  const st = daily.status(g.id);
+  if (!st?.done) return { text: t('menu.dailyNew'), cls: 'new' };
+  return { text: `✓${st.won && st.streak > 1 ? ` ${t('menu.dailyStreak', { n: st.streak })}` : ''}`, cls: 'done' };
+}
+
 function renderMenu({ animate = true } = {}) {
+  const dg = dailyGames();
+  $('shelf-daily').hidden = !dg.length;
+  if (dg.length) render($('grid-daily'), dg, { animate, badge: dailyBadge });
   const rec = recent(6);
   const forYou = recommend(6);
   $('shelf-recent').hidden = !rec.length;
   $('shelf-for-you').hidden = !forYou.length;
-  if (rec.length) render($('grid-recent'), rec, { animate });
-  if (forYou.length) render($('grid-for-you'), forYou, { animate, offset: rec.length });
+  if (rec.length) render($('grid-recent'), rec, { animate, offset: dg.length });
+  if (forYou.length) render($('grid-for-you'), forYou, { animate, offset: dg.length + rec.length });
   const games = available();
-  render($('grid-all'), games, { fill: true, animate, offset: rec.length + forYou.length });
+  render($('grid-all'), games, { fill: true, animate, offset: dg.length + rec.length + forYou.length });
   $('count-all').textContent = games.length === 1 ? t('menu.game') : t('menu.games', { n: games.length });
   const empty = $('all-empty');
   empty.hidden = games.length > 0;
@@ -95,6 +106,12 @@ addEventListener('hashchange', (e) => {
   if (/#play\//.test(location.hash) && !/#play\//.test(e.oldURL)) enteredFromMenu = true;
   route();
 });
+
+// un juego diario (iframe del mismo origen) deja su resumen en localStorage: las insignias del menú se actualizan solas
+addEventListener('storage', (e) => {
+  if (e.key?.startsWith('gameit:daily:') && !player.isActive()) renderMenu({ animate: false });
+});
+document.addEventListener('visibilitychange', () => !document.hidden && !player.isActive() && renderMenu({ animate: false }));
 
 document.addEventListener('click', (e) => {
   const card = e.target.closest?.('.card[data-id]');

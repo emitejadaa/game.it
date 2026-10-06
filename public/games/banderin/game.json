@@ -1,0 +1,20 @@
+{
+  "id": "banderin",
+  "title": { "es": "Banderín", "en": "Banderín" },
+  "description": {
+    "es": "La bandera del día está tapada por bloques: adiviná el país en 6 intentos. Un desafío nuevo todos los días.",
+    "en": "Today's flag is hidden behind blocks: guess the country in 6 tries. A new puzzle every day."
+  },
+  "categories": ["diarios", "puzzle", "casual"],
+  "tags": ["bandera", "flag", "pais", "country", "geografia", "geography", "diario", "daily", "adivinar", "guess"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": false, "multiplayer": false, "story": false, "daily": true },
+  "daily": { "epoch": "2026-10-06" },
+  "order": 27
+}

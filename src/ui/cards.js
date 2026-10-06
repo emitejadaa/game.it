@@ -2,24 +2,25 @@ import { pick, t } from '../core/i18n.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-function cardHtml(g, i, enter) {
+function cardHtml(g, i, enter, badge) {
   const title = esc(pick(g.title));
   const media = g.thumbnail
     ? `<img src="${esc(g.thumbnail)}" alt="" loading="lazy" decoding="async" draggable="false">`
     : `<div class="ph">${esc(title.slice(0, 2))}</div>`;
   return `<a class="card${enter}" href="#play/${esc(g.id)}" data-id="${esc(g.id)}" style="--i:${i}" aria-label="${title}">
-    ${media}<div class="name"><span>${title}</span></div></a>`;
+    ${media}${badge ? `<span class="badge ${esc(badge.cls)}">${esc(badge.text)}</span>` : ''}<div class="name"><span>${title}</span></div></a>`;
 }
 
 const soonHtml = (i, enter) => `<div class="card soon${enter}" style="--i:${i}" aria-hidden="true"><b>${t('menu.soon')}</b></div>`;
 
 /**
  * Pinta una grilla de tarjetas. `fill` agrega espacios "pronto" hasta completar la fila
- * (se ve la estructura aunque todavía haya pocos juegos).
+ * (se ve la estructura aunque todavía haya pocos juegos). `badge(g)` devuelve { text, cls } para una insignia en la
+ * esquina de la tarjeta (juegos diarios) o null.
  */
-export function render(grid, games, { fill = false, offset = 0, animate = true } = {}) {
+export function render(grid, games, { fill = false, offset = 0, animate = true, badge = null } = {}) {
   const enter = animate ? ' enter' : '';
-  let html = games.map((g, i) => cardHtml(g, i + offset, enter)).join('');
+  let html = games.map((g, i) => cardHtml(g, i + offset, enter, badge?.(g))).join('');
   if (fill) {
     const cols = columns(grid);
     const min = Math.max(cols, 4);

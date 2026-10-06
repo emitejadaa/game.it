@@ -1,0 +1,20 @@
+{
+  "id": "quinteto",
+  "title": { "es": "Quinteto", "en": "Quinteto" },
+  "description": {
+    "es": "Adiviná la palabra de 5 letras del día en 6 intentos. Un desafío nuevo todos los días.",
+    "en": "Guess today's 5-letter word in 6 tries. A new puzzle every day."
+  },
+  "categories": ["diarios", "palabras", "puzzle", "casual"],
+  "tags": ["palabra", "word", "diario", "daily", "adivinar", "guess", "letras", "letters", "5 letras"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": false, "multiplayer": false, "story": false, "daily": true },
+  "daily": { "epoch": "2026-10-06" },
+  "order": 22
+}

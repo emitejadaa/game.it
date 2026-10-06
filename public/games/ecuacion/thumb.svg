@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+<defs><filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="320" height="200" fill="#07070a"/>
+<rect x="38.5" y="56.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="51.5" y="74.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">1</text>
+<rect x="69.5" y="56.0" width="26" height="26" rx="5" fill="#ffb800" filter="url(#g)"/>
+<text x="82.5" y="74.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#07070a">2</text>
+<rect x="100.5" y="56.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="113.5" y="74.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">+</text>
+<rect x="131.5" y="56.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="144.5" y="74.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">3</text>
+<rect x="162.5" y="56.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="175.5" y="74.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">4</text>
+<rect x="193.5" y="56.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="206.5" y="74.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">=</text>
+<rect x="224.5" y="56.0" width="26" height="26" rx="5" fill="#ffb800" filter="url(#g)"/>
+<text x="237.5" y="74.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#07070a">4</text>
+<rect x="255.5" y="56.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="268.5" y="74.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">6</text>
+<rect x="38.5" y="87.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="51.5" y="105.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">7</text>
+<rect x="69.5" y="87.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="82.5" y="105.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">×</text>
+<rect x="100.5" y="87.0" width="26" height="26" rx="5" fill="#ffb800" filter="url(#g)"/>
+<text x="113.5" y="105.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#07070a">8</text>
+<rect x="131.5" y="87.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="144.5" y="105.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">-</text>
+<rect x="162.5" y="87.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="175.5" y="105.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">9</text>
+<rect x="193.5" y="87.0" width="26" height="26" rx="5" fill="#b6ff00" filter="url(#g)"/>
+<text x="206.5" y="105.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#07070a">=</text>
+<rect x="224.5" y="87.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="237.5" y="105.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">4</text>
+<rect x="255.5" y="87.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="268.5" y="105.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">7</text>
+<rect x="38.5" y="118.0" width="26" height="26" rx="5" fill="#b6ff00" filter="url(#g)"/>
+<text x="51.5" y="136.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#07070a">1</text>
+<rect x="69.5" y="118.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="82.5" y="136.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">8</text>
+<rect x="100.5" y="118.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="113.5" y="136.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">+</text>
+<rect x="131.5" y="118.0" width="26" height="26" rx="5" fill="#ffb800" filter="url(#g)"/>
+<text x="144.5" y="136.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#07070a">2</text>
+<rect x="162.5" y="118.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="175.5" y="136.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">7</text>
+<rect x="193.5" y="118.0" width="26" height="26" rx="5" fill="#b6ff00" filter="url(#g)"/>
+<text x="206.5" y="136.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#07070a">=</text>
+<rect x="224.5" y="118.0" width="26" height="26" rx="5" fill="#ffb800" filter="url(#g)"/>
+<text x="237.5" y="136.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#07070a">4</text>
+<rect x="255.5" y="118.0" width="26" height="26" rx="5" fill="#2a2a36"/>
+<text x="268.5" y="136.8" font-family="JetBrains Mono, monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#eaeaf0">5</text>
+</svg>

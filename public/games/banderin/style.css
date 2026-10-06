@@ -1,0 +1,49 @@
+/* Banderín: la bandera del día tapada por bloques que se destapan con cada error. */
+.bd-flag {
+  position: relative;
+  width: min(100%, 340px);
+  aspect-ratio: 4 / 3;
+  flex: none;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--dg-surface);
+}
+.bd-flag img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.bd-cover {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+.bd-block {
+  background: var(--dg-surface);
+  border: 1px solid color-mix(in oklab, var(--gi-accent, #00f0ff) 22%, transparent);
+  display: grid;
+  place-items: center;
+  color: color-mix(in oklab, var(--gi-accent, #00f0ff) 55%, transparent);
+  font-size: 18px;
+  font-weight: 700;
+  transition: opacity 520ms var(--dg-ease), transform 520ms var(--dg-ease);
+}
+.bd-block.open {
+  opacity: 0;
+  transform: scale(0.92);
+  pointer-events: none;
+}
+.bd-count {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gi-mute, #6f6f80);
+}

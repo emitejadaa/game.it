@@ -266,6 +266,37 @@
   opacity: 0.7;
 }
 
+/* insignia de los juegos diarios ("Nuevo" / "✓ racha N") */
+.card .badge {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  right: 10px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.card .badge.new {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: var(--glow-sm);
+  animation: badge-pulse 2.4s var(--ease-io) infinite;
+}
+.card .badge.done {
+  background: color-mix(in oklab, var(--bg) 80%, transparent);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+@keyframes badge-pulse {
+  50% {
+    transform: scale(1.07);
+  }
+}
+
 /* ============ Búsqueda (panel superior) ============ */
 .scrim {
   position: fixed;

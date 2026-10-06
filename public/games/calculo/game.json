@@ -1,0 +1,50 @@
+{
+  "id": "calculo",
+  "title": {
+    "es": "Cálculo",
+    "en": "Cálculo"
+  },
+  "description": {
+    "es": "Hay un resultado y una cuenta oculta que lo da: adiviná cuál es en 6 intentos. Un desafío nuevo todos los días.",
+    "en": "There is a result and a hidden calculation that gives it: find it in 6 tries. A new puzzle every day."
+  },
+  "categories": [
+    "diarios",
+    "puzzle",
+    "casual"
+  ],
+  "tags": [
+    "matematica",
+    "math",
+    "calculo",
+    "calculation",
+    "cuentas",
+    "diario",
+    "daily",
+    "numeros",
+    "numbers"
+  ],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": [
+    "desktop",
+    "mobile"
+  ],
+  "orientation": "any",
+  "input": [
+    "keyboard",
+    "touch"
+  ],
+  "features": {
+    "online": false,
+    "multiplayer": false,
+    "story": false,
+    "daily": true
+  },
+  "daily": {
+    "epoch": "2026-10-06"
+  },
+  "order": 26
+}
