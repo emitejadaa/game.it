@@ -4,7 +4,7 @@
  * públicas o privadas, espectadores, bots y chat. Variantes: Clásico, Futsal, Hielo y Caos.
  */
 import { TPS } from './shared/match.js';
-import { MODES, STADIUMS, resolveStadium } from './shared/stadiums.js';
+import { MODES, STADIUMS, resolveStadium, hasMode, hasStadium } from './shared/stadiums.js';
 import { LocalSession, NetSession } from './play.js';
 import { Renderer, COLORS } from './render.js';
 import * as input from './input.js';
@@ -777,8 +777,8 @@ function renderRooms(list) {
   list.sort((a, b) => (a.state === 'lobby' ? 0 : 1) - (b.state === 'lobby' ? 0 : 1) || b.n - a.n);
   el.innerHTML = list
     .map((r) => {
-      const mode = MODES[r.mode] ? G.t(MODES[r.mode].name) : '';
-      const st = STADIUMS[r.stadium] ? G.t(STADIUMS[r.stadium].name) : t('auto');
+      const mode = hasMode(r.mode) ? G.t(MODES[r.mode].name) : '';
+      const st = hasStadium(r.stadium) ? G.t(STADIUMS[r.stadium].name) : t('auto');
       const live = r.state === 'playing';
       return `<li data-code="${esc(r.code)}" class="${r.n >= r.max ? 'full' : ''}"><div style="min-width:0;display:grid"><b>${esc(r.name)}</b><small>${esc(mode)} · ${esc(st)}${r.bots ? ` · ${r.bots} bots` : ''}</small></div><span class="pill ${live ? 'live' : ''}">${live && r.sc ? `${r.sc[0]}-${r.sc[1]}` : t(live ? 'inGame' : 'inLobby')}</span><small>${esc(r.code)}</small><span class="n">${r.n}/${r.max}</span></li>`;
     })
@@ -996,7 +996,7 @@ function renderRoom(room) {
   const live = room.live;
   const modeId = playing && live ? live.mode : st.mode;
   const stadiumId = playing && live ? live.stadium : st.stadium;
-  $('room-sub').textContent = `${G.t(MODES[modeId]?.name || MODES.classic.name)} · ${STADIUMS[stadiumId] ? G.t(STADIUMS[stadiumId].name) : t('auto')} · ${room.players.length} ${t('players')}${playing ? ` · ${t('inGame')}` : ''}`;
+  $('room-sub').textContent = `${G.t(MODES[hasMode(modeId) ? modeId : 'classic'].name)} · ${hasStadium(stadiumId) ? G.t(STADIUMS[stadiumId].name) : t('auto')} · ${room.players.length} ${t('players')}${playing ? ` · ${t('inGame')}` : ''}`;
   $('room-code').textContent = room.code;
   const cols = { 0: [], 1: [], 2: [] };
   for (const p of room.players) {

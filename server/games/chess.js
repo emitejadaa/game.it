@@ -45,7 +45,7 @@ function start(room, api) {
   const black = ids.find((id) => id !== white);
   cs.lastWhite = white;
   cs.n++;
-  const tc = TCS[room.settings.tc] ? room.settings.tc : '5+0';
+  const tc = Object.hasOwn(TCS, room.settings.tc) ? room.settings.tc : '5+0';
   const [base, inc] = TCS[tc];
   room.data = { n: cs.n, white, black, pos: new Position(), moves: [], tc, inc: inc * 1000, clock: [base * 1000, base * 1000], running: -1, since: Date.now(), result: null, draw: null, again: [] };
   // primera jugada de las blancas
@@ -90,7 +90,7 @@ export default {
 
   settings(cur, s) {
     const out = { ...cur };
-    if (typeof s.tc === 'string' && TCS[s.tc]) out.tc = s.tc;
+    if (typeof s.tc === 'string' && Object.hasOwn(TCS, s.tc)) out.tc = s.tc;
     return out;
   },
 

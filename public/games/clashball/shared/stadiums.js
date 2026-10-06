@@ -59,15 +59,20 @@ export const STADIUMS = {
   bighockey: { name: { es: 'Hockey grande', en: 'Big hockey' }, args: ['hockey', 600, 270, 550, 240, 90, 160, 75, 150] },
 };
 
+// Los ids llegan de los clientes: solo valen claves propias ("constructor" o "__proto__" no son modos ni estadios).
+const own = (table, key) => (typeof key === 'string' && Object.hasOwn(table, key) ? table[key] : undefined);
+export const hasMode = (id) => !!own(MODES, id);
+export const hasStadium = (id) => !!own(STADIUMS, id);
+
 /** Estadio sugerido según jugadores por equipo y modo. */
 export function autoStadium(perTeam, mode) {
-  if (MODES[mode]?.rink) return perTeam <= 2 ? 'hockey' : 'bighockey';
+  if (own(MODES, mode)?.rink) return perTeam <= 2 ? 'hockey' : 'bighockey';
   if (perTeam <= 2) return 'classic';
   if (perTeam <= 4) return 'big';
   return 'huge';
 }
 
-export const resolveStadium = (id, perTeam, mode) => (STADIUMS[id] ? id : autoStadium(perTeam, mode));
+export const resolveStadium = (id, perTeam, mode) => (hasStadium(id) ? id : autoStadium(perTeam, mode));
 
 // ------------------------------------------------------------------ construcción
 function base(id, width, height) {
@@ -182,11 +187,11 @@ function hockeyStadium(id, width, height, bw, bh, gy, goalLine, ko, corner) {
 
 /** Arma el estadio con la física del modo. */
 export function buildStadium(id, modeId = 'classic') {
-  const def = STADIUMS[id] || STADIUMS.classic;
-  const mode = MODES[modeId] || MODES.classic;
+  const def = own(STADIUMS, id) || STADIUMS.classic;
+  const mode = own(MODES, modeId) || MODES.classic;
   const [kind, ...args] = def.args;
   const st = kind === 'hockey' ? hockeyStadium(id, ...args) : classicStadium(id, ...args);
-  st.mode = MODES[modeId] ? modeId : 'classic';
+  st.mode = hasMode(modeId) ? modeId : 'classic';
   st.player = { ...PLAYER_PHYSICS, ...(mode.player || {}) };
   st.ball = { ...BALL_PHYSICS, ...(mode.ball || {}) };
   const n = mode.balls || 1;

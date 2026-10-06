@@ -13,6 +13,7 @@
  * y `listable` + `listInfo` (aparece en la lista de salas públicas si settings.public).
  */
 import { createServer } from 'node:http';
+import { isIP } from 'node:net';
 import { randomBytes, randomInt } from 'node:crypto';
 import { WebSocketServer } from 'ws';
 import minigolf from './games/minigolf.js';
@@ -45,7 +46,9 @@ const CFG = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
-  trustProxy: env('TRUST_PROXY', '1') === '1',
+  // proxies de confianza delante del servidor (Render = 1): la IP del cliente es la N-ésima desde la derecha de X-Forwarded-For
+  proxyHops: num('TRUST_PROXY_HOPS', env('TRUST_PROXY', '1') === '1' ? 1 : 0),
+  ipHeader: env('CLIENT_IP_HEADER', '').toLowerCase(), // opcional, p. ej. cf-connecting-ip si todo pasa por Cloudflare
   maxRooms: num('MAX_ROOMS', 300),
   maxConnPerIp: num('MAX_CONN_PER_IP', 6),
   roomsPerIpWindow: num('ROOMS_PER_IP', 6),
@@ -70,9 +73,34 @@ const ipJoins = new Map();
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 
 // ---------------- utilidades ----------------
+/** IPv6: una casa o un celular reciben un /64 entero, así que se limita por prefijo y no por dirección. */
+function normIp(ip) {
+  ip = String(ip || '').trim().replace(/^::ffff:(?=\d+\.)/, '');
+  if (isIP(ip) !== 6) return ip || '?';
+  const [head, tail = ''] = ip.split('::');
+  const h = head ? head.split(':') : [];
+  const t = tail ? tail.split(':') : [];
+  const full = [...h, ...Array(Math.max(0, 8 - h.length - t.length)).fill('0'), ...t];
+  return `${full.slice(0, 4).map((x) => x.toLowerCase().replace(/^0+(?=.)/, '')).join(':')}::/64`;
+}
+
+/**
+ * IP del cliente para los límites. La primera entrada de X-Forwarded-For la escribe el propio cliente:
+ * solo son confiables las que agregan los proxies, contando desde la derecha.
+ */
 function clientIp(req) {
-  const fwd = CFG.trustProxy && req.headers['x-forwarded-for'];
-  return (fwd ? String(fwd).split(',')[0] : req.socket.remoteAddress || '?').trim();
+  const direct = req.socket.remoteAddress || '?';
+  if (CFG.ipHeader) {
+    const v = String(req.headers[CFG.ipHeader] || '').trim();
+    if (isIP(v)) return normIp(v);
+  }
+  if (!CFG.proxyHops) return normIp(direct);
+  const list = String(req.headers['x-forwarded-for'] || '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
+  const ip = list.length >= CFG.proxyHops ? list[list.length - CFG.proxyHops] : '';
+  return normIp(isIP(ip) ? ip : direct);
 }
 
 function windowHit(map, ip, limit, windowMs) {
@@ -265,11 +293,13 @@ function leave(ws, reason = 'left') {
   const p = room.players.get(ws.pid);
   ws.room = null;
   if (!p) return;
-  if (reason === 'disconnect' && room.state === 'playing') {
+  if (reason === 'disconnect') {
+    // En cualquier estado se espera la reconexión (graceMs): en el lobby, compartir el link desde el celular
+    // suspende la pestaña y corta el socket. El barrido del heartbeat lo saca si no vuelve a tiempo.
     p.connected = false;
     p.ws = null;
     p.goneAt = Date.now();
-    GAMES[room.game].onDisconnect?.(room, room.api, p.id);
+    if (room.state === 'playing') GAMES[room.game].onDisconnect?.(room, room.api, p.id);
     sync(room);
     return;
   }
@@ -278,8 +308,12 @@ function leave(ws, reason = 'left') {
 
 function removePlayer(room, id) {
   room.players.delete(id);
-  if (!room.players.size || ![...room.players.values()].some((p) => p.connected)) return closeRoom(room, 'empty');
-  if (room.host === id) room.host = [...room.players.values()].find((p) => p.connected)?.id;
+  if (!room.players.size) return closeRoom(room, 'empty');
+  // quedan solo desconectados dentro de su gracia: la sala espera (el barrido los saca y la última baja la cierra)
+  if (room.host === id) {
+    const rest = [...room.players.values()];
+    room.host = (rest.find((p) => p.connected) || rest[0]).id;
+  }
   GAMES[room.game].removed?.(room, room.api, id);
   if (room.state === 'playing') GAMES[room.game].leave?.(room, room.api, id);
   sync(room);
@@ -345,6 +379,9 @@ function onMessage(ws, raw) {
       if (room.host !== ws.pid) return send(ws, { t: 'error', code: 'not_host' });
       if (room.state === 'playing') return;
       const mod = GAMES[room.game];
+      // quien se desconectó en el lobby y no volvió no ocupa lugar en la partida
+      for (const p of [...room.players.values()]) if (!p.connected) removePlayer(room, p.id);
+      if (rooms.get(room.code) !== room) return;
       const active = [...room.players.values()].filter((p) => p.connected);
       if (active.length < (mod.minPlayers || 1)) return send(ws, { t: 'error', code: 'need_players' });
       if (mod.settings) room.settings = mod.settings(room.settings, msg.settings || msg);
@@ -352,7 +389,17 @@ function onMessage(ws, raw) {
       if (why) return send(ws, { t: 'error', code: why });
       room.state = 'playing';
       touch(room);
-      mod.start(room, room.api);
+      try {
+        mod.start(room, room.api);
+      } catch (e) {
+        // un error al arrancar no deja la sala trabada en 'playing' sin partida
+        log('error', room.game, room.code, 'start', e?.stack || e);
+        for (const t of room.timers.values()) clearTimeout(t);
+        room.timers.clear();
+        room.state = 'lobby';
+        room.data = null;
+        send(ws, { t: 'error', code: 'start_failed' });
+      }
       sync(room);
       return;
     }
@@ -382,11 +429,13 @@ function onMessage(ws, raw) {
       if (mod.command) {
         const handled = mod.command(room, room.api, p, msg);
         if (handled === false) ws.strikes++;
+        else if (handled !== undefined && room.state === 'playing') touch(room);
         if (handled !== undefined) return;
       }
       if (room.state !== 'playing') return;
       const ok = mod.message?.(room, room.api, p, msg);
       if (ok === false) ws.strikes++;
+      else touch(room); // jugar cuenta como actividad: la sala no se cierra por 'idle' en pleno partido
     }
   }
 }
@@ -436,7 +485,11 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     const n = (ipConns.get(ws.ip) || 1) - 1;
     n ? ipConns.set(ws.ip, n) : ipConns.delete(ws.ip);
-    leave(ws, 'disconnect');
+    try {
+      leave(ws, 'disconnect');
+    } catch (e) {
+      log('error', ws.room?.game, ws.room?.code, 'close', e?.stack || e);
+    }
   });
   ws.on('error', () => {});
   send(ws, { t: 'hello', now: Date.now() });
@@ -454,16 +507,34 @@ setInterval(() => {
   }
   const now = Date.now();
   for (const room of [...rooms.values()]) {
-    const idle = now - room.lastActivity;
-    if (now - room.createdAt > CFG.roomMaxLifeMs) closeRoom(room, 'max_life');
-    else if (room.state !== 'playing' && idle > CFG.lobbyIdleMs) closeRoom(room, 'idle');
-    else if (room.state === 'playing' && idle > CFG.roomIdleMs) closeRoom(room, 'idle');
-    else
-      for (const p of [...room.players.values()])
-        if (!p.connected && p.goneAt && now - p.goneAt > CFG.graceMs) removePlayer(room, p.id);
+    try {
+      const idle = now - room.lastActivity;
+      if (now - room.createdAt > CFG.roomMaxLifeMs) closeRoom(room, 'max_life');
+      else if (room.state !== 'playing' && idle > CFG.lobbyIdleMs) closeRoom(room, 'idle');
+      else if (room.state === 'playing' && idle > CFG.roomIdleMs) closeRoom(room, 'idle');
+      else
+        for (const p of [...room.players.values()])
+          if (!p.connected && p.goneAt && now - p.goneAt > CFG.graceMs && rooms.get(room.code) === room) removePlayer(room, p.id);
+    } catch (e) {
+      // un módulo que falla al sacar a un jugador no frena el barrido de las demás salas
+      log('error', room.game, room.code, 'sweep', e?.stack || e);
+    }
   }
   for (const map of [ipRooms, ipJoins])
     for (const [ip, list] of map) if (!list.some((t) => now - t < CFG.roomsWindowMs)) map.delete(ip);
 }, CFG.heartbeatMs);
+
+// Último recurso: se registra y se sigue (reiniciar el proceso cortaría todas las salas). Si los errores
+// se disparan, se sale y Render levanta uno nuevo.
+let fatal = [];
+const onFatal = (kind) => (e) => {
+  log('fatal', kind, e?.stack || e);
+  const now = Date.now();
+  fatal = fatal.filter((t) => now - t < 60e3);
+  fatal.push(now);
+  if (fatal.length > 20) process.exit(1);
+};
+process.on('uncaughtException', onFatal('uncaughtException'));
+process.on('unhandledRejection', onFatal('unhandledRejection'));
 
 http.listen(CFG.port, () => log(`game.it server en :${CFG.port}`, `juegos: ${Object.keys(GAMES).join(', ')}`, CFG.origins.length ? `orígenes: ${CFG.origins.join(', ')}` : 'orígenes: todos'));
