@@ -1,0 +1,482 @@
+[
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Flores","palabras":["MARGARITA","JAZMÍN","TULIPÁN","ORQUÍDEA"]},
+      {"nivel":2,"tema":"Colores","palabras":["ROSA","CELESTE","TURQUESA","BORDÓ"]},
+      {"nivel":3,"tema":"Cosas que tienen teclas","palabras":["PIANO","ACORDEÓN","CAJERO","COMPU"]},
+      {"nivel":4,"tema":"Esconden un número","palabras":["AYUNO","ESTRÉS","BRONCE","MOCHO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Planetas","palabras":["MARTE","VENUS","SATURNO","URANO"]},
+      {"nivel":2,"tema":"Metales","palabras":["HIERRO","COBRE","ESTAÑO","MERCURIO"]},
+      {"nivel":3,"tema":"Palos de la baraja española","palabras":["ORO","COPA","ESPADA","BASTO"]},
+      {"nivel":4,"tema":"Esconden un animal","palabras":["GLOBO","PIRATA","GRANADA","ESPOSO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Pastas","palabras":["SORRENTINO","CANELONES","TALLARÍN","LASAÑA"]},
+      {"nivel":2,"tema":"Quesos","palabras":["PROVOLONE","ROQUEFORT","PARMESANO","CHEDDAR"]},
+      {"nivel":3,"tema":"Tipos de pizza","palabras":["FUGAZZETA","CALABRESA","NAPOLITANA","MUZZARELLA"]},
+      {"nivel":4,"tema":"Empiezan con una nota musical","palabras":["REMERA","MIEDO","FÁCIL","SOLDADO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Deportes de raqueta","palabras":["TENIS","PÁDEL","SQUASH","BÁDMINTON"]},
+      {"nivel":2,"tema":"Puestos del fútbol","palabras":["ARQUERO","DELANTERO","LATERAL","DEFENSOR"]},
+      {"nivel":3,"tema":"Partes de un auto","palabras":["VOLANTE","BUJÍA","EMBRAGUE","BAÚL"]},
+      {"nivel":4,"tema":"Cambian de significado con el o la","palabras":["CAPITAL","COMETA","CURA","FRENTE"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Mamíferos marinos","palabras":["BALLENA","DELFÍN","FOCA","ORCA"]},
+      {"nivel":2,"tema":"Peces","palabras":["TIBURÓN","ATÚN","SALMÓN","MERLUZA"]},
+      {"nivel":3,"tema":"Aves que no vuelan","palabras":["PINGÜINO","ÑANDÚ","AVESTRUZ","KIWI"]},
+      {"nivel":4,"tema":"Palabras esdrújulas","palabras":["PÁJARO","MÚSICA","CÁMARA","MÉDICO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Provincias argentinas","palabras":["SALTA","JUJUY","CHACO","MISIONES"]},
+      {"nivel":2,"tema":"Capitales sudamericanas","palabras":["MONTEVIDEO","QUITO","BOGOTÁ","ASUNCIÓN"]},
+      {"nivel":3,"tema":"Países de Sudamérica","palabras":["CHILE","BOLIVIA","ECUADOR","VENEZUELA"]},
+      {"nivel":4,"tema":"Ríos de la cuenca del Plata","palabras":["PARANÁ","PARAGUAY","URUGUAY","PILCOMAYO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Prendas de abrigo","palabras":["BUFANDA","GORRO","GUANTES","CAMPERA"]},
+      {"nivel":2,"tema":"Articulaciones","palabras":["CODO","RODILLA","TOBILLO","HOMBRO"]},
+      {"nivel":3,"tema":"Partes de una camisa","palabras":["CUELLO","PUÑO","BOTÓN","MANGA"]},
+      {"nivel":4,"tema":"Empiezan con una parte del cuerpo","palabras":["CARAMELO","PELOTA","MANOPLA","PIEDRA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Cosas del mate","palabras":["BOMBILLA","YERBA","TERMO","CALABAZA"]},
+      {"nivel":2,"tema":"Verduras","palabras":["ACELGA","ZANAHORIA","BERENJENA","PUERRO"]},
+      {"nivel":3,"tema":"Achuras","palabras":["CHINCHULÍN","MOLLEJA","MORCILLA","RIÑÓN"]},
+      {"nivel":4,"tema":"Empiezan con un artículo","palabras":["ELEFANTE","LADRILLO","LOSA","UNIFORME"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Insectos","palabras":["HORMIGA","ABEJA","MOSCA","GRILLO"]},
+      {"nivel":2,"tema":"Moluscos","palabras":["CARACOL","CALAMAR","PULPO","ALMEJA"]},
+      {"nivel":3,"tema":"Arácnidos","palabras":["ARAÑA","ESCORPIÓN","GARRAPATA","TARÁNTULA"]},
+      {"nivel":4,"tema":"Contienen las cinco vocales","palabras":["MURCIÉLAGO","EUCALIPTO","ARQUITECTO","EDUCACIÓN"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Monedas","palabras":["PESO","DÓLAR","EURO","YEN"]},
+      {"nivel":2,"tema":"Signos del zodíaco","palabras":["LIBRA","ARIES","LEO","VIRGO"]},
+      {"nivel":3,"tema":"Maneras de decir \"dinero\"","palabras":["PLATA","GUITA","LANA","PASTA"]},
+      {"nivel":4,"tema":"Se leen igual al revés","palabras":["RADAR","SOMOS","REVIVIR","RECONOCER"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Frutas con carozo","palabras":["DURAZNO","CIRUELA","CEREZA","ALBARICOQUE"]},
+      {"nivel":2,"tema":"Frutos secos","palabras":["NUEZ","ALMENDRA","AVELLANA","PISTACHO"]},
+      {"nivel":3,"tema":"Cosas de una picada","palabras":["SALAME","ACEITUNA","PALITOS","MANÍ"]},
+      {"nivel":4,"tema":"Cosas que tienen ojos","palabras":["AGUJA","PAPA","HURACÁN","QUESO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Géneros musicales","palabras":["ROCK","JAZZ","CUMBIA","REGGAE"]},
+      {"nivel":2,"tema":"Herramientas","palabras":["SERRUCHO","ALICATE","FORMÓN","MARTILLO"]},
+      {"nivel":3,"tema":"Cosas que tienen cabeza","palabras":["CLAVO","FÓSFORO","ALFILER","AJO"]},
+      {"nivel":4,"tema":"Anagramas de animales","palabras":["ATAR","ROTO","TOGA","CAVA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Cítricos","palabras":["LIMÓN","POMELO","MANDARINA","LIMA"]},
+      {"nivel":2,"tema":"Colores del arcoíris","palabras":["ROJO","AÑIL","VIOLETA","NARANJA"]},
+      {"nivel":3,"tema":"Precipitaciones","palabras":["LLUVIA","GRANIZO","NIEVE","GARÚA"]},
+      {"nivel":4,"tema":"Se rompen (en sentido figurado)","palabras":["HIELO","RÉCORD","PROMESA","SILENCIO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Unidades de tiempo","palabras":["SEMANA","SIGLO","DÉCADA","SEGUNDO"]},
+      {"nivel":2,"tema":"Unidades de medida","palabras":["METRO","LITRO","GRAMO","KILÓMETRO"]},
+      {"nivel":3,"tema":"Cuerpos geométricos","palabras":["CUBO","ESFERA","CONO","CILINDRO"]},
+      {"nivel":4,"tema":"Cosas que tienen boca","palabras":["RÍO","CUEVA","VOLCÁN","TÚNEL"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Felinos","palabras":["LEÓN","GUEPARDO","LINCE","PANTERA"]},
+      {"nivel":2,"tema":"Razas de perro","palabras":["LABRADOR","BOXER","DÁLMATA","COLLIE"]},
+      {"nivel":3,"tema":"Embutidos","palabras":["MORTADELA","CHORIZO","SALCHICHA","BONDIOLA"]},
+      {"nivel":4,"tema":"Al revés dicen otra palabra","palabras":["AMOR","ODIO","SALA","RAMA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Oficios","palabras":["PANADERO","CARPINTERO","PLOMERO","ZAPATERO"]},
+      {"nivel":2,"tema":"Gente de un juicio","palabras":["JUEZ","FISCAL","ABOGADO","TESTIGO"]},
+      {"nivel":3,"tema":"Tripulación de un barco","palabras":["CAPITÁN","GRUMETE","TIMONEL","MARINERO"]},
+      {"nivel":4,"tema":"Cosas que tienen cuello","palabras":["BOTELLA","GUITARRA","CAMISA","JIRAFA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"En el cielo nocturno","palabras":["LUNA","ESTRELLA","COMETA","GALAXIA"]},
+      {"nivel":2,"tema":"Elementos químicos","palabras":["HELIO","OXÍGENO","CARBONO","NITRÓGENO"]},
+      {"nivel":3,"tema":"Huesos","palabras":["FÉMUR","TIBIA","COSTILLA","RADIO"]},
+      {"nivel":4,"tema":"Nombres de mujer que son también cosas","palabras":["ALBA","PILAR","DOLORES","MARINA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Días de la semana","palabras":["LUNES","MARTES","JUEVES","SÁBADO"]},
+      {"nivel":2,"tema":"Meses del año","palabras":["ENERO","MARZO","JUNIO","AGOSTO"]},
+      {"nivel":3,"tema":"Fiestas de fin de año","palabras":["PESEBRE","TURRÓN","SIDRA","GUIRNALDA"]},
+      {"nivel":4,"tema":"Nombres de letras","palabras":["HACHE","EQUIS","ZETA","ERRE"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Legumbres","palabras":["LENTEJA","GARBANZO","POROTO","ARVEJA"]},
+      {"nivel":2,"tema":"Cereales","palabras":["TRIGO","AVENA","CEBADA","ARROZ"]},
+      {"nivel":3,"tema":"Hierbas aromáticas","palabras":["ALBAHACA","ROMERO","ORÉGANO","PEREJIL"]},
+      {"nivel":4,"tema":"Cosas que se baten","palabras":["HUEVOS","PALMAS","ALAS","CREMA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Deportes de combate","palabras":["BOXEO","JUDO","KARATE","ESGRIMA"]},
+      {"nivel":2,"tema":"Deportes acuáticos","palabras":["NATACIÓN","REMO","SURF","BUCEO"]},
+      {"nivel":3,"tema":"Deportes de invierno","palabras":["ESQUÍ","SNOWBOARD","CURLING","TRINEO"]},
+      {"nivel":4,"tema":"Otros nombres de la cabeza","palabras":["MATE","COCO","BOCHA","TESTA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Piezas de ajedrez","palabras":["TORRE","ALFIL","PEÓN","CABALLO"]},
+      {"nivel":2,"tema":"Juegos de cartas","palabras":["TRUCO","ESCOBA","CANASTA","CHINCHÓN"]},
+      {"nivel":3,"tema":"Cosas que tienen hojas","palabras":["LIBRO","PUERTA","ÁRBOL","CUCHILLO"]},
+      {"nivel":4,"tema":"Empiezan con ANTE","palabras":["ANTENA","ANTEOJOS","ANTEBRAZO","ANTESALA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Muebles","palabras":["SILLA","MESA","SOFÁ","ESTANTE"]},
+      {"nivel":2,"tema":"Cosas de una plaza","palabras":["BANCO","TOBOGÁN","HAMACA","SUBIBAJA"]},
+      {"nivel":3,"tema":"Electrodomésticos","palabras":["HELADERA","LICUADORA","TOSTADORA","LAVARROPAS"]},
+      {"nivel":4,"tema":"Después de SACA- forman un objeto","palabras":["PUNTAS","CORCHOS","MANCHAS","BOCADOS"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Continentes","palabras":["ÁFRICA","ASIA","EUROPA","OCEANÍA"]},
+      {"nivel":2,"tema":"Océanos","palabras":["ATLÁNTICO","PACÍFICO","ÍNDICO","ÁRTICO"]},
+      {"nivel":3,"tema":"Ríos del mundo","palabras":["NILO","AMAZONAS","DANUBIO","MISISIPI"]},
+      {"nivel":4,"tema":"Esconden la palabra MAR","palabras":["ARMARIO","CAMARERO","AMARILLO","MARIPOSA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Animales de zoológico","palabras":["CEBRA","PANDA","HIPOPÓTAMO","CAMELLO"]},
+      {"nivel":2,"tema":"Partes de una bicicleta","palabras":["PEDAL","MANUBRIO","CADENA","RUEDA"]},
+      {"nivel":3,"tema":"Sinónimos de \"miedo\"","palabras":["TEMOR","PAVOR","PÁNICO","ESPANTO"]},
+      {"nivel":4,"tema":"Ciudades argentinas que son otra palabra","palabras":["ROSARIO","CAMPANA","ESPERANZA","TIGRE"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Bebidas con alcohol","palabras":["VINO","CERVEZA","FERNET","LICOR"]},
+      {"nivel":2,"tema":"Bebidas calientes","palabras":["CAFÉ","TÉ","CHOCOLATE","CAPUCHINO"]},
+      {"nivel":3,"tema":"Postres","palabras":["FLAN","BUDÍN","TIRAMISÚ","MOUSSE"]},
+      {"nivel":4,"tema":"Se toman (sin ser bebidas)","palabras":["DECISIÓN","FOTO","RECREO","SOL"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Árboles","palabras":["ROBLE","SAUCE","PINO","CEIBO"]},
+      {"nivel":2,"tema":"Partes de un árbol","palabras":["RAÍZ","TRONCO","COPA","RAMA"]},
+      {"nivel":3,"tema":"Partes de una flor","palabras":["PÉTALO","ESTAMBRE","PISTILO","TALLO"]},
+      {"nivel":4,"tema":"Cosas que tienen corteza","palabras":["PAN","QUESO","TIERRA","CEREBRO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Útiles escolares","palabras":["CUADERNO","LAPICERA","GOMA","COMPÁS"]},
+      {"nivel":2,"tema":"Materias","palabras":["MATEMÁTICA","HISTORIA","GEOGRAFÍA","BIOLOGÍA"]},
+      {"nivel":3,"tema":"Figuras geométricas","palabras":["CÍRCULO","ROMBO","TRIÁNGULO","CUADRADO"]},
+      {"nivel":4,"tema":"Escritores latinoamericanos","palabras":["BORGES","CORTÁZAR","NERUDA","GALEANO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Ambientes de la casa","palabras":["COCINA","LIVING","DORMITORIO","BAÑO"]},
+      {"nivel":2,"tema":"Cosas del baño","palabras":["JABÓN","DUCHA","INODORO","BIDET"]},
+      {"nivel":3,"tema":"Cosas de la playa","palabras":["SOMBRILLA","BALDE","REPOSERA","TOALLA"]},
+      {"nivel":4,"tema":"Tienen una palabra que suena igual","palabras":["HOLA","TUBO","SIERRA","ASAR"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Transportes","palabras":["TREN","SUBTE","TRANVÍA","TAXI"]},
+      {"nivel":2,"tema":"Embarcaciones","palabras":["VELERO","CARGUERO","FRAGATA","CANOA"]},
+      {"nivel":3,"tema":"Formas de decir \"autobús\"","palabras":["COLECTIVO","BONDI","MICRO","GUAGUA"]},
+      {"nivel":4,"tema":"Anagramas de países","palabras":["PANEL","PURÉ","MONA","LIMA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Órganos","palabras":["CORAZÓN","HÍGADO","PULMÓN","RIÑÓN"]},
+      {"nivel":2,"tema":"Partes del ojo","palabras":["PUPILA","IRIS","RETINA","CÓRNEA"]},
+      {"nivel":3,"tema":"Partes del oído","palabras":["TÍMPANO","ESTRIBO","CARACOL","MARTILLO"]},
+      {"nivel":4,"tema":"Cosas de una herrería","palabras":["FRAGUA","TENAZAS","HERRADURA","FUELLE"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Personajes de cuentos","palabras":["CENICIENTA","PINOCHO","CAPERUCITA","RAPUNZEL"]},
+      {"nivel":2,"tema":"Cosas que avisan","palabras":["ALARMA","TIMBRE","BOCINA","SILBATO"]},
+      {"nivel":3,"tema":"Dioses griegos","palabras":["ZEUS","HERA","ARES","APOLO"]},
+      {"nivel":4,"tema":"Criaturas míticas","palabras":["MINOTAURO","CENTAURO","SIRENA","UNICORNIO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Sonidos de animales","palabras":["RUGIR","MUGIR","BALAR","RELINCHAR"]},
+      {"nivel":2,"tema":"Maneras de cocinar","palabras":["HERVIR","FREÍR","HORNEAR","SALTEAR"]},
+      {"nivel":3,"tema":"Maneras de caminar","palabras":["TROTAR","MARCHAR","PASEAR","DESFILAR"]},
+      {"nivel":4,"tema":"Maneras de decir \"hablar\"","palabras":["CHARLAR","PLATICAR","CONVERSAR","CHAMUYAR"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Países de Europa","palabras":["ESPAÑA","ITALIA","FRANCIA","ALEMANIA"]},
+      {"nivel":2,"tema":"Países de Centroamérica","palabras":["PANAMÁ","HONDURAS","GUATEMALA","NICARAGUA"]},
+      {"nivel":3,"tema":"Capitales europeas","palabras":["LISBOA","ATENAS","BERLÍN","VIENA"]},
+      {"nivel":4,"tema":"___ rusa","palabras":["MONTAÑA","ENSALADA","RULETA","MUÑECA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Cosas de un cumpleaños","palabras":["TORTA","SORPRESA","PIÑATA","TARJETA"]},
+      {"nivel":2,"tema":"Cosas que se soplan","palabras":["VELA","GLOBO","FLAUTA","SOPA"]},
+      {"nivel":3,"tema":"Cosas de un camping","palabras":["CARPA","LINTERNA","FOGÓN","MOCHILA"]},
+      {"nivel":4,"tema":"Cosas de un circo","palabras":["PAYASO","TRAPECIO","DOMADOR","ACRÓBATA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Salsas","palabras":["MAYONESA","MOSTAZA","CHIMICHURRI","KÉTCHUP"]},
+      {"nivel":2,"tema":"Especias","palabras":["PIMIENTA","CANELA","COMINO","AZAFRÁN"]},
+      {"nivel":3,"tema":"Comidas al paso","palabras":["EMPANADA","CHORIPÁN","LOMITO","PANCHO"]},
+      {"nivel":4,"tema":"Cosas que pican","palabras":["MOSQUITO","ORTIGA","PULGA","AJÍ"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Partes de una computadora","palabras":["TECLADO","MONITOR","PARLANTE","IMPRESORA"]},
+      {"nivel":2,"tema":"Fenómenos del cielo","palabras":["NUBE","TORMENTA","ARCOÍRIS","RELÁMPAGO"]},
+      {"nivel":3,"tema":"Enfermedades","palabras":["GRIPE","RESFRÍO","VARICELA","SARAMPIÓN"]},
+      {"nivel":4,"tema":"Bichos de la compu","palabras":["RATÓN","VIRUS","GUSANO","BUG"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Pintores","palabras":["PICASSO","DALÍ","GOYA","MIRÓ"]},
+      {"nivel":2,"tema":"Instrumentos de cuerda","palabras":["GUITARRA","VIOLÍN","ARPA","CHARANGO"]},
+      {"nivel":3,"tema":"Partes de un libro","palabras":["TAPA","LOMO","CAPÍTULO","PRÓLOGO"]},
+      {"nivel":4,"tema":"Cosas que se afinan","palabras":["VOZ","PUNTERÍA","MOTOR","OÍDO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Destinos turísticos argentinos","palabras":["BARILOCHE","USHUAIA","MENDOZA","IGUAZÚ"]},
+      {"nivel":2,"tema":"Cosas del fútbol","palabras":["PENAL","CÓRNER","OFFSIDE","TIRO LIBRE"]},
+      {"nivel":3,"tema":"Deportes de equipo","palabras":["RUGBY","HOCKEY","VÓLEY","BÁSQUET"]},
+      {"nivel":4,"tema":"Pelajes de caballo","palabras":["ALAZÁN","ZAINO","OVERO","TORDILLO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Frutas tropicales","palabras":["BANANA","ANANÁ","MANGO","PAPAYA"]},
+      {"nivel":2,"tema":"Verduras verdes","palabras":["BRÓCOLI","ESPINACA","LECHUGA","ZAPALLITO"]},
+      {"nivel":3,"tema":"Raíces y tubérculos","palabras":["PAPA","BATATA","MANDIOCA","ZANAHORIA"]},
+      {"nivel":4,"tema":"Me importa un ___","palabras":["PEPINO","RÁBANO","PIMIENTO","PITO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Sinónimos de \"grande\"","palabras":["ENORME","GIGANTE","INMENSO","COLOSAL"]},
+      {"nivel":2,"tema":"Sinónimos de \"camino\"","palabras":["SENDA","SENDERO","TROCHA","ATAJO"]},
+      {"nivel":3,"tema":"Sinónimos de \"mentira\"","palabras":["EMBUSTE","PATRAÑA","CUENTO","FARSA"]},
+      {"nivel":4,"tema":"Maneras de decir \"amigo\"","palabras":["PANA","PARCE","VATO","COLEGA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Calzado","palabras":["ZAPATILLA","SANDALIA","BORCEGO","ALPARGATA"]},
+      {"nivel":2,"tema":"Joyas","palabras":["ANILLO","COLLAR","ARETE","PULSERA"]},
+      {"nivel":3,"tema":"Partes de un zapato","palabras":["SUELA","TACO","PLANTILLA","CORDÓN"]},
+      {"nivel":4,"tema":"Cosas que tienen lengua","palabras":["ZAPATO","CAMPANA","FUEGO","TIERRA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Roedores","palabras":["RATA","CARPINCHO","ARDILLA","CASTOR"]},
+      {"nivel":2,"tema":"Aves argentinas","palabras":["HORNERO","CARANCHO","CALANDRIA","CÓNDOR"]},
+      {"nivel":3,"tema":"Reptiles","palabras":["IGUANA","CAIMÁN","YARARÁ","LAGARTO"]},
+      {"nivel":4,"tema":"Símbolos de lentitud","palabras":["TORTUGA","CARACOL","BABOSA","PEREZOSO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Partes de la cara","palabras":["CEJA","PESTAÑA","MEJILLA","MENTÓN"]},
+      {"nivel":2,"tema":"Dedos de la mano","palabras":["PULGAR","ÍNDICE","ANULAR","MEÑIQUE"]},
+      {"nivel":3,"tema":"Partes de un reloj","palabras":["ESFERA","AGUJA","CORONA","CORREA"]},
+      {"nivel":4,"tema":"Cosas que tienen cara","palabras":["MONEDA","DADO","MONTAÑA","CUBO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Géneros de cine","palabras":["TERROR","COMEDIA","WESTERN","DRAMA"]},
+      {"nivel":2,"tema":"Trabajos del cine","palabras":["DIRECTOR","ACTOR","GUIONISTA","PRODUCTOR"]},
+      {"nivel":3,"tema":"Cosas de un teatro","palabras":["ESCENARIO","PLATEA","PALCO","BUTACA"]},
+      {"nivel":4,"tema":"Se corren (en frases)","palabras":["CORTINA","RIESGO","RUMOR","TELÓN"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Vientos","palabras":["ZONDA","PAMPERO","SUDESTADA","MISTRAL"]},
+      {"nivel":2,"tema":"Tipos de nubes","palabras":["CIRRO","CÚMULO","ESTRATO","NIMBO"]},
+      {"nivel":3,"tema":"Accidentes geográficos","palabras":["VALLE","MESETA","PENÍNSULA","GOLFO"]},
+      {"nivel":4,"tema":"Esconden un instrumento","palabras":["ZARPA","DEBAJO","TROMPADA","BOMBONERA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Emociones","palabras":["ALEGRÍA","TRISTEZA","MIEDO","SORPRESA"]},
+      {"nivel":2,"tema":"Virtudes","palabras":["HONESTIDAD","RESPETO","LEALTAD","BONDAD"]},
+      {"nivel":3,"tema":"Pecados capitales","palabras":["ENVIDIA","SOBERBIA","AVARICIA","GULA"]},
+      {"nivel":4,"tema":"Se pierde la ___","palabras":["CABEZA","MEMORIA","VERGÜENZA","PACIENCIA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Vajilla","palabras":["PLATO","VASO","TAZA","JARRA"]},
+      {"nivel":2,"tema":"Materiales","palabras":["MADERA","VIDRIO","PLÁSTICO","CARTÓN"]},
+      {"nivel":3,"tema":"Utensilios de cocina","palabras":["TENEDOR","COLADOR","RALLADOR","CUCHARÓN"]},
+      {"nivel":4,"tema":"Herramientas de albañil","palabras":["CUCHARA","PLOMADA","NIVEL","FRATACHO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Estados de la materia","palabras":["SÓLIDO","LÍQUIDO","GASEOSO","PLASMA"]},
+      {"nivel":2,"tema":"Fuentes de energía","palabras":["SOLAR","EÓLICA","GEOTÉRMICA","NUCLEAR"]},
+      {"nivel":3,"tema":"Capas de la Tierra","palabras":["CORTEZA","MANTO","NÚCLEO","ATMÓSFERA"]},
+      {"nivel":4,"tema":"Cosas que tienen núcleo","palabras":["ÁTOMO","CÉLULA","COMETA","GALAXIA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Signos de puntuación","palabras":["COMA","PUNTO","COMILLAS","PARÉNTESIS"]},
+      {"nivel":2,"tema":"Géneros literarios","palabras":["NOVELA","POEMA","ENSAYO","CRÓNICA"]},
+      {"nivel":3,"tema":"Onomatopeyas","palabras":["GUAU","MIAU","PLOP","ZAS"]},
+      {"nivel":4,"tema":"Figuras retóricas","palabras":["METÁFORA","HIPÉRBOLE","IRONÍA","ONOMATOPEYA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Cosas que vuelan","palabras":["AVIÓN","BARRILETE","DRON","HELICÓPTERO"]},
+      {"nivel":2,"tema":"Juguetes","palabras":["PELOTA","MUÑECA","TROMPO","PELUCHE"]},
+      {"nivel":3,"tema":"Cosas que se cuelgan","palabras":["CUADRO","ROPA","TELÉFONO","HAMACA"]},
+      {"nivel":4,"tema":"Cosas que se inflan","palabras":["GLOBO","NEUMÁTICO","PRECIOS","COLCHÓN"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Negocios que terminan en -ería","palabras":["PANADERÍA","CARNICERÍA","LIBRERÍA","HELADERÍA"]},
+      {"nivel":2,"tema":"Cosas de la calle","palabras":["VEREDA","ESQUINA","SEMÁFORO","CRUCE"]},
+      {"nivel":3,"tema":"Lugares de estudio","palabras":["ESCUELA","BIBLIOTECA","UNIVERSIDAD","JARDÍN"]},
+      {"nivel":4,"tema":"Siglas que se leen como palabras","palabras":["OVNI","LÁSER","RADAR","SONAR"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Tipos de vino","palabras":["TINTO","BLANCO","ROSADO","ESPUMANTE"]},
+      {"nivel":2,"tema":"Peinados","palabras":["TRENZA","FLEQUILLO","MELENA","MOÑO"]},
+      {"nivel":3,"tema":"Tipos de agua","palabras":["MINERAL","POTABLE","SALADA","DULCE"]},
+      {"nivel":4,"tema":"Esconden un color","palabras":["AZULEJO","TESORO","ROSARIO","ENROJECER"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Instrumentos de percusión","palabras":["BOMBO","TAMBOR","PLATILLOS","MARACAS"]},
+      {"nivel":2,"tema":"Bailes del mundo","palabras":["SALSA","MERENGUE","FLAMENCO","POLCA"]},
+      {"nivel":3,"tema":"Ritmos folklóricos argentinos","palabras":["CHACARERA","ZAMBA","CHAMAMÉ","MILONGA"]},
+      {"nivel":4,"tema":"Se tocan (en frases)","palabras":["TIMBRE","FONDO","PUERTA","BOCINA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Cosas del fuego","palabras":["LLAMA","CHISPA","BRASA","CENIZA"]},
+      {"nivel":2,"tema":"Cosas del desierto","palabras":["DUNA","OASIS","CACTUS","ESPEJISMO"]},
+      {"nivel":3,"tema":"Camélidos","palabras":["GUANACO","VICUÑA","ALPACA","CAMELLO"]},
+      {"nivel":4,"tema":"Se echan","palabras":["ANCLA","SUERTE","RAÍCES","CULPA"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Festividades","palabras":["NAVIDAD","PASCUA","CARNAVAL","AÑO NUEVO"]},
+      {"nivel":2,"tema":"Comidas del día","palabras":["DESAYUNO","ALMUERZO","MERIENDA","CENA"]},
+      {"nivel":3,"tema":"Momentos del día","palabras":["AMANECER","MEDIODÍA","ATARDECER","MEDIANOCHE"]},
+      {"nivel":4,"tema":"Esconden un mes","palabras":["MAYONESA","ABRILLANTAR","JUNIOR","MAYORDOMO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Medios de comunicación","palabras":["RADIO","TELEVISIÓN","DIARIO","REVISTA"]},
+      {"nivel":2,"tema":"Inventos chinos","palabras":["BRÚJULA","PÓLVORA","PAPEL","IMPRENTA"]},
+      {"nivel":3,"tema":"Cosas de una oficina","palabras":["ESCRITORIO","GRAPADORA","ARCHIVO","CARPETA"]},
+      {"nivel":4,"tema":"Cosas que tienen tapa","palabras":["OLLA","FRASCO","ALCANTARILLA","BIDÓN"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Sabores de helado","palabras":["CHOCOLATE","VAINILLA","FRUTILLA","MENTA"]},
+      {"nivel":2,"tema":"Golosinas","palabras":["CARAMELO","CHICLE","PIRULÍN","ALFAJOR"]},
+      {"nivel":3,"tema":"Cosas que se untan","palabras":["MANTECA","MERMELADA","PATÉ","QUESO"]},
+      {"nivel":4,"tema":"Facturas argentinas","palabras":["MEDIALUNA","VIGILANTE","CAÑONCITO","SACRAMENTO"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Formas musicales","palabras":["SINFONÍA","ÓPERA","CONCIERTO","SONATA"]},
+      {"nivel":2,"tema":"Compositores","palabras":["MOZART","BEETHOVEN","BACH","CHOPIN"]},
+      {"nivel":3,"tema":"Tipos de voz","palabras":["SOPRANO","TENOR","BAJO","BARÍTONO"]},
+      {"nivel":4,"tema":"Partes de una canción","palabras":["ESTROFA","CORO","ESTRIBILLO","PUENTE"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Mariscos","palabras":["CAMARÓN","LANGOSTINO","MEJILLÓN","CANGREJO"]},
+      {"nivel":2,"tema":"Peces de agua dulce","palabras":["SURUBÍ","DORADO","PACÚ","BOGA"]},
+      {"nivel":3,"tema":"Cosas de pescar","palabras":["ANZUELO","CARNADA","SEÑUELO","RED"]},
+      {"nivel":4,"tema":"Bebidas fuertes","palabras":["CAÑA","GRAPA","GIN","RON"]}
+    ]
+  },
+  {
+    "grupos": [
+      {"nivel":1,"tema":"Cosas del campo","palabras":["ALAMBRADO","MOLINO","SILO","TRANQUERA"]},
+      {"nivel":2,"tema":"Maneras de decir \"niño\"","palabras":["PIBE","GURÍ","CHAVAL","CHAMACO"]},
+      {"nivel":3,"tema":"Ropa y cosas del gaucho","palabras":["BOMBACHA","FACÓN","RASTRA","CHIRIPÁ"]},
+      {"nivel":4,"tema":"Palabras de origen guaraní","palabras":["YACARÉ","TUCÁN","CARPINCHO","MANDIOCA"]}
+    ]
+  }
+]

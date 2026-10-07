@@ -1,0 +1,2642 @@
+[
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Citrus fruits",
+    "palabras": [
+     "LIME",
+     "GRAPEFRUIT",
+     "TANGERINE",
+     "ORANGE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Things with a bridge",
+    "palabras": [
+     "GUITAR",
+     "NOSE",
+     "GLASSES",
+     "VIOLIN"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Hidden body parts",
+    "palabras": [
+     "CHARM",
+     "SHINY",
+     "CHINA",
+     "PEARL"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"drop\"",
+    "palabras": [
+     "LEMON",
+     "RAIN",
+     "DEW",
+     "COUGH"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Planets",
+    "palabras": [
+     "MARS",
+     "VENUS",
+     "JUPITER",
+     "NEPTUNE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Metals",
+    "palabras": [
+     "IRON",
+     "ZINC",
+     "COPPER",
+     "MERCURY"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Add an S in front to make a new word",
+    "palabras": [
+     "LAP",
+     "WORD",
+     "TEAM",
+     "NAIL"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Hidden numbers",
+    "palabras": [
+     "TENT",
+     "PHONE",
+     "WEIGHT",
+     "CANINE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Brass instruments",
+    "palabras": [
+     "TRUMPET",
+     "TROMBONE",
+     "TUBA",
+     "CORNET"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Chess pieces",
+    "palabras": [
+     "ROOK",
+     "PAWN",
+     "KNIGHT",
+     "BISHOP"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Birds that are also verbs",
+    "palabras": [
+     "DUCK",
+     "SWALLOW",
+     "CROW",
+     "HAWK"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Hidden colors",
+    "palabras": [
+     "SHRED",
+     "TANGO",
+     "STEAL",
+     "PINKIE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Pasta",
+    "palabras": [
+     "PENNE",
+     "RAVIOLI",
+     "LASAGNA",
+     "FUSILLI"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Things you can break",
+    "palabras": [
+     "RECORD",
+     "PROMISE",
+     "BREAD",
+     "NEWS"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things that come in cubes",
+    "palabras": [
+     "ICE",
+     "SUGAR",
+     "DICE",
+     "BOUILLON"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Sound like letters",
+    "palabras": [
+     "SEA",
+     "EYE",
+     "TEA",
+     "YOU"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Racket sports",
+    "palabras": [
+     "TENNIS",
+     "BADMINTON",
+     "PADEL",
+     "PICKLEBALL"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Vegetables",
+    "palabras": [
+     "SQUASH",
+     "LEEK",
+     "KALE",
+     "OKRA"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Fast",
+    "palabras": [
+     "RAPID",
+     "SWIFT",
+     "BRISK",
+     "SPEEDY"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Hidden animals",
+    "palabras": [
+     "SCATTER",
+     "BEARD",
+     "CRATE",
+     "DOGMA"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Currencies",
+    "palabras": [
+     "DOLLAR",
+     "EURO",
+     "YEN",
+     "POUND"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Units of weight",
+    "palabras": [
+     "OUNCE",
+     "GRAM",
+     "STONE",
+     "TON"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Silent first letter",
+    "palabras": [
+     "KNIFE",
+     "GNOME",
+     "WRIST",
+     "GNASH"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things with a face",
+    "palabras": [
+     "CLOCK",
+     "CLIFF",
+     "COIN",
+     "CARD"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Shades of blue",
+    "palabras": [
+     "NAVY",
+     "CYAN",
+     "TEAL",
+     "AZURE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Dances",
+    "palabras": [
+     "WALTZ",
+     "POLKA",
+     "SAMBA",
+     "RUMBA"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Sauces and dips",
+    "palabras": [
+     "SALSA",
+     "HUMMUS",
+     "PESTO",
+     "GUACAMOLE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"fly\"",
+    "palabras": [
+     "BUTTER",
+     "HOUSE",
+     "FIRE",
+     "HORSE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Bodies of water",
+    "palabras": [
+     "LAKE",
+     "RIVER",
+     "POND",
+     "STREAM"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Fish",
+    "palabras": [
+     "BASS",
+     "PIKE",
+     "RAY",
+     "CARP"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Parts of a shoe",
+    "palabras": [
+     "SOLE",
+     "HEEL",
+     "LACE",
+     "TONGUE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Sound like body parts",
+    "palabras": [
+     "HEAL",
+     "TOW",
+     "HARE",
+     "WASTE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Dog breeds",
+    "palabras": [
+     "POODLE",
+     "BEAGLE",
+     "BOXER",
+     "HUSKY"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Coffee drinks",
+    "palabras": [
+     "LATTE",
+     "ESPRESSO",
+     "MACCHIATO",
+     "CAPPUCCINO"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things you can pull",
+    "palabras": [
+     "MUSCLE",
+     "TRIGGER",
+     "ROPE",
+     "TOOTH"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Foods named after places",
+    "palabras": [
+     "BOLOGNA",
+     "CHEDDAR",
+     "CHAMPAGNE",
+     "HAMBURGER"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Winter Olympic sports",
+    "palabras": [
+     "SKIING",
+     "CURLING",
+     "LUGE",
+     "BOBSLED"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Cold",
+    "palabras": [
+     "CHILLY",
+     "FROSTY",
+     "FRIGID",
+     "NIPPY"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things in a toolbox",
+    "palabras": [
+     "HAMMER",
+     "WRENCH",
+     "CHISEL",
+     "PLANE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"bank\"",
+    "palabras": [
+     "BLOOD",
+     "PIGGY",
+     "DATA",
+     "FOOD"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Red fruits",
+    "palabras": [
+     "CHERRY",
+     "STRAWBERRY",
+     "RASPBERRY",
+     "CRANBERRY"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Things you can catch",
+    "palabras": [
+     "COLD",
+     "BUS",
+     "BREATH",
+     "FISH"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Italian music terms",
+    "palabras": [
+     "ALLEGRO",
+     "ADAGIO",
+     "FORTE",
+     "CRESCENDO"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Remove the first letter for a new word",
+    "palabras": [
+     "BRAIN",
+     "SLOW",
+     "GLOVE",
+     "CHEAT"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Greek letters",
+    "palabras": [
+     "ALPHA",
+     "BETA",
+     "GAMMA",
+     "OMEGA"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Landforms",
+    "palabras": [
+     "DELTA",
+     "CANYON",
+     "VALLEY",
+     "PLATEAU"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things you can crack",
+    "palabras": [
+     "EGG",
+     "CODE",
+     "JOKE",
+     "KNUCKLE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"board\"",
+    "palabras": [
+     "SKATE",
+     "SURF",
+     "DART",
+     "KEY"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Edge of the sea",
+    "palabras": [
+     "BEACH",
+     "SHORE",
+     "COAST",
+     "SEASIDE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Kitchen utensils",
+    "palabras": [
+     "WHISK",
+     "LADLE",
+     "SPATULA",
+     "GRATER"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Ways to cook",
+    "palabras": [
+     "BOIL",
+     "ROAST",
+     "STEW",
+     "POACH"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things with shells",
+    "palabras": [
+     "TURTLE",
+     "SNAIL",
+     "OYSTER",
+     "WALNUT"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Weather",
+    "palabras": [
+     "RAIN",
+     "HAIL",
+     "SLEET",
+     "DRIZZLE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Words before \"storm\"",
+    "palabras": [
+     "DUST",
+     "THUNDER",
+     "SNOW",
+     "WIND"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Mythical creatures",
+    "palabras": [
+     "UNICORN",
+     "PHOENIX",
+     "GRIFFIN",
+     "MERMAID"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Chinese zodiac animals",
+    "palabras": [
+     "RAT",
+     "TIGER",
+     "MONKEY",
+     "DRAGON"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Parts of the eye",
+    "palabras": [
+     "IRIS",
+     "PUPIL",
+     "RETINA",
+     "CORNEA"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Flowers",
+    "palabras": [
+     "ROSE",
+     "TULIP",
+     "DAISY",
+     "LILY"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Sound like numbers",
+    "palabras": [
+     "WON",
+     "TOO",
+     "ATE",
+     "FORE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can draw",
+    "palabras": [
+     "CURTAIN",
+     "BATH",
+     "SWORD",
+     "CONCLUSION"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Card suits",
+    "palabras": [
+     "HEARTS",
+     "SPADES",
+     "CLUBS",
+     "DIAMONDS"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Golf scores",
+    "palabras": [
+     "BIRDIE",
+     "EAGLE",
+     "BOGEY",
+     "ALBATROSS"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Parts of a book",
+    "palabras": [
+     "SPINE",
+     "COVER",
+     "CHAPTER",
+     "INDEX"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things with spines",
+    "palabras": [
+     "CACTUS",
+     "HEDGEHOG",
+     "PORCUPINE",
+     "URCHIN"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Breakfast foods",
+    "palabras": [
+     "PANCAKE",
+     "CEREAL",
+     "BACON",
+     "WAFFLE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Units of time",
+    "palabras": [
+     "SECOND",
+     "HOUR",
+     "DECADE",
+     "FORTNIGHT"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Very small",
+    "palabras": [
+     "MINUTE",
+     "TINY",
+     "WEE",
+     "PETITE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can raise",
+    "palabras": [
+     "TOAST",
+     "FLAG",
+     "EYEBROW",
+     "ALARM"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Sea creatures",
+    "palabras": [
+     "SHARK",
+     "WHALE",
+     "DOLPHIN",
+     "OCTOPUS"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Parts of a ship",
+    "palabras": [
+     "HULL",
+     "MAST",
+     "DECK",
+     "ANCHOR"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"fish\"",
+    "palabras": [
+     "GOLD",
+     "STAR",
+     "JELLY",
+     "CAT"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"paper\"",
+    "palabras": [
+     "SAND",
+     "WALL",
+     "TISSUE",
+     "NEWS"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Farm animals",
+    "palabras": [
+     "COW",
+     "SHEEP",
+     "GOAT",
+     "HORSE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Baby animals",
+    "palabras": [
+     "CALF",
+     "FOAL",
+     "LAMB",
+     "PUPPY"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"house\"",
+    "palabras": [
+     "GREEN",
+     "LIGHT",
+     "WARE",
+     "DOG"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"pen\"",
+    "palabras": [
+     "FELT",
+     "PLAY",
+     "FOUNTAIN",
+     "PIG"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Shapes",
+    "palabras": [
+     "CIRCLE",
+     "SQUARE",
+     "TRIANGLE",
+     "OVAL"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Gemstones",
+    "palabras": [
+     "RUBY",
+     "OPAL",
+     "TOPAZ",
+     "JADE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Cheeses",
+    "palabras": [
+     "BRIE",
+     "FETA",
+     "EDAM",
+     "GOUDA"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Slang for money",
+    "palabras": [
+     "DOUGH",
+     "CASH",
+     "BUCKS",
+     "LOOT"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Stringed instruments",
+    "palabras": [
+     "VIOLA",
+     "CELLO",
+     "HARP",
+     "BANJO"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Woodwind instruments",
+    "palabras": [
+     "FLUTE",
+     "OBOE",
+     "CLARINET",
+     "PICCOLO"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Percussion instruments",
+    "palabras": [
+     "CYMBAL",
+     "GONG",
+     "BONGO",
+     "TAMBOURINE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Parts of the middle ear",
+    "palabras": [
+     "DRUM",
+     "ANVIL",
+     "HAMMER",
+     "STIRRUP"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "European capitals",
+    "palabras": [
+     "PARIS",
+     "ROME",
+     "MADRID",
+     "BERLIN"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Oceans",
+    "palabras": [
+     "ATLANTIC",
+     "PACIFIC",
+     "ARCTIC",
+     "INDIAN"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Rivers",
+    "palabras": [
+     "NILE",
+     "DANUBE",
+     "THAMES",
+     "RHINE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"cake\"",
+    "palabras": [
+     "CUP",
+     "CHEESE",
+     "FRUIT",
+     "PAN"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Shades of green",
+    "palabras": [
+     "MINT",
+     "LIME",
+     "EMERALD",
+     "FOREST"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Pizza toppings",
+    "palabras": [
+     "OLIVE",
+     "PEPPERONI",
+     "MUSHROOM",
+     "ANCHOVY"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Herbs",
+    "palabras": [
+     "BASIL",
+     "THYME",
+     "OREGANO",
+     "PARSLEY"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things with leaves",
+    "palabras": [
+     "TREE",
+     "BOOK",
+     "TABLE",
+     "TEA"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Happy",
+    "palabras": [
+     "GLAD",
+     "JOYFUL",
+     "CHEERFUL",
+     "ELATED"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Ways to walk",
+    "palabras": [
+     "STROLL",
+     "STRIDE",
+     "MARCH",
+     "SAUNTER"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Public transport",
+    "palabras": [
+     "TRAM",
+     "SUBWAY",
+     "FERRY",
+     "TAXI"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things with a crown",
+    "palabras": [
+     "TOOTH",
+     "KING",
+     "PINEAPPLE",
+     "WATCH"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Animal sounds",
+    "palabras": [
+     "MEOW",
+     "ROAR",
+     "QUACK",
+     "HOWL"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Parts of a tree",
+    "palabras": [
+     "ROOT",
+     "BRANCH",
+     "TRUNK",
+     "BARK"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things that wind",
+    "palabras": [
+     "ROAD",
+     "RIVER",
+     "CLOCK",
+     "BANDAGE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can spill",
+    "palabras": [
+     "BEANS",
+     "SECRETS",
+     "MILK",
+     "COFFEE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Toys",
+    "palabras": [
+     "MARBLE",
+     "KITE",
+     "YOYO",
+     "PUZZLE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Rocks",
+    "palabras": [
+     "GRANITE",
+     "BASALT",
+     "SLATE",
+     "LIMESTONE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Parts of an atom",
+    "palabras": [
+     "PROTON",
+     "NEUTRON",
+     "ELECTRON",
+     "NUCLEUS"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"cell\"",
+    "palabras": [
+     "PRISON",
+     "STEM",
+     "FUEL",
+     "SOLAR"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Kitchen appliances",
+    "palabras": [
+     "OVEN",
+     "TOASTER",
+     "BLENDER",
+     "FRIDGE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Furniture",
+    "palabras": [
+     "SOFA",
+     "DESK",
+     "CHAIR",
+     "WARDROBE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Homes",
+    "palabras": [
+     "COTTAGE",
+     "VILLA",
+     "CABIN",
+     "CASTLE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"place\"",
+    "palabras": [
+     "FIRE",
+     "MARKET",
+     "BIRTH",
+     "COMMON"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Tropical fruits",
+    "palabras": [
+     "BANANA",
+     "MANGO",
+     "PAPAYA",
+     "GUAVA"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Nuts",
+    "palabras": [
+     "ALMOND",
+     "CASHEW",
+     "PECAN",
+     "CHESTNUT"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"tree\"",
+    "palabras": [
+     "FAMILY",
+     "SHOE",
+     "DECISION",
+     "PALM"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Crazy",
+    "palabras": [
+     "BONKERS",
+     "LOCO",
+     "LOONY",
+     "NUTTY"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Road vehicles",
+    "palabras": [
+     "TRUCK",
+     "VAN",
+     "SEDAN",
+     "COUPE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Handbags",
+    "palabras": [
+     "TOTE",
+     "SATCHEL",
+     "PURSE",
+     "CLUTCH"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Car parts",
+    "palabras": [
+     "ENGINE",
+     "BRAKE",
+     "BUMPER",
+     "HOOD"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you pump",
+    "palabras": [
+     "IRON",
+     "FIST",
+     "GAS",
+     "BLOOD"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Insects",
+    "palabras": [
+     "ANT",
+     "BEE",
+     "BEETLE",
+     "MOTH"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Garden tools",
+    "palabras": [
+     "SPADE",
+     "RAKE",
+     "HOE",
+     "TROWEL"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Poker terms",
+    "palabras": [
+     "FLUSH",
+     "BLUFF",
+     "FOLD",
+     "ANTE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things that sting",
+    "palabras": [
+     "NETTLE",
+     "SCORPION",
+     "JELLYFISH",
+     "STINGRAY"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Ball sports",
+    "palabras": [
+     "SOCCER",
+     "BASKETBALL",
+     "VOLLEYBALL",
+     "HANDBALL"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Swimming strokes",
+    "palabras": [
+     "BACKSTROKE",
+     "FREESTYLE",
+     "BUTTERFLY",
+     "CRAWL"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Athletics events",
+    "palabras": [
+     "JAVELIN",
+     "HURDLES",
+     "DISCUS",
+     "MARATHON"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can throw",
+    "palabras": [
+     "PARTY",
+     "TANTRUM",
+     "PUNCH",
+     "FIT"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Music genres",
+    "palabras": [
+     "JAZZ",
+     "REGGAE",
+     "OPERA",
+     "COUNTRY"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Parts of a song",
+    "palabras": [
+     "VERSE",
+     "CHORUS",
+     "BRIDGE",
+     "INTRO"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Singing voices",
+    "palabras": [
+     "SOPRANO",
+     "ALTO",
+     "TENOR",
+     "BARITONE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Boxing punches",
+    "palabras": [
+     "HOOK",
+     "JAB",
+     "UPPERCUT",
+     "HAYMAKER"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Parts of the hand",
+    "palabras": [
+     "THUMB",
+     "FINGERTIP",
+     "KNUCKLE",
+     "WRIST"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Ways to serve eggs",
+    "palabras": [
+     "SCRAMBLED",
+     "FRIED",
+     "BOILED",
+     "POACHED"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things you can give",
+    "palabras": [
+     "HAND",
+     "HUG",
+     "LIFT",
+     "SPEECH"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Sound like animals",
+    "palabras": [
+     "DEAR",
+     "BORE",
+     "WAIL",
+     "FLEE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Seasons",
+    "palabras": [
+     "WINTER",
+     "SUMMER",
+     "AUTUMN",
+     "FALL"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Water sources",
+    "palabras": [
+     "SPRING",
+     "WELL",
+     "FOUNTAIN",
+     "GEYSER"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"mark\"",
+    "palabras": [
+     "BOOK",
+     "LAND",
+     "BENCH",
+     "TRADE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Always plural",
+    "palabras": [
+     "SCISSORS",
+     "TROUSERS",
+     "TWEEZERS",
+     "BINOCULARS"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Pets",
+    "palabras": [
+     "HAMSTER",
+     "RABBIT",
+     "GOLDFISH",
+     "PARROT"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Big cats",
+    "palabras": [
+     "LION",
+     "TIGER",
+     "LEOPARD",
+     "CHEETAH"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"cat\"",
+    "palabras": [
+     "COPY",
+     "ALLEY",
+     "WILD",
+     "BOB"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Animals in \"as ... as a\" similes",
+    "palabras": [
+     "BAT",
+     "MULE",
+     "MOUSE",
+     "OWL"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Clothing",
+    "palabras": [
+     "SHIRT",
+     "SOCK",
+     "JACKET",
+     "SCARF"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Hats",
+    "palabras": [
+     "BERET",
+     "FEDORA",
+     "BEANIE",
+     "SOMBRERO"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Footwear",
+    "palabras": [
+     "SANDAL",
+     "LOAFER",
+     "SNEAKER",
+     "BOOT"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can kick",
+    "palabras": [
+     "BUCKET",
+     "HABIT",
+     "BALL",
+     "TIRES"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Medical jobs",
+    "palabras": [
+     "DOCTOR",
+     "NURSE",
+     "DENTIST",
+     "SURGEON"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Restaurant jobs",
+    "palabras": [
+     "CHEF",
+     "BAKER",
+     "WAITER",
+     "BARISTA"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Jobs that are also verbs",
+    "palabras": [
+     "PILOT",
+     "GUARD",
+     "USHER",
+     "SHEPHERD"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can spin",
+    "palabras": [
+     "YARN",
+     "WEB",
+     "TOP",
+     "WHEEL"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Playground equipment",
+    "palabras": [
+     "SWING",
+     "SEESAW",
+     "SANDBOX",
+     "ROUNDABOUT"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Pies",
+    "palabras": [
+     "APPLE",
+     "PUMPKIN",
+     "CHERRY",
+     "MUD"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Presentation words",
+    "palabras": [
+     "SLIDE",
+     "DECK",
+     "POINTER",
+     "PODIUM"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Friend",
+    "palabras": [
+     "BUDDY",
+     "PAL",
+     "MATE",
+     "CHUM"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Drinks",
+    "palabras": [
+     "WATER",
+     "JUICE",
+     "SODA",
+     "LEMONADE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Dairy",
+    "palabras": [
+     "BUTTER",
+     "YOGURT",
+     "CREAM",
+     "CHEESE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"milk\"",
+    "palabras": [
+     "ALMOND",
+     "OAT",
+     "COCONUT",
+     "SOY"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"cream\"",
+    "palabras": [
+     "SOUR",
+     "ICE",
+     "SUN",
+     "FACE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Trees",
+    "palabras": [
+     "OAK",
+     "MAPLE",
+     "BIRCH",
+     "CEDAR"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Cutting tools",
+    "palabras": [
+     "SAW",
+     "AXE",
+     "KNIFE",
+     "RAZOR"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Long for",
+    "palabras": [
+     "PINE",
+     "YEARN",
+     "CRAVE",
+     "ACHE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"wood\"",
+    "palabras": [
+     "DRIFT",
+     "FIRE",
+     "RED",
+     "HEART"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "School subjects",
+    "palabras": [
+     "MATH",
+     "HISTORY",
+     "ART",
+     "SCIENCE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Results of arithmetic",
+    "palabras": [
+     "SUM",
+     "PRODUCT",
+     "QUOTIENT",
+     "DIFFERENCE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Fractions",
+    "palabras": [
+     "HALF",
+     "THIRD",
+     "QUARTER",
+     "EIGHTH"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"time\"",
+    "palabras": [
+     "PRIME",
+     "BED",
+     "LUNCH",
+     "SHOW"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Space objects",
+    "palabras": [
+     "STAR",
+     "MOON",
+     "COMET",
+     "GALAXY"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Zodiac signs",
+    "palabras": [
+     "ARIES",
+     "TAURUS",
+     "GEMINI",
+     "VIRGO"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Spacecraft",
+    "palabras": [
+     "ROCKET",
+     "PROBE",
+     "SATELLITE",
+     "CAPSULE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Weaving equipment",
+    "palabras": [
+     "SHUTTLE",
+     "LOOM",
+     "SPINDLE",
+     "BOBBIN"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Camping gear",
+    "palabras": [
+     "LANTERN",
+     "CAMPFIRE",
+     "BACKPACK",
+     "COMPASS"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Compass points",
+    "palabras": [
+     "NORTH",
+     "SOUTH",
+     "EAST",
+     "WEST"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words after \"wild\"",
+    "palabras": [
+     "CARD",
+     "LIFE",
+     "FLOWER",
+     "GOOSE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things with poles",
+    "palabras": [
+     "MAGNET",
+     "EARTH",
+     "BATTERY",
+     "FLAG"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Watercraft",
+    "palabras": [
+     "BOAT",
+     "YACHT",
+     "CANOE",
+     "RAFT"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Map features",
+    "palabras": [
+     "LEGEND",
+     "KEY",
+     "GRID",
+     "SCALE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things with scales",
+    "palabras": [
+     "FISH",
+     "SNAKE",
+     "LIZARD",
+     "PIANO"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Palindromes",
+    "palabras": [
+     "LEVEL",
+     "RADAR",
+     "CIVIC",
+     "KAYAK"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Breads",
+    "palabras": [
+     "BAGUETTE",
+     "CIABATTA",
+     "PITA",
+     "BAGEL"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Italian food",
+    "palabras": [
+     "PIZZA",
+     "RISOTTO",
+     "GELATO",
+     "TIRAMISU"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Mexican dishes",
+    "palabras": [
+     "TACO",
+     "BURRITO",
+     "QUESADILLA",
+     "ENCHILADA"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can roll",
+    "palabras": [
+     "DICE",
+     "EYES",
+     "DOUGH",
+     "SUSHI"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Rodents",
+    "palabras": [
+     "RAT",
+     "SQUIRREL",
+     "BEAVER",
+     "CHIPMUNK"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Computer hardware",
+    "palabras": [
+     "KEYBOARD",
+     "MONITOR",
+     "PRINTER",
+     "SCANNER"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things with windows",
+    "palabras": [
+     "CAR",
+     "SHOP",
+     "TRAIN",
+     "HOUSE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"trap\"",
+    "palabras": [
+     "TOURIST",
+     "BOOBY",
+     "SPEED",
+     "MOUSE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Days of the week",
+    "palabras": [
+     "MONDAY",
+     "FRIDAY",
+     "SATURDAY",
+     "SUNDAY"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Months",
+    "palabras": [
+     "JULY",
+     "OCTOBER",
+     "DECEMBER",
+     "JANUARY"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"day\"",
+    "palabras": [
+     "BIRTH",
+     "HOLI",
+     "PAY",
+     "FIELD"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"year\"",
+    "palabras": [
+     "LEAP",
+     "LIGHT",
+     "GAP",
+     "SCHOOL"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Desserts",
+    "palabras": [
+     "CAKE",
+     "PUDDING",
+     "COOKIE",
+     "BROWNIE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Candy",
+    "palabras": [
+     "CARAMEL",
+     "TOFFEE",
+     "NOUGAT",
+     "FUDGE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Spices",
+    "palabras": [
+     "CUMIN",
+     "PAPRIKA",
+     "NUTMEG",
+     "CLOVE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Hit",
+    "palabras": [
+     "SMACK",
+     "WHACK",
+     "THUMP",
+     "BELT"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Keyboard keys",
+    "palabras": [
+     "ENTER",
+     "SHIFT",
+     "DELETE",
+     "ESCAPE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Run away",
+    "palabras": [
+     "BOLT",
+     "FLEE",
+     "SCRAM",
+     "DASH"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things you can shift",
+    "palabras": [
+     "GEARS",
+     "BLAME",
+     "FOCUS",
+     "WEIGHT"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"lock\"",
+    "palabras": [
+     "DEAD",
+     "PAD",
+     "FLINT",
+     "WED"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Birds of prey",
+    "palabras": [
+     "EAGLE",
+     "FALCON",
+     "OWL",
+     "VULTURE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Flightless birds",
+    "palabras": [
+     "OSTRICH",
+     "EMU",
+     "PENGUIN",
+     "CASSOWARY"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Things you can hatch",
+    "palabras": [
+     "PLOT",
+     "PLAN",
+     "EGG",
+     "SCHEME"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Fuzzy things",
+    "palabras": [
+     "PEACH",
+     "MOSS",
+     "TEDDY",
+     "KIWI"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Cutlery",
+    "palabras": [
+     "FORK",
+     "SPOON",
+     "CHOPSTICKS",
+     "LADLE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Crockery",
+    "palabras": [
+     "PLATE",
+     "SAUCER",
+     "MUG",
+     "TEAPOT"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Baseball roles",
+    "palabras": [
+     "CATCHER",
+     "UMPIRE",
+     "BATTER",
+     "PITCHER"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Containers for liquid",
+    "palabras": [
+     "CARAFE",
+     "FLASK",
+     "JUG",
+     "EWER"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Reptiles",
+    "palabras": [
+     "GECKO",
+     "IGUANA",
+     "CROCODILE",
+     "ALLIGATOR"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Amphibians",
+    "palabras": [
+     "FROG",
+     "NEWT",
+     "SALAMANDER",
+     "AXOLOTL"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Animals that jump",
+    "palabras": [
+     "KANGAROO",
+     "FLEA",
+     "HARE",
+     "LOCUST"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"stool\"",
+    "palabras": [
+     "TOAD",
+     "FOOT",
+     "BAR",
+     "MILKING"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Clouds",
+    "palabras": [
+     "CIRRUS",
+     "CUMULUS",
+     "STRATUS",
+     "NIMBUS"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Natural disasters",
+    "palabras": [
+     "EARTHQUAKE",
+     "TORNADO",
+     "TSUNAMI",
+     "HURRICANE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Electrical units",
+    "palabras": [
+     "WATT",
+     "VOLT",
+     "OHM",
+     "AMP"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Winds",
+    "palabras": [
+     "GUST",
+     "BREEZE",
+     "GALE",
+     "ZEPHYR"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Big",
+    "palabras": [
+     "HUGE",
+     "ENORMOUS",
+     "MASSIVE",
+     "COLOSSAL"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Small",
+    "palabras": [
+     "TINY",
+     "WEE",
+     "MINI",
+     "SLIGHT"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"size\"",
+    "palabras": [
+     "BITE",
+     "KING",
+     "PLUS",
+     "FUN"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words after \"giant\"",
+    "palabras": [
+     "PANDA",
+     "SQUID",
+     "SLALOM",
+     "SEQUOIA"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Art forms",
+    "palabras": [
+     "PAINTING",
+     "SCULPTURE",
+     "DRAWING",
+     "POTTERY"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "A painter's kit",
+    "palabras": [
+     "CANVAS",
+     "EASEL",
+     "PALETTE",
+     "BRUSH"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Words before \"brush\"",
+    "palabras": [
+     "PAINT",
+     "TOOTH",
+     "HAIR",
+     "SCRUB"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can frame",
+    "palabras": [
+     "PICTURE",
+     "POSTER",
+     "SUSPECT",
+     "QUESTION"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Parts of the face",
+    "palabras": [
+     "CHIN",
+     "FOREHEAD",
+     "EYELID",
+     "NOSTRIL"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Words before \"bone\"",
+    "palabras": [
+     "WISH",
+     "FUNNY",
+     "BACK",
+     "COLLAR"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Boldness",
+    "palabras": [
+     "NERVE",
+     "GALL",
+     "SASS",
+     "CHEEK"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things you can hold",
+    "palabras": [
+     "BREATH",
+     "TONGUE",
+     "HORSES",
+     "GROUND"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Poultry",
+    "palabras": [
+     "CHICKEN",
+     "DUCK",
+     "QUAIL",
+     "PHEASANT"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Meats",
+    "palabras": [
+     "STEAK",
+     "SAUSAGE",
+     "SALAMI",
+     "MEATBALL"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Silly person",
+    "palabras": [
+     "GOOSE",
+     "TURKEY",
+     "DODO",
+     "TWIT"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things that can be stuffed",
+    "palabras": [
+     "ANIMAL",
+     "SHIRT",
+     "PEPPER",
+     "TOY"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Coins",
+    "palabras": [
+     "PENNY",
+     "NICKEL",
+     "DIME",
+     "QUARTER"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Things you can save",
+    "palabras": [
+     "MONEY",
+     "TIME",
+     "ENERGY",
+     "FILE"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Ways to pay",
+    "palabras": [
+     "CASH",
+     "CHECK",
+     "CREDIT",
+     "TRANSFER"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Things with heads",
+    "palabras": [
+     "NAIL",
+     "MATCH",
+     "LETTUCE",
+     "BED"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Sciences",
+    "palabras": [
+     "BIOLOGY",
+     "PHYSICS",
+     "CHEMISTRY",
+     "GEOLOGY"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Lab equipment",
+    "palabras": [
+     "BEAKER",
+     "MICROSCOPE",
+     "PIPETTE",
+     "BURNER"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "States of matter",
+    "palabras": [
+     "SOLID",
+     "LIQUID",
+     "GAS",
+     "PLASMA"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Dense things",
+    "palabras": [
+     "FOG",
+     "FOREST",
+     "CROWD",
+     "JUNGLE"
+    ]
+   }
+  ]
+ },
+ {
+  "grupos": [
+   {
+    "nivel": 1,
+    "tema": "Winter things",
+    "palabras": [
+     "SNOWMAN",
+     "SLED",
+     "ICICLE",
+     "FIREPLACE"
+    ]
+   },
+   {
+    "nivel": 2,
+    "tema": "Ways to speak",
+    "palabras": [
+     "WHISPER",
+     "MUTTER",
+     "SHOUT",
+     "MURMUR"
+    ]
+   },
+   {
+    "nivel": 3,
+    "tema": "Ways to laugh",
+    "palabras": [
+     "GIGGLE",
+     "CHUCKLE",
+     "SNICKER",
+     "CACKLE"
+    ]
+   },
+   {
+    "nivel": 4,
+    "tema": "Words before \"back\"",
+    "palabras": [
+     "PAPER",
+     "FEED",
+     "FLASH",
+     "HORSE"
+    ]
+   }
+  ]
+ }
+]
