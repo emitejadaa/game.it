@@ -1,0 +1,19 @@
+{
+  "id": "estela",
+  "title": { "es": "Estela", "en": "Trail" },
+  "description": {
+    "es": "Motos de luz en una arena: doblá, usá el turbo y hacé que los demás choquen con tu estela. Online con gente y bots, sala privada o sin conexión.",
+    "en": "Light cycles in an arena: turn, boost and make everyone else crash into your trail. Online with people and bots, private room or offline."
+  },
+  "categories": ["arcade", "accion", "online", "multijugador", "casual"],
+  "tags": ["motos", "luz", "estela", "trail", "light", "cycle", "tron", "snake", "io", "arena", "bots", "turbo", "neon"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 10, "bots": true, "story": false },
+  "order": 33
+}

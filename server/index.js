@@ -10,7 +10,9 @@
  * Opcionales por módulo: `lateJoin` (se puede entrar con la partida en curso), `onJoin`,
  * `removed` (sale un jugador, en cualquier estado), `command` (mensajes propios en cualquier
  * estado: devuelve true si lo manejó, false si era inválido), `canStart` (código de error o null)
- * y `listable` + `listInfo` (aparece en la lista de salas públicas si settings.public).
+ * y `listable` + `listInfo` (aparece en la lista de salas públicas si settings.public). `realtime: true` marca a los juegos que
+ * simulan a ritmo fijo: comparten el tope MAX_RT_ROOMS (crear otra devuelve `server_full_rt`) y pueden informar el costo de su
+ * paso en `room.avgTickMs` (sale en /health y en la lista de salas). `create` acepta `settings` (opciones iniciales).
  */
 import { createServer } from 'node:http';
 import { isIP } from 'node:net';
@@ -32,10 +34,17 @@ import garabato from './games/garabato.js';
 import telefono from './games/telefono.js';
 import padel from './games/padel.js';
 import naval from './games/naval.js';
+import estela from './games/estela.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono, padel, naval };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono, padel, naval, estela };
 /** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
 const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
+/**
+ * Juegos en tiempo real (simulan en el servidor a ritmo fijo): comparten el tope MAX_RT_ROOMS. Un módulo se declara con
+ * `realtime: true`; esta lista cubre a los que todavía no lo declaran.
+ */
+const RT_LEGACY = new Set(['ameba', 'serpentina', 'clashball', 'padel']);
+const isRealtime = (game) => !!(GAMES[game]?.realtime || RT_LEGACY.has(game));
 
 const env = (k, d) => (process.env[k] !== undefined ? process.env[k] : d);
 const num = (k, d) => Number(env(k, d));
@@ -51,6 +60,7 @@ const CFG = {
   proxyHops: num('TRUST_PROXY_HOPS', 0),
   ipHeader: env('CLIENT_IP_HEADER', '').toLowerCase(),
   maxRooms: num('MAX_ROOMS', 300),
+  maxRtRooms: num('MAX_RT_ROOMS', 4), // salas en tiempo real a la vez (el servidor gratis de Render tiene 0,1 CPU)
   maxConnPerIp: num('MAX_CONN_PER_IP', 6),
   roomsPerIpWindow: num('ROOMS_PER_IP', 6),
   roomsWindowMs: num('ROOMS_WINDOW_MS', 10 * 60e3),
@@ -171,6 +181,8 @@ function makeApi(room) {
     touch: () => touch(room),
     players: () => [...room.players.values()],
     connected: (pid) => !!room.players.get(pid)?.connected,
+    /** Bytes que esperan en el socket de un jugador (para saltear snapshots descartables si el cliente no da abasto). */
+    bufferedAmount: (pid) => room.players.get(pid)?.ws?.bufferedAmount || 0,
     setTimer(name, ms, fn) {
       clearTimeout(room.timers.get(name));
       room.timers.set(
@@ -238,10 +250,27 @@ function closeRoom(room, reason) {
   log('room closed', room.code, room.game, reason, 'rooms:', rooms.size);
 }
 
-function createRoom(ws, name, game) {
+/** Salas en tiempo real abiertas y el costo medio de su paso (lo informan los módulos en `room.avgTickMs`). */
+function rtStats() {
+  let n = 0;
+  let sum = 0;
+  let timed = 0;
+  for (const r of rooms.values()) {
+    if (!isRealtime(r.game)) continue;
+    n++;
+    if (r.avgTickMs > 0) {
+      sum += r.avgTickMs;
+      timed++;
+    }
+  }
+  return { rooms: n, max: CFG.maxRtRooms, avgTickMs: timed ? Math.round((sum / timed) * 1000) / 1000 : 0 };
+}
+
+function createRoom(ws, name, game, settings) {
   const mod = gameMod(game);
   if (!mod) return send(ws, { t: 'error', code: 'bad_game' });
   if (rooms.size >= CFG.maxRooms) return send(ws, { t: 'error', code: 'server_full' });
+  if (isRealtime(game) && rtStats().rooms >= CFG.maxRtRooms) return send(ws, { t: 'error', code: 'server_full_rt' });
   if (!windowHit(ipRooms, ws.ip, CFG.roomsPerIpWindow, CFG.roomsWindowMs)) return send(ws, { t: 'error', code: 'too_many_rooms' });
   const code = newCode();
   if (!code) return send(ws, { t: 'error', code: 'server_full' });
@@ -257,6 +286,14 @@ function createRoom(ws, name, game) {
     data: null, // estado propio del juego
     settings: mod.defaults ? { ...mod.defaults } : {},
   };
+  // opciones elegidas al crear (para los juegos que arrancan solos y no pasan por el lobby)
+  if (mod.settings && settings && typeof settings === 'object') {
+    try {
+      room.settings = mod.settings(room.settings, settings);
+    } catch (e) {
+      log('error', game, 'create settings', e?.stack || e);
+    }
+  }
   room.api = makeApi(room);
   rooms.set(code, room);
   log('room created', code, game, 'rooms:', rooms.size);
@@ -380,10 +417,10 @@ function onMessage(ws, raw) {
 
   switch (msg.t) {
     case 'ping':
-      return send(ws, { t: 'pong', now });
+      return send(ws, { t: 'pong', now, ...(Number.isFinite(msg.c) ? { c: msg.c } : {}) }); // `c` es el reloj del cliente: sirve para medir el ping
     case 'create':
       if (room) leave(ws);
-      return createRoom(ws, msg.name, typeof msg.game === 'string' ? msg.game : 'minigolf');
+      return createRoom(ws, msg.name, typeof msg.game === 'string' ? msg.game : 'minigolf', msg.settings);
     case 'join':
       if (room) leave(ws);
       return joinRoom(ws, msg.code, msg.name, typeof msg.token === 'string' ? msg.token.slice(0, 64) : null, typeof msg.game === 'string' ? msg.game : null);
@@ -392,12 +429,12 @@ function onMessage(ws, raw) {
     case 'list': {
       // salas públicas de un juego (solo módulos con `listable`)
       const mod = gameMod(msg.game);
-      if (!mod?.listable) return send(ws, { t: 'list', game: msg.game, rooms: [] });
+      if (!mod?.listable) return send(ws, { t: 'list', game: msg.game, rooms: [], rt: rtStats() });
       const list = [...rooms.values()]
         .filter((r) => r.game === msg.game && r.settings?.public)
         .slice(0, 60)
         .map((r) => ({ code: r.code, n: r.players.size, max: mod.maxPlayers, state: r.state, ...mod.listInfo?.(r) }));
-      return send(ws, { t: 'list', game: msg.game, rooms: list });
+      return send(ws, { t: 'list', game: msg.game, rooms: list, rt: rtStats() });
     }
     case 'settings': {
       // el anfitrión cambia opciones en el lobby (pista, vueltas, hoyos…)
@@ -479,7 +516,7 @@ function onMessage(ws, raw) {
 const http = createServer((req, res) => {
   if (req.url === '/health') {
     res.writeHead(200, { 'content-type': 'application/json', 'access-control-allow-origin': '*' });
-    res.end(JSON.stringify({ ok: true, rooms: rooms.size, conns: wss.clients.size, games: Object.keys(GAMES) }));
+    res.end(JSON.stringify({ ok: true, rooms: rooms.size, conns: wss.clients.size, games: Object.keys(GAMES), rt: rtStats() }));
     return;
   }
   res.writeHead(404, { 'content-type': 'text/plain' });

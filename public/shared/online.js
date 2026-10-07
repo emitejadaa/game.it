@@ -22,6 +22,7 @@ const TXT = {
     room_full: 'La sala está llena.',
     in_progress: 'La partida ya empezó.',
     server_full: 'El servidor está lleno, probá en un rato.',
+    server_full_rt: 'Hay muchas partidas en vivo. Probá en un rato o jugá contra la compu.',
     too_many_rooms: 'Creaste demasiadas salas. Esperá unos minutos.',
     too_many_joins: 'Demasiados intentos. Esperá un minuto.',
     not_host: 'Solo el anfitrión puede hacer eso.',
@@ -47,6 +48,7 @@ const TXT = {
     room_full: 'The room is full.',
     in_progress: 'The match already started.',
     server_full: 'Server is full, try again soon.',
+    server_full_rt: 'Lots of live games right now. Try again soon or play the computer.',
     too_many_rooms: 'Too many rooms created. Wait a few minutes.',
     too_many_joins: 'Too many attempts. Wait a minute.',
     not_host: 'Only the host can do that.',
@@ -102,8 +104,9 @@ export async function share(game, code) {
 }
 
 export class OnlineRoom {
-  constructor(game, { onRoom, onMessage, onStatus, onJoined } = {}) {
+  constructor(game, { onRoom, onMessage, onStatus, onJoined, onPong } = {}) {
     this.game = game;
+    this.onPong = onPong || null; // el kit de red (net/clock.js) mide el ping con los pong
     this.onRoom = onRoom || (() => {});
     this.onMessage = onMessage || (() => {});
     this.onStatus = onStatus || (() => {});
@@ -188,7 +191,7 @@ export class OnlineRoom {
       this.offset = msg.now - (sentAt + Date.now()) / 2;
       return;
     }
-    if (msg.t === 'pong') return;
+    if (msg.t === 'pong') return void this.onPong?.(msg);
     if (msg.t === 'joined') {
       this.myId = msg.id;
       this.session = { code: msg.code, token: msg.token, name: this.name };
@@ -219,11 +222,12 @@ export class OnlineRoom {
     this.raw(msg);
   }
 
-  create(name) {
+  /** `settings`: opciones iniciales de la sala (los juegos que arrancan solos no pasan por el lobby). */
+  create(name, settings) {
     this.name = name;
     saveName(name);
     this.session = null;
-    this.send({ t: 'create', game: this.game, name });
+    this.send({ t: 'create', game: this.game, name, ...(settings ? { settings } : {}) });
   }
 
   join(code, name) {
