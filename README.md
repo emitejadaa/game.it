@@ -318,4 +318,21 @@ Datos generados con herramientas de `tools/daily/` (`words5.mjs`, `countries.mjs
 cada carpeta de datos tiene su `LEEME.txt` con las fuentes y licencias. Para sumar un diario nuevo, copiar `public/games/banderin/` (con
 `createDailyApp`) o `public/games/quinteto/` (con `createGuessGame`).
 
+### Los diarios, uno por uno
+
+| Juego | Qué se juega | De dónde salen los datos |
+| --- | --- | --- |
+| Quinteto, Cuarteto | Palabra de 5 letras en 6 intentos (Cuarteto: 4 tableros a la vez, 9 intentos). | `words5/`, de los diccionarios de Mecha Corta. |
+| Dígitos, Ecuación, Cálculo | Número, ecuación o cuenta secreta con pistas por casilla. | Se generan con la semilla del día (`math-expr.js`). |
+| Banderín | Bandera tapada con bloques que se destapan en 6 intentos. | `flag-icons` (MIT), solo se baja la bandera del día. |
+| Silueta | País por su silueta, con km, flecha y % de cercanía por intento. | Natural Earth (dominio público), `shapes.json` armado con `tools/daily/countries.mjs`. |
+| Rumbo | Globo que se gira: cada país probado se pinta según qué tan cerca está su frontera de la del país del día (intentos ilimitados). | Mismo dataset, `world.json`; proyección y distancias en `geo.js`. |
+| Vínculos | 16 palabras en 4 grupos ocultos, 4 errores. | `data/puzzles-<idioma>.json` (60 por idioma, escritos para el juego); `node tools/daily/vinculos-check.mjs` los valida. |
+| Colmena | 7 letras en un panal: palabras de 4 o más con la letra central; rangos por % del máximo. | `tools/daily/colmena-gen.mjs` arma 730 panales por idioma con los diccionarios de Mecha; las "rebuscadas" valen sin sumar. |
+| Tibio | Palabra secreta; cada intento devuelve su puesto por cercanía de significado. | Vectores fastText common-crawl (CC BY-SA 3.0, ver `tibio/data/LICENSE.txt`) reducidos con PCA a 96 dimensiones e int8 (≈3 MB por idioma); `tools/daily/tibio-build.py` los regenera. El ranking se calcula en el navegador. |
+
+El texto para compartir de cada uno es `game.it · <Juego> #N …` con cuadraditos de colores y el link; en modo práctica no se
+suma nada a las estadísticas. Las listas de respuestas y de puzzles se pueden ampliar sin tocar el código (los desafíos
+siguen en orden y vuelven a empezar al agotarse: `vinculos-check` informa hasta qué fecha alcanzan los puzzles cargados).
+
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.
