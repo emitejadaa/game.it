@@ -34,7 +34,7 @@ Hay una plantilla lista en [`templates/juego-base/`](templates/juego-base/) y `n
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
 - Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel y Batalla Naval): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
-  Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma). La IP de cada cliente (para los límites por IP) se detecta sola cuando hay un proxy delante (solo se confía en los encabezados si quien se conecta por TCP es una dirección interna); se puede fijar con `CLIENT_IP_HEADER` (p. ej. `cf-connecting-ip`) o `TRUST_PROXY_HOPS` (cuántos proxies agregan una entrada a `X-Forwarded-For`, contando desde la derecha). Límites ajustables en `server/index.js` (`CFG`).
+  Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma). La IP de cada cliente (para los límites por IP) se detecta sola cuando hay un proxy delante (solo se confía en los encabezados si quien se conecta por TCP es una dirección interna); se puede fijar con `CLIENT_IP_HEADER` (p. ej. `cf-connecting-ip`) o `TRUST_PROXY_HOPS` (cuántos proxies agregan una entrada a `X-Forwarded-For`, contando desde la derecha). `MAX_RT_ROOMS` (4 por defecto) es el tope de salas en tiempo real a la vez (Ameba, Serpentina, Clashball, Pádel y las arenas nuevas): el servidor gratis de Render tiene 0,1 CPU; al llegar al tope, crear otra devuelve `server_full_rt`. `/health` informa `rt: { rooms, max, avgTickMs }`. Límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
 ## Anuncios (Google AdSense)
@@ -66,7 +66,10 @@ src/
   ui/loader.js          pantalla de carga general (menú y juegos)
   ui/search.js          panel de búsqueda que baja desde arriba, con categorías
   ui/prefs-panel.js     popup de preferencias (esquina superior derecha)
-  ui/player.js          reproductor: iframe aislado + puente con el SDK
+  ui/report.js          popup "Reportar un problema" (correo → código → dónde → tipo → detalle → gracias)
+  ui/report-flow.js     la lógica pura de esos pasos (se prueba sin DOM)
+  core/report-api.js    envío del reporte: hoy un simulacro (cualquier código vale); el contrato HTTP está en el encabezado
+  ui/player.js          reproductor: iframe aislado + puente con el SDK; pausa por razones (hold/release)
   styles/               tokens (colores, curvas de animación), menú, paneles
 public/
   sdk/gameit.js         SDK que usa cada juego
@@ -75,7 +78,7 @@ public/
 ```
 
 - **Sin cuentas.** Preferencias e historial se guardan en `localStorage`. Los juegos no guardan progreso.
-- **Caché.** En producción un service worker guarda el portal y los juegos ya jugados.
+- **Caché.** En producción un service worker guarda el portal y los juegos ya jugados. Su versión sale de un hash del build (`vite.config.js`), así que cada deploy renueva el caché solo.
 - **Aislamiento.** Cada juego corre en su propio `iframe`: puede ser canvas, WebGL, Phaser, Three.js, Unity, Godot, React… Al salir, el iframe se destruye y se libera memoria, audio y GPU.
 
 ## Reglas comunes para todos los juegos
@@ -277,6 +280,33 @@ compu, tiempo por turno y lo que ve cada jugador) en `shared/table.js`: el mismo
 compu y en el servidor online, que baraja, valida cada jugada y a cada jugador le manda solo su mano. Se avisa
 "¡Última!" con una carta; si otro te agarra antes de que juegue el siguiente, robás 2. Opcional: acumular +2/+4.
 Online de 2 a 6 (el anfitrión puede sumar compu); si alguien se desconecta juega solo hasta que vuelve.
+
+### Arenas en tiempo real (base común) y Estela
+
+Las arenas FFA con bots comparten una base para que cada juego nuevo sean unas ~100 líneas en el servidor:
+
+- `server/games/_arena.js`: `arenaGame({ World, tps, viewer, brain, think, command, settings, … })` devuelve el módulo completo para
+  `server/index.js` (el contrato está documentado en el encabezado del archivo). Pone el bucle de paso fijo con recuperación de atraso
+  y protegido con try/catch, el arranque automático al crear la sala (así "Partida rápida" no cae en un lobby que nadie empezó),
+  los bots que completan la arena, un gobernador de CPU (saca bots si el costo por paso pasa del 25 % del intervalo), un snapshot por
+  jugador con backpressure (se saltea si el socket tiene más de 64 KB sin enviar), ranking a 1 Hz, y el mensaje `reset` al entrar o reconectar.
+  Los jugadores desconectados siguen en el mundo manejados por un bot hasta que vence la gracia. Un juego declara `realtime: true`
+  para contar en `MAX_RT_ROOMS`.
+- `public/shared/net/`: kit de red del cliente. `clock.js` (RTT y reloj del servidor con la muestra de menor RTT), `interp.js` (buffer de
+  snapshots con retardo adaptativo según el jitter), `predict.js` (entradas con número de secuencia y reconciliación suave),
+  `input.js` y `status.js` (chip con el ping y "Reconectando…"). Todo es lógica pura testeable en Node.
+- `public/shared/arena-lobby.js` + `arena.css`: el menú común (nombre y color, Partida rápida, Sala privada con código y link, Sin conexión
+  contra bots, lista de salas en vivo). Su encabezado documenta cómo usarlo.
+- `tools/netsim/delay-proxy.mjs` pone latencia, jitter y paradas entre el navegador y el servidor para probar con ~160 ms de RTT
+  (`?server=ws://localhost:<puerto del proxy>` en el link del juego, solo en localhost); `tools/load-bots.mjs` simula N jugadores y mide
+  ms por paso del servidor y KB/s por cliente.
+
+**Estela**: motos de luz en una grilla (160×160 por defecto, 20 pasos/s). Avanzás una celda por paso dejando una estela de largo máximo que
+crece con el puntaje; chocar con una estela o una pared te hace explotar (el derribo suma al dueño de la estela; chocarte solo no da puntos a nadie), y dos
+cabezas en la misma celda mueren las dos. El turbo gasta energía que se recarga rozando paredes y estelas. Se reaparece con escudo.
+El mundo (`shared/world.js`) es determinista y corre igual en el servidor y sin conexión; la moto propia se predice y se reconcilia con
+el servidor (responde en un cuadro aun con 250 ms de RTT) y las demás se interpolan. Cada cliente recibe solo lo cercano (interés de ±72 celdas).
+Medido con 10 jugadores en la máquina de desarrollo: ~0,6 ms por paso del servidor y ~3,5 KB/s por cliente.
 
 ### Drift Neon
 
