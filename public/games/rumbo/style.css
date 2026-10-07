@@ -1,0 +1,183 @@
+/* Rumbo: el globo del día, la escala de colores y la lista de intentos. */
+.rb-globe {
+  position: relative;
+  /* cuadrado: el ancho disponible o, si la pantalla es baja, lo que deje el alto (mínimo 260 px) */
+  width: min(100%, max(260px, calc(100dvh - 330px)));
+  aspect-ratio: 1;
+  flex: none;
+  overflow: hidden;
+  border-radius: 16px;
+}
+.rb-canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: grab;
+  border-radius: 16px;
+  outline-offset: -2px;
+}
+.rb-globe.grab .rb-canvas {
+  cursor: grabbing;
+}
+.rb-ctls {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: grid;
+  gap: 6px;
+}
+.rb-ctl {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--gi-bg, #07070a) 72%, transparent);
+  color: var(--gi-fg, #eaeaf0);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transition: color 0.2s var(--dg-ease), border-color 0.2s var(--dg-ease), transform 0.3s var(--dg-ease);
+}
+.rb-ctl:hover {
+  color: var(--gi-accent, #00f0ff);
+  border-color: var(--gi-accent, #00f0ff);
+}
+.rb-ctl:active {
+  transform: scale(0.92);
+}
+
+.rb-status {
+  width: min(100%, 380px);
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.rb-count {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gi-mute, #6f6f80);
+}
+.rb-give {
+  padding: 4px 10px;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gi-mute, #6f6f80);
+  transition: color 0.2s var(--dg-ease), border-color 0.2s var(--dg-ease);
+}
+.rb-give[hidden] {
+  display: none;
+}
+.rb-give:hover,
+.rb-give.ask {
+  color: var(--gi-red, #ff3b5c);
+  border-color: var(--gi-red, #ff3b5c);
+}
+
+.rb-legend {
+  width: min(100%, 380px);
+  display: grid;
+  gap: 4px;
+}
+.rb-bar-scale {
+  height: 8px;
+  border-radius: 99px;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+}
+.rb-legend-t {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gi-mute, #6f6f80);
+}
+
+.rb-list {
+  width: min(100%, 380px);
+  display: grid;
+  gap: 6px;
+}
+.rb-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+  border-radius: 8px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: border-color 0.2s var(--dg-ease), background 0.2s var(--dg-ease);
+}
+.rb-row:hover {
+  border-color: color-mix(in oklab, var(--gi-fg, #eaeaf0) 45%, transparent);
+}
+.rb-row.sel {
+  border-color: var(--gi-accent, #00f0ff);
+  background: color-mix(in oklab, var(--gi-accent, #00f0ff) 10%, transparent);
+}
+.rb-row.new {
+  animation: dg-rise 380ms var(--dg-ease) both;
+}
+.rb-row.hit {
+  background: var(--gi-accent, #00f0ff);
+  border-color: var(--gi-accent, #00f0ff);
+  color: var(--gi-bg, #07070a);
+}
+.rb-row.hit small {
+  color: var(--gi-bg, #07070a);
+}
+.rb-chip {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1px solid color-mix(in oklab, var(--gi-fg, #eaeaf0) 35%, transparent);
+}
+.rb-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rb-row small {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--gi-mute, #6f6f80);
+  font-variant-numeric: tabular-nums;
+}
+
+/* el campo queda pegado abajo aunque la lista sea larga */
+.rb-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding: 10px 0 2px;
+  background: linear-gradient(to bottom, transparent, var(--gi-bg, #07070a) 28%);
+}
+
+/* las etiquetas del histograma tienen hasta cinco caracteres ("21-30") */
+.dg-hrow {
+  grid-template-columns: 40px 1fr;
+}
+
+:root[data-gi-motion='reduced'] .rb-row.new {
+  animation-duration: 1ms !important;
+}
