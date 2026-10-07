@@ -1,0 +1,9 @@
+[
+  {"id":"f-001","lat":-34.6037,"lng":-58.3816,"cc":"AR","n":{"es":"Obelisco","en":"Obelisk of Buenos Aires"}},
+  {"id":"f-002","lat":-34.6083,"lng":-58.3712,"cc":"AR","n":{"es":"Plaza de Mayo","en":"Plaza de Mayo"}},
+  {"id":"f-003","lat":48.8584,"lng":2.2945,"cc":"FR","n":{"es":"Torre Eiffel","en":"Eiffel Tower"}},
+  {"id":"f-004","lat":40.758,"lng":-73.9855,"cc":"US","n":{"es":"Times Square","en":"Times Square"}},
+  {"id":"f-005","lat":41.8902,"lng":12.4922,"cc":"IT","n":{"es":"Coliseo","en":"Colosseum"}},
+  {"id":"f-006","lat":51.5007,"lng":-0.1246,"cc":"GB","n":{"es":"Big Ben","en":"Big Ben"}},
+  {"id":"f-007","lat":-33.8568,"lng":151.2153,"cc":"AU","n":{"es":"Ópera de Sídney","en":"Sydney Opera House"}}
+]

@@ -1,0 +1,85 @@
+{
+  "v": 0,
+  "generado": "semilla",
+  "metodo": "SEMILLA de desarrollo: la reemplaza tools/trotamundos-datos.mjs",
+  "paises": {
+    "AR": {
+      "cont": "SA",
+      "latam": 1,
+      "d": 3900
+    },
+    "BR": {
+      "cont": "SA",
+      "latam": 1,
+      "d": 4300
+    },
+    "MX": {
+      "cont": "NA",
+      "latam": 1,
+      "d": 3300
+    },
+    "US": {
+      "cont": "NA",
+      "d": 4600
+    },
+    "FR": {
+      "cont": "EU",
+      "d": 1100
+    },
+    "GB": {
+      "cont": "EU",
+      "d": 1200
+    },
+    "ES": {
+      "cont": "EU",
+      "d": 1100
+    },
+    "IT": {
+      "cont": "EU",
+      "d": 1200
+    },
+    "AU": {
+      "cont": "OC",
+      "d": 4100
+    },
+    "ZA": {
+      "cont": "AF",
+      "d": 1900
+    },
+    "KE": {
+      "cont": "AF",
+      "d": 1000
+    },
+    "TH": {
+      "cont": "AS",
+      "d": 1700
+    },
+    "JP": {
+      "cont": "AS",
+      "d": 2800
+    }
+  },
+  "regiones": {
+    "latam": {
+      "d": 9000
+    },
+    "EU": {
+      "d": 5200
+    },
+    "SA": {
+      "d": 5600
+    },
+    "NA": {
+      "d": 7000
+    },
+    "AS": {
+      "d": 9500
+    },
+    "AF": {
+      "d": 7600
+    },
+    "OC": {
+      "d": 5000
+    }
+  }
+}
