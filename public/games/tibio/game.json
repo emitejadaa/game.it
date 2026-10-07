@@ -1,0 +1,20 @@
+{
+  "id": "tibio",
+  "title": { "es": "Tibio", "en": "Tibio" },
+  "description": {
+    "es": "Hay una palabra secreta: probá palabras y mirá en qué puesto de cercanía de significado están. Un desafío nuevo todos los días.",
+    "en": "There is a secret word: try words and see how close they are in meaning. A new puzzle every day."
+  },
+  "categories": ["diarios", "palabras", "puzzle", "casual"],
+  "tags": ["palabra", "word", "significado", "meaning", "semantica", "semantic", "similitud", "similarity", "diario", "daily", "adivinar", "guess", "frio", "caliente", "hot", "cold"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": false, "multiplayer": false, "story": false, "daily": true },
+  "daily": { "epoch": "2026-10-06" },
+  "order": 32
+}
