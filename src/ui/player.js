@@ -30,8 +30,25 @@ function send(type, data = {}) {
   frame?.contentWindow?.postMessage({ gameit: 1, type, ...data }, origin);
 }
 
-export const pause = () => send('pause');
-export const resume = () => send('resume');
+// Razones por las que el juego está en pausa ('prefs', 'hidden', 'ad', 'report'…). Cada una avisa por su cuenta:
+// el juego se pausa al entrar la primera y se reanuda recién cuando se soltó la última, así nadie
+// reanuda un juego que otra cosa sigue necesitando quieto (p. ej. al volver a la pestaña con un panel abierto).
+const holds = new Set();
+
+export function hold(reason) {
+  const was = holds.size;
+  holds.add(reason);
+  if (!was) send('pause');
+}
+
+export function release(reason) {
+  if (holds.delete(reason) && !holds.size) send('resume');
+}
+
+export const isHeld = () => holds.size > 0;
+/** Pausa/reanuda "a mano" (razón 'manual'): para quien no necesita su propia razón. */
+export const pause = () => hold('manual');
+export const resume = () => release('manual');
 
 function markActive() {
   player.classList.remove('idle');
@@ -47,6 +64,7 @@ function onMessage(e) {
   switch (d.type) {
     case 'hello':
       send('init', { prefs: prefs.resolved(), game: { id: current.id }, ads: 1 });
+      if (holds.size) send('pause'); // el pedido de pausa llegó antes de que el juego escuchara
       break;
     case 'progress':
       creep = Math.max(creep, Math.min(0.98, +d.value || 0));
@@ -76,7 +94,7 @@ export function init(h) {
   document.getElementById('btn-exit').addEventListener('click', () => hooks.onExit());
   bar.addEventListener('pointermove', markActive);
   prefs.subscribe((_, r) => send('prefs', { prefs: r }));
-  document.addEventListener('visibilitychange', () => current && (document.hidden ? pause() : resume()));
+  document.addEventListener('visibilitychange', () => (document.hidden ? hold('hidden') : release('hidden')));
 }
 
 /** Abre un juego. Resuelve cuando ya se ve (la pantalla de carga se retiró). */
@@ -87,7 +105,7 @@ export async function launch(g, query = '') {
   await loader.show(t('loader.game', { name: pick(g.title) }));
 
   origin = new URL(g.entry, location.href).origin;
-  gameAds.attach(send, (on) => (on ? pause() : resume()));
+  gameAds.attach(send, (on) => (on ? hold('ad') : release('ad')));
   frame = document.createElement('iframe');
   frame.title = pick(g.title);
   frame.allow = 'autoplay; fullscreen; gamepad; clipboard-write; screen-wake-lock';
@@ -133,6 +151,7 @@ export async function launch(g, query = '') {
 }
 
 function teardown() {
+  holds.clear();
   gameAds.detach();
   pendingReady?.(false);
   frame?.remove(); // libera memoria, audio y WebGL del juego anterior

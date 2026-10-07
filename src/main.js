@@ -1,9 +1,10 @@
 import './styles/base.css';
 import './styles/menu.css';
 import './styles/panels.css';
+import './styles/report.css';
 
 import * as prefs from './core/prefs.js';
-import { setLang, t, translateDom } from './core/i18n.js';
+import { setLang, getLang, t, translateDom } from './core/i18n.js';
 import { available, byId, playable, dailyGames } from './core/registry.js';
 import * as daily from './core/daily.js';
 import * as device from './core/device.js';
@@ -12,6 +13,7 @@ import * as loader from './ui/loader.js';
 import { render, fitNames, enableSpotlight } from './ui/cards.js';
 import * as search from './ui/search.js';
 import * as prefsPanel from './ui/prefs-panel.js';
+import * as report from './ui/report.js';
 import * as player from './ui/player.js';
 import * as ads from './ui/ads.js';
 import * as gameAds from './ui/game-ads.js';
@@ -49,6 +51,7 @@ function applyLang() {
   setLang(prefs.get().lang);
   translateDom();
   prefsPanel.rerender();
+  report.rerender();
   search.renderChips();
   renderMenu({ animate: false });
 }
@@ -83,10 +86,12 @@ async function route() {
     if (player.game()?.id === g.id) return;
     search.close();
     prefsPanel.close();
+    report.close();
     track(g.id);
     await player.launch(g, m[2] || '');
   } else if (player.isActive()) {
     prefsPanel.close();
+    report.close();
     await player.close(() => renderMenu());
     ads.show();
   }
@@ -122,6 +127,14 @@ document.addEventListener('click', (e) => {
 
 // ---------- Teclado ----------
 document.addEventListener('keydown', (e) => {
+  if (report.isOpen()) {
+    // con el reporte abierto nada más responde al teclado (ni "/" ni Ctrl+K); Esc lo cierra
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      report.close();
+    }
+    return;
+  }
   if (player.isActive()) {
     if (e.key === 'Escape' && prefsPanel.isOpen()) prefsPanel.close();
     return;
@@ -197,11 +210,27 @@ async function start() {
   prefsPanel.init({
     onToggle: (open) => {
       if (open) search.close();
-      if (player.isActive()) open ? player.pause() : player.resume();
+      if (player.isActive()) open ? player.hold('prefs') : player.release('prefs');
     },
     onLangChange: applyLang,
     isInGame: player.isActive,
+    // primero se abre el reporte (toma su razón de pausa) y después se cierra prefs (suelta la suya): el juego no se reanuda en el medio
+    onReport: () => {
+      report.open({
+        gameId: player.game()?.id,
+        returnTo: $(player.isActive() ? 'btn-player-prefs' : 'btn-prefs'),
+      });
+      prefsPanel.close();
+    },
   });
+  report.init({
+    onToggle: (open) => {
+      if (!open) player.release('report');
+      else if (player.isActive()) player.hold('report');
+    },
+  });
+  // otra pestaña cambió el idioma con el reporte abierto: se repinta el paso actual conservando lo escrito
+  prefs.subscribe((p) => report.isOpen() && p.lang !== getLang() && applyLang());
   player.init({ onExit: exitGame });
   ads.init();
   gameAds.init();

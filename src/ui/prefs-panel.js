@@ -6,6 +6,7 @@ const triggers = [document.getElementById('btn-prefs'), document.getElementById(
 
 let onOpenChange = () => {};
 let inGame = () => false;
+let onReport = () => {};
 export const isOpen = () => panel.classList.contains('open');
 
 const seg = (key, options) => {
@@ -76,6 +77,10 @@ function html() {
       ['en', 'EN'],
     ])}</div>`,
   )}
+  ${group(
+    t('prefs.help'),
+    `<div class="prow"><span>${t('prefs.report')}</span><button class="pill-btn report-btn" data-action="report"><svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5" /></svg>${t('prefs.reportBtn')}</button></div>`,
+  )}
   <div class="prefs-foot"><button class="text-btn" data-action="reset">↺ ${t('prefs.reset')}</button></div>`;
 }
 
@@ -113,8 +118,9 @@ function sync() {
   });
 }
 
-export function init({ onToggle, onLangChange, isInGame } = {}) {
+export function init({ onToggle, onLangChange, isInGame, onReport: report } = {}) {
   onOpenChange = onToggle || onOpenChange;
+  onReport = report || onReport;
   inGame = isInGame || inGame;
   rerender();
   sync();
@@ -129,6 +135,7 @@ export function init({ onToggle, onLangChange, isInGame } = {}) {
   panel.addEventListener('click', (e) => {
     const b = e.target.closest('button');
     if (!b) return;
+    if (b.dataset.action === 'report') return void onReport();
     if (b.dataset.action === 'reset') {
       const lang = prefs.get().lang;
       prefs.reset();
