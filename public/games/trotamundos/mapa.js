@@ -190,6 +190,34 @@ export function camaraPara(puntos, { ancho, alto, relleno = { top: 0, bottom: 0,
   };
 }
 
+// ---------------------------------------------------------------- textos propios de MapLibre (opción `locale`)
+/** Textos de la interfaz de MapLibre en español (los que faltan quedan en inglés, que es lo que trae por defecto). */
+const UI_ES = {
+  'AttributionControl.ToggleAttribution': 'Mostrar u ocultar la atribución',
+  'AttributionControl.MapFeedback': 'Comentarios sobre el mapa',
+  'LogoControl.Title': 'Logo de MapLibre',
+  'Marker.Title': 'Marcador del mapa',
+  'NavigationControl.ResetBearing': 'Arrastrá para girar el mapa, tocá para orientarlo al norte',
+  'NavigationControl.ZoomIn': 'Acercar',
+  'NavigationControl.ZoomOut': 'Alejar',
+  'Popup.Close': 'Cerrar',
+};
+const UI_EN = {
+  'AttributionControl.ToggleAttribution': 'Toggle attribution',
+  'AttributionControl.MapFeedback': 'Map feedback',
+  'LogoControl.Title': 'MapLibre logo',
+  'Marker.Title': 'Map marker',
+  'NavigationControl.ResetBearing': 'Drag to rotate map, click to reset north',
+  'NavigationControl.ZoomIn': 'Zoom in',
+  'NavigationControl.ZoomOut': 'Zoom out',
+  'Popup.Close': 'Close popup',
+};
+
+/** `locale` de MapLibre para ese idioma; 'Map.Title' es el aria-label del canvas (el elemento que recibe el foco con Tab). */
+export function localeMapa(lang, etiqueta) {
+  return { ...(lang === 'en' ? UI_EN : UI_ES), 'Map.Title': etiqueta || (lang === 'en' ? 'Map' : 'Mapa') };
+}
+
 // ---------------------------------------------------------------- estilo (se pide una sola vez por página)
 let promesaEstilo = null;
 function pedirEstilo(url) {
@@ -273,7 +301,6 @@ export class Mapa {
     const lienzo = document.createElement('div');
     lienzo.className = 'tm-mapa__lienzo';
     Object.assign(lienzo.style, { position: 'absolute', inset: '0' });
-    lienzo.setAttribute('aria-label', this.textos.etiqueta);
     const aviso = document.createElement('div');
     aviso.className = 'tm-mapa__aviso';
     aviso.hidden = true;
@@ -320,8 +347,29 @@ export class Mapa {
   ponerTextos(textos) {
     Object.assign(this.textos, textos);
     this._avisoBtn.textContent = this.textos.reintentar;
-    this._lienzo.setAttribute('aria-label', this.textos.etiqueta);
+    this._textosUi();
     if (!this._aviso.hidden) this._avisoMsg.textContent = this.textos.error;
+  }
+
+  /** Pone en el idioma actual los textos que MapLibre ya dibujó: el aria-label del canvas (que recibe el foco) y los títulos de los controles. */
+  _textosUi() {
+    const m = this.map;
+    if (!m) return;
+    const loc = localeMapa(this.lang, this.textos.etiqueta);
+    m.getCanvas()?.setAttribute('aria-label', loc['Map.Title']);
+    const poner = (sel, clave) => {
+      for (const e of this.raiz.querySelectorAll(sel)) {
+        e.setAttribute('aria-label', loc[clave]);
+        e.title = loc[clave];
+      }
+    };
+    poner('.maplibregl-ctrl-zoom-in', 'NavigationControl.ZoomIn');
+    poner('.maplibregl-ctrl-zoom-out', 'NavigationControl.ZoomOut');
+    poner('.maplibregl-ctrl-attrib-button', 'AttributionControl.ToggleAttribution');
+    for (const e of this.raiz.querySelectorAll('.maplibregl-marker')) e.setAttribute('aria-label', loc['Marker.Title']);
+    try {
+      Object.assign(m._locale, loc); // los controles y pines que se creen después salen en el idioma nuevo
+    } catch {}
   }
 
   // ------------------------------------------------------------ creación y errores
@@ -347,6 +395,7 @@ export class Mapa {
       doubleClickZoom: false,
       touchPitch: false,
       fadeDuration: this.reducido() ? 0 : 200,
+      locale: localeMapa(this.lang, this.textos.etiqueta),
     });
     this.map = m;
     m.touchZoomRotate.disableRotation();
@@ -664,6 +713,7 @@ export class Mapa {
     lang = lang === 'en' ? 'en' : 'es';
     if (lang === this.lang) return;
     this.lang = lang;
+    this._textosUi();
     const m = this.map;
     if (!m || !this._base) return;
     for (const capa of adaptarEstilo(this._base, this.tema, lang).layers) {

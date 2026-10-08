@@ -37,6 +37,8 @@ const lang = () => (G.prefs.lang === 'en' ? 'en' : 'es');
 const t = (k, v) => traducir(lang(), k, v);
 const agregarTextos = (o) => Object.assign(TEXTOS, o);
 const esTactil = () => !!G.prefs.touch || matchMedia('(pointer: coarse)').matches;
+/** "Reducir movimiento": la preferencia del portal o la del sistema (también cuenta con el juego abierto suelto, sin portal). */
+const reducido = () => !!G.prefs.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------------------------------------------------------------- utilidades de DOM y formato
 function el(tag, props = {}, ...hijos) {
@@ -144,18 +146,39 @@ function pantalla(id, { juego = id === 'ronda' } = {}) {
 }
 
 let toastT = 0;
+/** Ubica el aviso en un lugar libre: arriba al centro (debajo de la barra) o, con el mapa abierto, a la derecha del mapa o, si no queda lugar, sobre el borde de abajo del mapa. Nunca tapa el título "Mapa", "Cerrar mapa" ni la atribución de Google. */
+function colocarToast(e) {
+  for (const k of ['left', 'right', 'top', 'bottom', 'maxWidth', 'transform']) e.style[k] = '';
+  const dock = $('dock');
+  if (S.pantalla !== 'ronda' || dock.dataset.estado !== 'grande') return;
+  const d = dock.getBoundingClientRect();
+  const topPorDefecto = $('barra').getBoundingClientRect().bottom + 10;
+  const alto = e.offsetHeight;
+  if (topPorDefecto + alto + 6 <= d.top) return; // entra arriba, entre la barra y el mapa
+  const libreDer = innerWidth - d.right - 24;
+  if (libreDer >= 220) {
+    Object.assign(e.style, { left: `${d.right + 12}px`, transform: 'none', maxWidth: `${libreDer}px`, top: `${topPorDefecto}px` });
+    return;
+  }
+  const m = $('slot-ronda').getBoundingClientRect(); // no entra en ningún lado libre: sobre el borde de abajo del mapa (sin tapar el botón "Adivinar")
+  Object.assign(e.style, { left: `${d.left + 8}px`, transform: 'none', maxWidth: `${Math.max(120, d.width - 16)}px`, top: 'auto', bottom: `${innerHeight - m.bottom + 8}px` });
+}
+/** Aviso breve (role="status"): no toma el foco ni lo mueve, así que el foco queda donde estaba. */
 function toast(msg, ms = 3200) {
   const e = $('toast');
   e.textContent = msg;
   e.hidden = false;
+  colocarToast(e);
   clearTimeout(toastT);
   toastT = setTimeout(() => (e.hidden = true), ms);
 }
 
 let dlgResolver = null;
+let dlgFoco = null; // elemento que tenía el foco antes de abrir el diálogo
 /** Diálogo modal: devuelve el `valor` del botón que se tocó (o `cancelar` con Esc). */
 function dialogo({ titulo, texto, botones, cancelar = null }) {
   cerrarDialogo(cancelar);
+  dlgFoco = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null;
   S.dialogo = true;
   $('dlg-t').textContent = titulo;
   $('dlg-d').textContent = texto || '';
@@ -176,6 +199,10 @@ function cerrarDialogo(valor) {
   if (!dlgResolver && $('dialogo').hidden) return;
   $('dialogo').hidden = true;
   S.dialogo = false;
+  // el foco vuelve a lo que lo tenía (si sigue en pantalla); si después se cambia de pantalla, esa pantalla pone el suyo
+  const foco = dlgFoco;
+  dlgFoco = null;
+  if (foco?.isConnected && foco.getClientRects().length) foco.focus({ preventScroll: true });
   const r = dlgResolver;
   dlgResolver = null;
   r?.(valor);
@@ -212,7 +239,7 @@ const visor = new Visor($('visor-host'), { lang: lang(), titulo: t('visorTitulo'
 const mapaEl = el('div', { class: 'mapa-ancla' });
 let mapa = null;
 function crearMapa(host, opts = {}) {
-  return new Mapa(host, { tema: G.prefs.theme, lang: lang(), reducido: () => G.prefs.reducedMotion, textos: textosMapa(), ...opts });
+  return new Mapa(host, { tema: G.prefs.theme, lang: lang(), reducido, textos: textosMapa(), ...opts });
 }
 const textosMapa = () => ({ error: t('mapaError'), reintentar: t('reintentar'), etiqueta: t('mapaEtiqueta'), centro: t('mapa_centro') });
 const crearVisor = (host, opts = {}) => new Visor(host, { lang: lang(), titulo: t('visorTitulo'), textoCargando: t('cargandoVista'), ...opts });
@@ -255,7 +282,7 @@ async function abrirOnline() {
     await m.abrirOnline(ctx);
   } catch (e) {
     console.error('[trotamundos] online', e);
-    await mensaje(t('onlineTitulo'), t('onlineError'));
+    await mensaje(t('m_online'), t('onlineError'));
     irMenu();
   }
 }
@@ -390,7 +417,10 @@ function pintarBuscador() {
     );
   }
 }
-$('pais-q').addEventListener('input', pintarBuscador);
+$('pais-q').addEventListener('input', () => {
+  pintarBuscador();
+  if (!$('paises').hidden) $('paises').scrollIntoView({ block: 'nearest' }); // con poca altura la lista queda abajo: se la trae a la vista
+});
 $('congelado').addEventListener('click', () => {
   S.opc.congelado = !S.opc.congelado;
   pintarOpciones();
@@ -736,7 +766,7 @@ function pintarResultado() {
   $('res-barra').style.width = `${(r.puntos / MAX_SCORE) * 100}%`;
   const out = $('res-pts');
   clearInterval(contarT);
-  if (G.prefs.reducedMotion || !r.puntos) out.textContent = `+${fmt(r.puntos)}`;
+  if (reducido() || !r.puntos) out.textContent = `+${fmt(r.puntos)}`;
   else {
     const t0 = performance.now();
     contarT = setInterval(() => {
@@ -849,7 +879,9 @@ $('p-ronda').addEventListener('click', (e) => {
   const b = e.target.closest?.('button');
   if (b && e.detail > 0 && b !== $('adivinar')) {
     b.blur();
-    $('p-ronda').focus({ preventScroll: true });
+    // si ese toque abrió un diálogo (Salir), el foco ya está en él: al cerrarlo vuelve a la ronda, no al botón tocado
+    if (S.dialogo) dlgFoco = $('p-ronda');
+    else $('p-ronda').focus({ preventScroll: true });
   }
 });
 
@@ -983,3 +1015,7 @@ pintarMenu();
 cargarDatosJuego().catch(() => {});
 G.gameplay(false);
 G.ready(); // el menú ya se puede ver: el portal retira su pantalla de carga
+// con ?room=CODE (link de invitación) o con una sala guardada en esta pestaña (recarga), se entra directo al online
+try {
+  if (new URLSearchParams(location.search).has('room') || sessionStorage.getItem('gameit:session:trotamundos')) abrirOnline();
+} catch {}
