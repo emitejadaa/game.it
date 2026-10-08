@@ -6,7 +6,7 @@ export const R_KM = 6371.0088; // radio medio de la Tierra
 export const WORLD_D = 14916.862; // "tamaño" del mapa mundo (km): escala del puntaje
 export const MAX_SCORE = 5000;
 export const ROUNDS_DAILY = 5;
-export const REGIONS = ['AF', 'AS', 'EU', 'NA', 'SA', 'OC']; // continentes (NA incluye Centroamérica y el Caribe)
+export const REGIONS = ['africa', 'asia', 'europa', 'norteamerica', 'sudamerica', 'oceania']; // continentes; en minúscula y con nombre entero para no chocar con códigos de país (NA = Namibia, SA = Arabia Saudita…). norteamerica incluye Centroamérica y el Caribe
 /** Radio de cada pista como fracción de la escala del mapa. Cada una es ≤ 1/3 de la anterior, así quedan anidadas. */
 export const HINT_FRACTIONS = [0.2, 0.065, 0.02];
 
@@ -59,7 +59,7 @@ const clampScale = (d) => (Number.isFinite(d) && d > 0 ? Math.min(WORLD_D, Math.
 
 /**
  * ¿La ubicación entra en el ámbito? scope: 'mundo' | 'latam' | un continente de REGIONS | un código de país (ISO-2).
- * `meta` es datos/paises.json: { paises: { AR: { cont: 'SA', latam: 1, d: 3900 } }, regiones: { EU: { d: 5200 } } }.
+ * `meta` es datos/paises.json: { paises: { AR: { cont: 'sudamerica', latam: 1, d: 3900 } }, regiones: { europa: { d: 5200 } } }.
  */
 export function inScope(loc, scope, meta) {
   if (!scope || scope === 'mundo') return true;

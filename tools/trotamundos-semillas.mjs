@@ -41,7 +41,7 @@ export const RECORTES = {
 };
 
 /** Continente por país cuando Natural Earth no coincide con la convención del juego (NA incluye Centroamérica y el Caribe). */
-export const CONTINENTE_FORZADO = { RU: 'EU' };
+export const CONTINENTE_FORZADO = { RU: 'europa' };
 
 // ---------------------------------------------------------------- sitios famosos
 /**

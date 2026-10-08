@@ -303,9 +303,9 @@ test('ajustes: se validan y corrigen', async () => {
   // un ámbito sin lugares (o con menos lugares que rondas) cae a 'mundo'
   assert.equal((await set({ rounds: 3, mode: 'random', scope: 'ZZ' })).scope, 'mundo');
   assert.equal((await set({ scope: 'zz' })).scope, 'mundo');
-  const withPlaces = ['latam', 'AR', 'EU', 'NA', 'SA', 'AS', 'AF', 'OC'].filter((sc) => poolSize('random', sc) >= 3);
+  const withPlaces = ['latam', 'AR', 'europa', 'norteamerica', 'sudamerica', 'asia', 'africa', 'oceania'].filter((sc) => poolSize('random', sc) >= 3);
   for (const sc of withPlaces) assert.equal((await set({ rounds: 3, mode: 'random', scope: sc })).scope, sc, `ámbito ${sc}`);
-  const few = ['latam', 'AR', 'EU', 'NA', 'SA', 'AS', 'AF', 'OC'].filter((sc) => poolSize('random', sc) < 10);
+  const few = ['latam', 'AR', 'europa', 'norteamerica', 'sudamerica', 'asia', 'africa', 'oceania'].filter((sc) => poolSize('random', sc) < 10);
   for (const sc of few) {
     await set({ rounds: 3, scope: sc });
     assert.equal((await set({ rounds: 10, scope: sc })).scope, 'mundo', `ámbito ${sc} con 10 rondas`);
@@ -1065,7 +1065,7 @@ test('si faltan los datos, el servidor arranca igual (y avisa al empezar)', asyn
     assert.equal(reveals(c)[0].scale, WORLD_D);
     c.send({ t: 'rematch' });
     await c.until((m) => m.t === 'room' && m.room.state === 'lobby', { from: f2 });
-    c.send({ t: 'settings', settings: { scope: 'EU', rounds: 3 } });
+    c.send({ t: 'settings', settings: { scope: 'europa', rounds: 3 } });
     await c.until((m) => m.t === 'room' && m.room.state === 'lobby' && m.room.settings.scope === 'mundo', { from: f2 });
     await closeAll([c, d]);
     assert.deepEqual(s2.errors().filter((l) => !l.includes('no se pudo leer')), []);

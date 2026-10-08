@@ -45,7 +45,7 @@ documentados de Google (ni desde el juego ni para generar datos); no se copia c�
 - **Modos (un jugador):**
   - *Sitios famosos*: `datos/famosos.json`, ámbito Mundo o Argentina/Latinoamérica.
   - *Lugares al azar*: `datos/mundo.json`, ámbito Mundo (países distintos en cada partida).
-  - *Por país o región*: ámbito = Argentina · Latinoamérica · un continente (AF, AS, EU, NA, SA, OC) · cualquier país con
+  - *Por país o región*: ámbito = Argentina · Latinoamérica · un continente (africa, asia, europa, norteamerica, sudamerica, oceania) · cualquier país con
     suficientes lugares (buscador). Se juega sobre `mundo.json` filtrado con `inScope`.
   - *Desafío diario*: `dailyRounds(famosos, mundo, dailyKey(), v)` → 5 ubicaciones iguales para todos ese día (cambia a las 0 h
     de Argentina), 2 minutos por ronda, se puede caminar. Se puede repetir (sin récords). "Copiar resultado" arma un texto para pegar.
@@ -68,7 +68,7 @@ documentados de Google (ni desde el juego ni para generar datos); no se copia c�
   (`h` = rumbo inicial, opcional). Unos 150 del mundo y unos 70 de Argentina y Latinoamérica.
 - `mundo.json`: `[{ "id": "m-0001", "lat": …, "lng": …, "cc": "FR", "h": 120, "p": "Lyon" }]` (`h` y `p` = lugar poblado cercano, opcionales).
   Todos los países con cobertura, con más densidad en Argentina y Latinoamérica.
-- `paises.json`: `{ "v": 1, "generado": "AAAA-MM-DD", "metodo": "…", "paises": { "AR": { "cont": "SA", "latam": 1, "d": 3900, "n": 190, "f": 12 } }, "regiones": { "mundo": {…}, "latam": { "d": 9000 }, "EU": { "d": 5200 } } }`
+- `paises.json`: `{ "v": 1, "generado": "AAAA-MM-DD", "metodo": "…", "paises": { "AR": { "cont": "sudamerica", "latam": 1, "d": 3900, "n": 190, "f": 12 } }, "regiones": { "mundo": {…}, "latam": { "d": 9000 }, "europa": { "d": 5200 } } }`
   (`d` = escala en km, `n` = cuántos lugares tiene `mundo.json`, `f` = cuántos famosos). `v` es la versión del conjunto
   (entra en la semilla del diario).
 - `CREDITOS.txt`: fuentes y licencias (Natural Earth, dominio público; OpenStreetMap vía OpenFreeMap; coordenadas de sitios famosos).

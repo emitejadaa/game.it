@@ -63,25 +63,25 @@ test('destinationPoint y bearingDeg son coherentes con distanceKm', () => {
 
 test('inScope y scopeScale', () => {
   const meta = {
-    paises: { AR: { cont: 'SA', latam: 1, d: 3900 }, FR: { cont: 'EU', d: 1000 }, CL: { cont: 'SA', latam: 1, d: 100 }, US: { cont: 'NA', d: 4500 } },
-    regiones: { EU: { d: 5200 }, latam: { d: 9000 }, SA: { d: 99999 } },
+    paises: { AR: { cont: 'sudamerica', latam: 1, d: 3900 }, FR: { cont: 'europa', d: 1000 }, CL: { cont: 'sudamerica', latam: 1, d: 100 }, US: { cont: 'norteamerica', d: 4500 } },
+    regiones: { europa: { d: 5200 }, latam: { d: 9000 }, sudamerica: { d: 99999 } },
   };
   const ar = { cc: 'AR' };
   const fr = { cc: 'FR' };
   assert.ok(inScope(ar, 'mundo', meta) && inScope(fr, undefined, meta));
   assert.ok(inScope(ar, 'latam', meta) && !inScope(fr, 'latam', meta));
-  assert.ok(inScope(ar, 'SA', meta) && !inScope(ar, 'EU', meta) && inScope(fr, 'EU', meta));
+  assert.ok(inScope(ar, 'sudamerica', meta) && !inScope(ar, 'europa', meta) && inScope(fr, 'europa', meta));
   assert.ok(inScope(ar, 'AR', meta) && !inScope(fr, 'AR', meta));
-  assert.ok(!inScope({ cc: 'ZZ' }, 'latam', meta) && !inScope(ar, 'EU', undefined));
+  assert.ok(!inScope({ cc: 'ZZ' }, 'latam', meta) && !inScope(ar, 'europa', undefined));
   assert.equal(scopeScale('mundo', meta), WORLD_D);
   assert.equal(scopeScale(undefined, meta), WORLD_D);
-  assert.equal(scopeScale('EU', meta), 5200);
+  assert.equal(scopeScale('europa', meta), 5200);
   assert.equal(scopeScale('latam', meta), 9000);
   assert.equal(scopeScale('AR', meta), 3900);
   assert.equal(scopeScale('CL', meta), 250, 'piso de 250 km');
-  assert.equal(scopeScale('SA', meta), WORLD_D, 'tope en el tamaño del mundo');
+  assert.equal(scopeScale('sudamerica', meta), WORLD_D, 'tope en el tamaño del mundo');
   assert.equal(scopeScale('XX', meta), WORLD_D, 'país sin datos');
-  assert.deepEqual(REGIONS, ['AF', 'AS', 'EU', 'NA', 'SA', 'OC']);
+  assert.deepEqual(REGIONS, ['africa', 'asia', 'europa', 'norteamerica', 'sudamerica', 'oceania']);
 });
 
 test('hashSeed y rngFrom: deterministas y bien repartidos', () => {
@@ -200,4 +200,14 @@ test('embedUrl: sin clave usa el embed de Insertar; con clave, la Embed API ofic
   const k = embedUrl({ lat: 48.8584, lng: 2.2945, heading: 10, pitch: 0, fov: 120, lang: 'en', key: 'AB&c=d' });
   assert.ok(k.startsWith('https://www.google.com/maps/embed/v1/streetview?key=AB%26c%3Dd&location=48.8584,2.2945&heading=10&pitch=0&fov=100&language=en'));
   assert.ok(embedUrl({ lat: 1, lng: 2, key: 'K', lang: 'fr' }).endsWith('&language=es'));
+});
+
+test('los ámbitos de continente no chocan con códigos de país (NA = Namibia, SA = Arabia Saudita…)', () => {
+  const meta = { paises: { NA: { cont: 'africa', d: 1500 }, SA: { cont: 'asia', d: 2000 }, AR: { cont: 'sudamerica', d: 3900 } }, regiones: { africa: { d: 7000 }, sudamerica: { d: 5600 } } };
+  assert.ok(REGIONS.every((r) => !/^[A-Za-z]{2}$/.test(r)), 'ningún continente parece un código de país');
+  assert.ok(inScope({ cc: 'NA' }, 'NA', meta) && !inScope({ cc: 'AR' }, 'NA', meta), 'NA es Namibia');
+  assert.ok(inScope({ cc: 'NA' }, 'africa', meta) && !inScope({ cc: 'NA' }, 'sudamerica', meta));
+  assert.ok(inScope({ cc: 'SA' }, 'SA', meta) && !inScope({ cc: 'AR' }, 'SA', meta), 'SA es Arabia Saudita');
+  assert.equal(scopeScale('NA', meta), 1500);
+  assert.equal(scopeScale('africa', meta), 7000);
 });

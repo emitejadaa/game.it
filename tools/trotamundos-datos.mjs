@@ -27,8 +27,8 @@ export const VERSION_DATOS = 1;
 export const MAX_CARGAS = 3000; // tope de cargas del visor en total (lo cacheado no cuenta)
 export const CONCURRENCIA = 3;
 export const MAX_BYTES = 400 * 1024; // todo datos/ pesa menos de 400 KB
-const CONTINENTES = ['AF', 'AS', 'EU', 'NA', 'SA', 'OC'];
-const CONT_NE = { Africa: 'AF', Asia: 'AS', Europe: 'EU', 'North America': 'NA', 'South America': 'SA', Oceania: 'OC' };
+const CONTINENTES = ['africa', 'asia', 'europa', 'norteamerica', 'sudamerica', 'oceania'];
+const CONT_NE = { Africa: 'africa', Asia: 'asia', Europe: 'europa', 'North America': 'norteamerica', 'South America': 'sudamerica', Oceania: 'oceania' };
 
 const NE_BASE = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/';
 const NE_ARCHIVOS = {

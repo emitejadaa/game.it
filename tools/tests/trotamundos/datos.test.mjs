@@ -38,13 +38,13 @@ test('poligonosDe y puntoEnPais: Polygon, MultiPolygon y recorte', () => {
   assert.equal(poligonosDe({ type: 'Polygon', coordinates: cuadrado(0, 0, 1, 1) }).length, 1);
   assert.equal(poligonosDe({ type: 'MultiPolygon', coordinates: [cuadrado(0, 0, 1, 1), cuadrado(5, 5, 6, 6)] }).length, 2);
   assert.deepEqual(poligonosDe({ type: 'Point', coordinates: [0, 0] }), []);
-  const p = crearPais('XX', 'Equis', 'SA', [cuadrado(0, 0, 10, 10), cuadrado(20, 0, 22, 2)]);
+  const p = crearPais('XX', 'Equis', 'sudamerica', [cuadrado(0, 0, 10, 10), cuadrado(20, 0, 22, 2)]);
   assert.equal(puntoEnPais(5, 5, p), true);
   assert.equal(puntoEnPais(21, 1, p), true);
   assert.equal(puntoEnPais(15, 5, p), false, 'entre los dos polígonos');
   assert.equal(puntoEnPais(5, 5, p, [6, 0, 30, 10]), false, 'fuera del recorte');
   assert.equal(puntoEnPais(8, 5, p, [6, 0, 30, 10]), true);
-  const q = crearPais('YY', 'Y', 'EU', [cuadrado(10, 10, 12, 12)]);
+  const q = crearPais('YY', 'Y', 'europa', [cuadrado(10, 10, 12, 12)]);
   assert.equal(paisDe(5, 5, [p, q]), 'XX');
   assert.equal(paisDe(11, 11, new Map([['XX', p], ['YY', q]])), 'YY');
   assert.equal(paisDe(50, 50, [p, q]), null);
@@ -62,14 +62,14 @@ test('escalaPais: rectángulo sin islas lejanas y mínimo de 250 km', () => {
   const principal = cuadrado(-70, -40, -60, -30); // ~1.350 km de diagonal
   const isla = cuadrado(-110, -30, -109, -29); // a miles de km
   const vecina = cuadrado(-59.5, -42, -57.5, -40); // cerca y de buen tamaño relativo
-  const p = crearPais('XX', 'X', 'SA', [principal, isla, vecina]);
-  const sola = crearPais('XX', 'X', 'SA', [principal]);
-  assert.equal(escalaPais(p), escalaPais(crearPais('XX', 'X', 'SA', [principal, vecina])), 'la isla lejana no cuenta');
+  const p = crearPais('XX', 'X', 'sudamerica', [principal, isla, vecina]);
+  const sola = crearPais('XX', 'X', 'sudamerica', [principal]);
+  assert.equal(escalaPais(p), escalaPais(crearPais('XX', 'X', 'sudamerica', [principal, vecina])), 'la isla lejana no cuenta');
   assert.ok(escalaPais(p) > escalaPais(sola), 'la vecina sí');
   near(escalaPais(sola), diagonalKm([-70, -40, -60, -30]), 1, 'diagonal');
-  assert.equal(escalaPais(crearPais('MC', 'M', 'EU', [cuadrado(7.4, 43.7, 7.45, 43.75)])), 250, 'mínimo 250');
+  assert.equal(escalaPais(crearPais('MC', 'M', 'europa', [cuadrado(7.4, 43.7, 7.45, 43.75)])), 250, 'mínimo 250');
   // con recorte, solo cuenta esa zona
-  const grande = crearPais('US', 'U', 'NA', [cuadrado(-120, 25, -70, 49), cuadrado(-160, 55, -140, 70)]);
+  const grande = crearPais('US', 'U', 'norteamerica', [cuadrado(-120, 25, -70, 49), cuadrado(-160, 55, -140, 70)]);
   assert.ok(escalaPais(grande, [-125, 24, -66.5, 49.6]) < escalaPais(grande));
 });
 
@@ -121,7 +121,7 @@ test('lugarMasCercano: el más cercano a menos de 100 km, o nada', () => {
 });
 
 test('generarCandidatos: espaciados, dentro del país y reproducibles', () => {
-  const pais = crearPais('XX', 'X', 'SA', [cuadrado(0, 0, 4, 4)]);
+  const pais = crearPais('XX', 'X', 'sudamerica', [cuadrado(0, 0, 4, 4)]);
   const rutas = [];
   for (let x = -1; x <= 5; x += 0.05) rutas.push({ lat: 2, lng: x, h: 90 });
   const pueblos = [{ lat: 1, lng: 1, tipo: 'c' }, { lat: 3, lng: 3, tipo: 'c' }, { lat: 3.0005, lng: 3.0005, tipo: 'g' }, { lat: 1, lng: 3, tipo: 'g' }, { lat: 9, lng: 9, tipo: 'g' }];
@@ -200,17 +200,17 @@ test('rumboHaciaSitio: hacia el sitio, o nada si está a menos de 20 m', () => {
 });
 
 test('construirPaises y serializarPaises: n, f, latam, cont y regiones', () => {
-  const geo = new Map([['AR', { cont: 'SA', d: 4100 }], ['FR', { cont: 'EU', d: 1100 }], ['US', { cont: 'NA', d: 4600 }]]);
+  const geo = new Map([['AR', { cont: 'sudamerica', d: 4100 }], ['FR', { cont: 'europa', d: 1100 }], ['US', { cont: 'norteamerica', d: 4600 }]]);
   const mundo = [{ id: 'm-0001', lat: -34, lng: -58, cc: 'AR' }, { id: 'm-0002', lat: -40, lng: -65, cc: 'AR' }, { id: 'm-0003', lat: 48, lng: 2, cc: 'FR' }];
   const famosos = [{ id: 'f-001', lat: -34.6, lng: -58.4, cc: 'AR', n: { es: 'Obelisco', en: 'Obelisk' } }, { id: 'f-002', lat: 40.7, lng: -74, cc: 'US', n: { es: 'x', en: 'x' } }];
   const m = construirPaises({ famosos, mundo, geo, generado: '2026-10-07' });
-  assert.deepEqual(m.paises.AR, { cont: 'SA', latam: 1, d: 4100, n: 2, f: 1 });
-  assert.deepEqual(m.paises.FR, { cont: 'EU', d: 1100, n: 1, f: 0 });
-  assert.deepEqual(m.paises.US, { cont: 'NA', d: 4600, n: 0, f: 1 });
+  assert.deepEqual(m.paises.AR, { cont: 'sudamerica', latam: 1, d: 4100, n: 2, f: 1 });
+  assert.deepEqual(m.paises.FR, { cont: 'europa', d: 1100, n: 1, f: 0 });
+  assert.deepEqual(m.paises.US, { cont: 'norteamerica', d: 4600, n: 0, f: 1 });
   assert.equal(m.v, VERSION_DATOS);
   assert.equal(m.regiones.mundo.d, WORLD_D);
-  assert.ok(m.regiones.latam.d >= 250 && m.regiones.SA.d >= 250 && m.regiones.EU.d >= 250);
-  assert.equal(m.regiones.AF, undefined, 'sin puntos no hay región');
+  assert.ok(m.regiones.latam.d >= 250 && m.regiones.sudamerica.d >= 250 && m.regiones.europa.d >= 250);
+  assert.equal(m.regiones.africa, undefined, 'sin puntos no hay región');
   const otra = JSON.parse(serializarPaises(m));
   assert.deepEqual(otra, JSON.parse(JSON.stringify(m)), 'el texto se lee igual');
   assert.throws(() => construirPaises({ famosos: [{ id: 'f-9', lat: 0, lng: 0, cc: 'ZZ' }], mundo: [], geo, generado: 'x' }), /ZZ/);
@@ -266,7 +266,7 @@ test('paises.json: versión, fecha, método, países y regiones', { skip: !hayDa
   // el ámbito y la escala que usa el juego andan con estos datos
   assert.equal(inScope({ cc: 'AR' }, 'latam', p), true);
   assert.equal(inScope({ cc: 'FR' }, 'latam', p), false);
-  assert.equal(inScope({ cc: 'FR' }, 'EU', p), true);
+  assert.equal(inScope({ cc: 'FR' }, 'europa', p), true);
   assert.ok(scopeScale('AR', p) >= 250 && scopeScale('latam', p) >= 250);
 });
 

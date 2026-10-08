@@ -8,7 +8,7 @@
  * AJUSTES (room.settings, los elige el anfitrión en el lobby con { t: 'settings', settings: {…} } o al
  * mandar { t: 'start', settings: {…} }; el servidor valida y corrige cada uno):
  *   mode   'random' (lugares al azar, datos/mundo.json) | 'famosos' (datos/famosos.json)
- *   scope  'mundo' | 'latam' | continente ('AF','AS','EU','NA','SA','OC') | código de país (ISO-2, 'AR')
+ *   scope  'mundo' | 'latam' | continente ('africa','asia','europa','norteamerica','sudamerica','oceania') | código de país (ISO-2, 'AR')
  *          Un ámbito que no tiene al menos `rounds` lugares disponibles cae a 'mundo'.
  *   rounds 3 | 5 | 10      (si hay menos lugares que rondas en todo el mundo, se juegan menos: tm.rounds)
  *   time   0 | 30 | 60 | 90 | 120 | 180   segundos para mirar y marcar (0 = sin límite)
@@ -153,7 +153,8 @@ const flag = (v, d) => (v === true || v === 1 || v === '1' ? 1 : v === false || 
 function normScope(v) {
   if (typeof v !== 'string') return null;
   const s = v.trim();
-  if (/^(mundo|latam)$/i.test(s)) return s.toLowerCase();
+  const low = s.toLowerCase();
+  if (low === 'mundo' || low === 'latam' || REGIONS.includes(low)) return low;
   const up = s.toUpperCase();
   return /^[A-Z]{2}$/.test(up) ? up : null;
 }

@@ -33,7 +33,7 @@ function conAlmacen(fn, { falla = false } = {}) {
 }
 
 // datos de prueba: 6 países, de 6 lugares cada uno
-const CC = { AR: ['SA', 1], BR: ['SA', 1], FR: ['EU', 0], ES: ['EU', 0], JP: ['AS', 0], AU: ['OC', 0] };
+const CC = { AR: ['sudamerica', 1], BR: ['sudamerica', 1], FR: ['europa', 0], ES: ['europa', 0], JP: ['asia', 0], AU: ['oceania', 0] };
 const mundo = [];
 for (const cc of Object.keys(CC)) for (let i = 0; i < 6; i++) mundo.push({ id: `${cc}-${i}`, lat: (i - 3) * 2, lng: (cc.charCodeAt(0) - 70) * 3 + i, cc, ...(i % 2 ? { h: 45 } : {}) });
 const famosos = [
@@ -105,8 +105,8 @@ test('lugaresEnAmbito y ambitoDisponible filtran con inScope y excluyen malas', 
   assert.equal(D.lugaresEnAmbito(mundo, 'mundo', meta).length, 36);
   assert.equal(D.lugaresEnAmbito(mundo, 'AR', meta).length, 6);
   assert.equal(D.lugaresEnAmbito(mundo, 'latam', meta).length, 12);
-  assert.equal(D.lugaresEnAmbito(mundo, 'EU', meta).length, 12);
-  assert.equal(D.lugaresEnAmbito(mundo, 'AS', meta).length, 6);
+  assert.equal(D.lugaresEnAmbito(mundo, 'europa', meta).length, 12);
+  assert.equal(D.lugaresEnAmbito(mundo, 'asia', meta).length, 6);
   assert.equal(D.lugaresEnAmbito(mundo, 'AR', meta, new Set(['AR-0', 'AR-1'])).length, 4);
   assert.equal(D.ambitoDisponible(datos, 'famosos', 'AR'), 1);
   assert.equal(D.ambitoDisponible(datos, 'famosos', 'mundo'), 2);
@@ -350,7 +350,7 @@ test('textos: cada data-t / data-t-aria / data-t-title del HTML y cada clave usa
   for (const m of js.matchAll(/\bt\(`(\w+)_\$\{/g)) for (const k of Object.keys(TEXTOS)) if (k.startsWith(`${m[1]}_`)) claves.add(k);
   for (const k of claves) assert.ok(TEXTOS[k], `falta el texto "${k}"`);
   for (const modo of D.MODOS) assert.ok(TEXTOS[`m_${modo}`] && TEXTOS[`op_${modo}`], `modo ${modo}: nombre y descripción`);
-  for (const c of ['AF', 'AS', 'EU', 'NA', 'SA', 'OC']) assert.ok(TEXTOS[`c_${c}`], `continente ${c}`);
+  for (const c of ['africa', 'asia', 'europa', 'norteamerica', 'sudamerica', 'oceania']) assert.ok(TEXTOS[`c_${c}`], `continente ${c}`);
 });
 
 // ------------------------------------------------------------------ reglas del repo
