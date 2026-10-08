@@ -1,0 +1,19 @@
+{
+  "id": "rey",
+  "title": { "es": "Rey de la Colina", "en": "King of the Hill" },
+  "description": {
+    "es": "Una colina que se muda: quedate solo adentro para sumar, sacá a los demás con el empujón y la onda y no caigas en los pozos. Online con gente y bots, sala privada o sin conexión.",
+    "en": "A hill that keeps moving: stay alone on it to score, knock rivals off with the shove and the wave, and avoid the pits. Online with people and bots, private room or offline."
+  },
+  "categories": ["arcade", "accion", "online", "multijugador", "casual"],
+  "tags": ["rey", "colina", "king", "hill", "discos", "empujar", "pozos", "pits", "push", "party", "io", "arena", "bots", "neon", "control"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 10, "bots": true, "story": false },
+  "order": 35
+}
