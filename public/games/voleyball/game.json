@@ -1,0 +1,19 @@
+{
+  "id": "voleyball",
+  "title": "Voleyball",
+  "description": {
+    "es": "Vóley de costado como en HaxBall: le pegás con Espacio y es punto si la pelota toca el piso del rival. 3 toques por equipo y saca el que hace el punto. Bots, 2 jugadores y salas online con chat.",
+    "en": "Side-view volleyball like HaxBall: hit with Space and score when the ball touches the other floor. 3 touches per side and the scorer serves. Bots, 2 players and online rooms with chat."
+  },
+  "categories": ["deporte", "online", "multijugador", "arcade"],
+  "tags": ["voley", "vóley", "voleibol", "volleyball", "voleyball", "playa", "beach", "remate", "red", "pelota", "ball", "equipos", "teams", "bots"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "gamepad", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 12, "localPlayers": 2, "bots": true, "chat": true, "story": false },
+  "order": 22
+}

@@ -39,8 +39,9 @@ import sumo from './games/sumo.js';
 import rey from './games/rey.js';
 import territorio from './games/territorio.js';
 import caida from './games/caida.js';
+import voleyball from './games/voleyball.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono, padel, naval, estela, sumo, rey, territorio, caida };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono, padel, naval, estela, sumo, rey, territorio, caida, voleyball };
 /** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
 const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
 /**
