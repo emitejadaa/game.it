@@ -128,6 +128,13 @@ test('IP automática (sin TRUST_PROXY_HOPS): se saltean los saltos internos y se
   }
 });
 
+test('/whoami devuelve la IP que usan los límites (solo la de quien consulta)', async () => {
+  const get = (headers) => fetch(`http://127.0.0.1:${srv.port}/whoami`, { headers }).then((r) => r.json());
+  // detrás de un proxy interno se confía en el encabezado; sin él es la dirección de la conexión
+  assert.deepEqual(await get({ 'x-forwarded-for': '9.9.9.9, 203.0.7.7' }), { ip: '203.0.7.7', internalPeer: true });
+  assert.deepEqual(await get({}), { ip: '127.0.0.1', internalPeer: true });
+});
+
 test('start valida antes de sacar a los desconectados, y una sala llena libera el lugar de un fantasma', async () => {
   const a = await connect('203.0.20.1');
   a.send({ t: 'create', game: 'tictactoe', name: 'Ana' });

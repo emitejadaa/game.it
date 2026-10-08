@@ -523,6 +523,13 @@ const http = createServer((req, res) => {
     res.end(JSON.stringify({ ok: true, rooms: rooms.size, conns: wss.clients.size, games: Object.keys(GAMES), rt: rtStats() }));
     return;
   }
+  if (req.url === '/whoami') {
+    // diagnóstico: la dirección que el servidor usa para los límites por IP (solo la de quien consulta). Sirve para
+    // comprobar en producción que, detrás del proxy del hosting, cada jugador cuenta con su IP y no todos con la del proxy.
+    res.writeHead(200, { 'content-type': 'application/json', 'access-control-allow-origin': '*', 'cache-control': 'no-store' });
+    res.end(JSON.stringify({ ip: clientIp(req), internalPeer: isPrivate(unmap(req.socket.remoteAddress || '?')) }));
+    return;
+  }
   res.writeHead(404, { 'content-type': 'text/plain' });
   res.end('game.it server');
 });
