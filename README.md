@@ -308,6 +308,42 @@ El mundo (`shared/world.js`) es determinista y corre igual en el servidor y sin 
 el servidor (responde en un cuadro aun con 250 ms de RTT) y las demás se interpolan. Cada cliente recibe solo lo cercano (interés de ±72 celdas).
 Medido con 10 jugadores en la máquina de desarrollo: ~0,6 ms por paso del servidor y ~3,5 KB/s por cliente.
 
+### Sumo y Rey de la Colina (arenas de discos)
+
+Comparten la física de `public/shared/arena-physics.js` (discos con masa, amortiguación y choques elásticos, paso fijo de 1/30 s,
+determinista y sin ganancia de energía). Los dos corren a 30 pasos/s con snapshots a 15 Hz; el disco propio se predice y se reconcilia
+(mezcla de 150 ms, salto sobre 40 px) y los demás se interpolan con el retardo adaptativo del kit de red. Hasta 10 personas más bots.
+
+- **Sumo** (`public/games/sumo/`): discos de radio 18 que se empujan sobre una plataforma que se achica del 100 % al 35 % en 75 s (después hay
+  muerte súbita, así ninguna ronda queda trabada). Quien sale de la plataforma mira; el último en pie gana la ronda (+3) y cada caída suma +1 a
+  quien te tocó en los 2 s previos. Rondas continuas, Empujón con recarga de 1,2 s. Medido con 10 jugadores: 0,44 ms por paso y 9 KB/s por cliente.
+- **Rey de la Colina** (`public/games/rey/`): arena cuadrada con paredes que rebotan y 3 pozos; la colina (radio 70) se muda cada 25 s y avisa 3 s
+  antes. Sumás 1 punto por segundo si estás solo adentro (disputada no suma nadie); Empujón y Onda (6 s de recarga, radio 120). Caer a un pozo = reaparecer
+  a los 2 s. Gana quien llega a 100 o lidera a los 3 minutos. 0,6 ms por paso con 10 jugadores.
+
+En el celular, joystick flotante a la izquierda y botones a la derecha (Empujón; y Onda en Rey). Los bots tienen tres niveles y predicen su posición
+con la velocidad para frenar antes del borde o de un pozo.
+
+### Territorio (captura de territorio)
+
+Salís de tu territorio dejando un rastro y, si volvés, te quedás con lo que encerraste (relleno desde el borde dentro de la caja del territorio más
+el rastro; un lazo de 100x100 cuesta ~3,5 ms). Si alguien pisa tu rastro (o vos el tuyo) perdés el territorio y el otro suma un derribo; de frente
+mueren los dos; adentro de lo tuyo estás a salvo. Grilla de 120x120 a 10 pasos/s, hasta 10 personas más bots. El territorio viaja por deltas RLE por fila
+dentro del área de interés; la cabeza y la captura propias se predicen con el mismo algoritmo y se reconcilian con el servidor. El cliente dibuja el
+territorio en una capa cacheada actualizada por deltas. Controles: flechas/WASD, deslizar o cruceta opcional. 1,3 ms por paso y ~2 KB/s por cliente.
+
+### Caída Libre (bloques que caen, último en pie)
+
+Hasta 16 personas más bots, cada una con su tablero de 10x20 y piezas de una bolsa de 7 compartida por toda la ronda. Limpiar líneas manda basura (2 = 1,
+3 = 2, 4 = 4, más racha) con un hueco por ataque, que se cancela con tus líneas y entra 1 s después; "la marea" evita que una ronda se eternice. Se elige a
+quién atacar (azar, quien te ataca, el más débil, el líder). **Autoridad distinta a las demás arenas:** no hay física por paso en el servidor; el cliente
+simula su tablero (respuesta inmediata) y manda cada fijado `lk`, el servidor lo reaplica con `shared/rules.js` (pieza de la bolsa, posición legal, apoyada
+y alcanzable), calcula líneas, basura y derribos y contesta `ak`; si algo no valida manda `bd` con el tablero real y a las 4 faltas en un minuto saca al
+jugador. Los rivales llegan como resúmenes a 2 Hz. Módulo propio sobre la API de salas (no `arenaGame`) y no cuenta en `MAX_RT_ROOMS`. Sin conexión:
+Maratón y Contra la compu. En el celular: tocar gira, arrastrar mueve por columnas, deslizar abajo = caída suave o dura. ~1,7 KB/s por cliente con 16.
+
+Pruebas con `npm test`; para medir cada arena: `node tools/load-bots.mjs --game sumo|rey|territorio|caida|estela --clients 10`.
+
 ### Drift Neon
 
 Física arcade propia en `public/games/drift/shared/car.js` (paso fijo de 1/120 s): el volante define una velocidad de
