@@ -60,6 +60,17 @@ scheduleStall();
 /** Cola de un sentido: cada mensaje sale a su hora, nunca antes que el anterior. */
 function pipe(deliver) {
   let last = 0;
+  const queue = []; // un solo temporizador por sentido: con varios, dos mensajes pegados podían salir al revés (el redondeo a ms los empata)
+  let timer = null;
+  const pump = () => {
+    timer = null;
+    const now = Date.now();
+    while (queue.length && queue[0].at <= now) {
+      const m = queue.shift();
+      deliver(m.data, m.isBinary);
+    }
+    if (queue.length) timer = setTimeout(pump, Math.max(0, Math.ceil(queue[0].at - Date.now())));
+  };
   return (data, isBinary) => {
     const now = Date.now();
     let at = now + cfg.latency + (Math.random() * 2 - 1) * cfg.jitter;
@@ -68,7 +79,8 @@ function pipe(deliver) {
     last = at;
     stats.msgs++;
     stats.bytes += data.length;
-    setTimeout(() => deliver(data, isBinary), Math.max(0, at - now));
+    queue.push({ at, data, isBinary });
+    if (!timer) timer = setTimeout(pump, Math.max(0, Math.ceil(at - now)));
   };
 }
 const validClose = (c) => (c >= 1000 && c <= 4999 && c !== 1005 && c !== 1006 && c !== 1015 ? c : 1000);

@@ -10,6 +10,8 @@
  *   --clients  personas simuladas en UNA sala (máx. las de la arena)      --bots  on = el servidor completa con bots (por defecto)
  *   --seconds  duración de la medición (después de 3 s de calentamiento)  --pid   PID del servidor: informa su CPU (de /proc)
  *   --json     imprime solo un JSON con los números
+ *   --game caida  juega piezas de verdad (mismo Sim y mismo bot que el cliente: 3 por segundo) y manda `lk`; --crowd small|normal|big elige el tamaño de la sala
+ *   --game territorio  usa vueltas cuadradas (el territorio cambia seguido); con --game estela se juega con giros al azar
  */
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
@@ -28,6 +30,8 @@ const SECONDS = Number(args.seconds ?? 30);
 const GAME = args.game || 'estela';
 const BOTS = (args.bots || 'on') !== 'off';
 const WARM = 3000;
+// Caída Libre: el cliente simula su tablero (lógica pura, sin DOM), así que se reusa la misma del juego
+const CD = GAME === 'caida' ? { ...(await import('../public/games/caida/logic.js')), ...(await import('../public/games/caida/shared/bots.js')) } : null;
 const HTTP = URL_WS.replace(/^ws/, 'http');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -53,7 +57,7 @@ class Client {
       const ws = (this.ws = new WebSocket(URL_WS));
       ws.on('error', reject);
       ws.on('open', () => {
-        ws.send(JSON.stringify(mode === 'create' ? { t: 'create', game: GAME, name: this.name, settings: { public: true, bots: BOTS } } : { t: 'join', game: GAME, code, name: this.name }));
+        ws.send(JSON.stringify(mode === 'create' ? { t: 'create', game: GAME, name: this.name, settings: { public: true, bots: BOTS, ...(args.crowd ? { crowd: args.crowd } : {}) } } : { t: 'join', game: GAME, code, name: this.name }));
       });
       ws.on('message', (raw) => {
         const len = raw.length;
@@ -66,7 +70,7 @@ class Client {
         if (this.measuring) {
           this.bytes += len;
           this.msgs++;
-          if (m.t === 's') this.snaps++;
+          if (m.t === 's' || m.t === 'sm') this.snaps++;
         }
         if (m.t === 'joined') {
           onJoined?.(m.code);
@@ -78,6 +82,7 @@ class Client {
   }
 
   onMsg(m) {
+    if (CD) return this.onCaida(m);
     if (m.t === 'me') {
       this.me = m.num;
       this.size = m.size || this.size;
@@ -94,16 +99,94 @@ class Client {
     } else if (m.t === 'dead') {
       this.alive = false;
       this.deaths++;
-      setTimeout(() => this.spawn(), 2600);
+      setTimeout(() => this.spawn(), GAME === 'territorio' ? 3200 : 2600);
     }
+  }
+
+  /** Caída Libre: tablero propio con el Sim del juego; una pieza cada ~300 ms con el bot de nivel 3 y se resincroniza con `bd`. */
+  onCaida(m) {
+    const start = (seed, wait) => {
+      this.sim = new CD.Sim();
+      this.sim.start(seed);
+      this.bot = CD.brain(3);
+      this.rnd = Math.random;
+      this.alive = true;
+      setTimeout(() => {
+        this.sim.running = true;
+        this.playing = true;
+      }, wait);
+      if (!this.timer) this.timer = setInterval(() => this.cdPlay(), 300);
+    };
+    if (m.t === 'me') {
+      this.me = m.num;
+      if (m.play && m.alive && (m.phase === 'count' || m.phase === 'play')) start(m.seed, m.in);
+    } else if (m.t === 'rs') {
+      this.playing = false;
+      start(m.seed, m.in);
+    } else if (m.t === 'bd' && this.sim) this.sim.resync(m);
+    else if (m.t === 'ak' && m.add && this.sim) this.sim.addGarbage(m.add);
+    else if (m.t === 'dead') {
+      this.alive = false;
+      this.playing = false;
+      this.deaths++;
+    }
+  }
+
+  cdPlay() {
+    const sim = this.sim;
+    if (!this.playing || !this.alive || sim.dead || this.ws.readyState !== 1) return;
+    const c = CD.choose(sim.grid, sim.feed, this.bot, this.rnd, false);
+    if (!c) return;
+    if (c.hold) sim.hold();
+    sim.piece.r = c.r;
+    sim.piece.x = c.x;
+    const res = sim.hardDrop();
+    if (res) this.ws.send(JSON.stringify(res.msg));
   }
 
   spawn() {
     if (this.ws.readyState === 1) this.ws.send(JSON.stringify({ t: 'spawn', name: this.name, color: this.i % 12 }));
   }
 
+  /**
+   * Territorio: vueltas cuadradas (gira a la derecha cada L pasos, y a los 4 giros vuelve a casa y captura un cuadrado de L×L),
+   * con L entre 6 y 14 y esquivando la pared. Así el territorio cambia seguido, que es lo que más pesa en la red.
+   */
+  thinkTurf(k) {
+    const [, x, y, dir] = this.head;
+    const L = 6 + Math.floor(Math.random() * 9);
+    this.next = k + L;
+    const ahead = (d, n) => [x + [0, 1, 0, -1][d] * n, y + [-1, 0, 1, 0][d] * n];
+    const wall = (d, n) => {
+      const [ax, ay] = ahead(d, n);
+      return ax < 1 || ay < 1 || ax > this.size - 2 || ay > this.size - 2;
+    };
+    let d = (dir + 1) & 3;
+    if (wall(d, L + 1)) d = [(dir + 3) & 3, dir].find((o) => !wall(o, L + 1)) ?? d;
+    if (d !== dir) this.input(d, k);
+  }
+
+  /** Sumo / Rey de la Colina: cada ~0,2–0,4 s elige un punto cerca del centro y va hacia allá, con algún Empujón (y Onda en Rey) suelto. */
+  thinkDisc(k) {
+    const [, x, y] = this.head;
+    this.next = k + 6 + Math.floor(Math.random() * 7);
+    const tx = (Math.random() - 0.5) * 300;
+    const ty = (Math.random() - 0.5) * 300;
+    const dx = tx - x;
+    const dy = ty - y;
+    const l = Math.hypot(dx, dy) || 1;
+    const ax = Math.max(-4, Math.min(4, Math.round((dx / l) * 4)));
+    const ay = Math.max(-4, Math.min(4, Math.round((dy / l) * 4)));
+    const b = Math.random() < 0.12 ? 1 : GAME === 'rey' && Math.random() < 0.04 ? 2 : 0;
+    this.recent.push([++this.seq, k + 2, (ax + 4) * 9 + (ay + 4), b]);
+    if (this.recent.length > 3) this.recent.shift();
+    if (this.ws.readyState === 1) this.ws.send(JSON.stringify({ t: 'i', e: this.recent }));
+  }
+
   /** Un giro al azar cada ~0,4–1,2 s, esquivando la pared de adelante. */
   think(k) {
+    if (GAME === 'sumo' || GAME === 'rey') return this.thinkDisc(k);
+    if (GAME === 'territorio') return this.thinkTurf(k);
     const [, x, y, dir] = this.head;
     this.next = k + 8 + Math.floor(Math.random() * 16);
     const ahead = (d, n) => [x + [0, 1, 0, -1][d] * n, y + [-1, 0, 1, 0][d] * n];
@@ -120,7 +203,7 @@ class Client {
 
   input(d, k) {
     const turbo = Math.random() < 0.15 ? 1 : 0;
-    this.recent.push([++this.seq, k + 2, d, turbo]);
+    this.recent.push([++this.seq, k + 2, d, GAME === 'territorio' ? 0 : turbo]);
     if (this.recent.length > 3) this.recent.shift();
     if (this.ws.readyState === 1) this.ws.send(JSON.stringify({ t: 'i', e: this.recent }));
   }
