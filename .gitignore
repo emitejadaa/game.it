@@ -3,3 +3,6 @@ dist
 .DS_Store
 *.log
 /*.png
+
+# caché de trabajo de tools/trotamundos-datos.mjs
+tools/.cache/

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Trotamundos · game.it</title>
+    <link rel="stylesheet" href="/vendor/maplibre-gl.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <!-- SDK del portal: preferencias, pausa, idioma, anuncios -->
+    <script src="/sdk/gameit.js"></script>
+    <!-- MapLibre GL JS (BSD-3, copiado a public/vendor). Se ejecuta antes que game.js -->
+    <script src="/vendor/maplibre-gl.js" defer></script>
+  </head>
+  <body>
+    <main id="app" class="app">
+      <!-- ============ Menú ============ -->
+      <section class="pantalla on" id="p-menu" aria-labelledby="menu-titulo">
+        <div class="centro">
+          <header class="cab">
+            <p class="kicker" data-t="kicker"></p>
+            <h1 id="menu-titulo" tabindex="-1" data-t="titulo"></h1>
+            <p class="lema" data-t="lema"></p>
+          </header>
+          <div class="modos" id="modos">
+            <button type="button" class="modo" data-modo="famosos">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z" /></svg>
+              <span class="modo-t" data-t="m_famosos"></span>
+              <span class="modo-s" data-t="m_famosos_s"></span>
+            </button>
+            <button type="button" class="modo" data-modo="azar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><circle cx="9" cy="9" r="1.1" fill="currentColor" /><circle cx="15" cy="15" r="1.1" fill="currentColor" /><circle cx="12" cy="12" r="1.1" fill="currentColor" /></svg>
+              <span class="modo-t" data-t="m_azar"></span>
+              <span class="modo-s" data-t="m_azar_s"></span>
+            </button>
+            <button type="button" class="modo" data-modo="pais">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5" /></svg>
+              <span class="modo-t" data-t="m_pais"></span>
+              <span class="modo-s" data-t="m_pais_s"></span>
+            </button>
+            <button type="button" class="modo" data-modo="diario">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M8 3v4M16 3v4" /></svg>
+              <span class="modo-t" data-t="m_diario"></span>
+              <span class="modo-s" id="diario-sub"></span>
+            </button>
+            <button type="button" class="modo" data-modo="online">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6" /><circle cx="17" cy="9" r="2.4" /><path d="M16.500 14.200c2.900.2 4.500 2.300 4.500 5.300" /></svg>
+              <span class="modo-t" data-t="m_online"></span>
+              <span class="modo-s" data-t="m_online_s"></span>
+            </button>
+          </div>
+          <p class="aviso-datos" id="datos-aviso" role="alert" hidden>
+            <span id="datos-msg"></span>
+            <button type="button" class="btn" id="datos-reintentar" data-t="reintentar"></button>
+          </p>
+          <p class="atajos" data-t="atajos"></p>
+        </div>
+      </section>
+
+      <!-- ============ Opciones del modo ============ -->
+      <section class="pantalla" id="p-opciones" aria-labelledby="op-titulo">
+        <div class="centro">
+          <header class="cab chica">
+            <h2 id="op-titulo" tabindex="-1"></h2>
+            <p class="lema" id="op-sub"></p>
+          </header>
+          <div class="panel">
+            <div class="grupo" id="g-ambito">
+              <span class="lbl" id="lbl-ambito" data-t="donde"></span>
+              <div class="chips" id="ambitos" role="radiogroup" aria-labelledby="lbl-ambito"></div>
+              <div class="buscar" id="buscar" hidden>
+                <label class="lbl" for="pais-q" data-t="otroPais"></label>
+                <input id="pais-q" type="search" autocomplete="off" spellcheck="false" maxlength="40" />
+                <div class="paises" id="paises" role="listbox" hidden></div>
+              </div>
+            </div>
+            <div class="grupo" id="g-azar" hidden>
+              <p class="nota" data-t="azarNota"></p>
+            </div>
+            <div class="grupo" id="g-tiempo">
+              <span class="lbl" id="lbl-tiempo" data-t="tiempo"></span>
+              <div class="chips" id="tiempos" role="radiogroup" aria-labelledby="lbl-tiempo"></div>
+            </div>
+            <div class="grupo" id="g-congelado">
+              <button type="button" class="interruptor" id="congelado" role="switch" aria-checked="false">
+                <span class="int-t"><b data-t="congelado"></b><small data-t="congelado_s"></small></span>
+                <span class="int-p" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="grupo" id="g-diario" hidden>
+              <p class="nota" id="diario-info"></p>
+            </div>
+            <p class="nota error" id="op-error" role="alert" hidden></p>
+          </div>
+          <div class="acciones">
+            <button type="button" class="btn" id="op-volver" data-t="volver"></button>
+            <button type="button" class="btn primario" id="op-jugar" data-t="jugar"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Ronda ============ -->
+      <section class="pantalla ronda" id="p-ronda" tabindex="-1" data-t-aria="r_aria">
+        <div class="visor-host" id="visor-host"></div>
+        <div class="barra" id="barra">
+          <div class="hud" id="hud">
+            <span class="chip" id="hud-ronda"></span>
+            <span class="chip" id="hud-reloj" hidden></span>
+            <span class="chip" id="hud-puntos"></span>
+            <span class="chip frio" id="hud-congelado" hidden data-t="congelado"></span>
+          </div>
+          <div class="herr" id="herr">
+            <button type="button" class="herr-b" id="b-reiniciar" data-t-aria="b_reiniciar" data-t-title="b_reiniciar_t">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.200M4 4v4h4" /></svg><span data-t="b_reiniciar"></span>
+            </button>
+            <button type="button" class="herr-b" id="b-pista" data-t-aria="b_pista" data-t-title="b_pista_t">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.500 10.900c.6.500 1 1.200 1 2.100h5c0-.9.4-1.600 1-2.100A6 6 0 0 0 12 3z" /></svg><span id="b-pista-t"></span><i class="anuncio" id="b-pista-ad" hidden aria-hidden="true">▶</i>
+            </button>
+            <button type="button" class="herr-b" id="b-nocarga" data-t-aria="b_nocarga" data-t-title="b_nocarga_t">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .900-1 1.700M12 17h.01" /></svg><span data-t="b_nocarga"></span>
+            </button>
+            <button type="button" class="herr-b" id="b-salir" data-t-aria="b_salir" data-t-title="b_salir_t">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9" /></svg><span data-t="b_salir"></span>
+            </button>
+          </div>
+        </div>
+        <!-- Minimapa: abajo a la izquierda, siempre 28 px arriba del borde de abajo (atribución de Google) -->
+        <div class="dock" id="dock" data-estado="mini" data-fijo="0" data-pin="0">
+          <div class="dock-cab">
+            <span class="dock-t" data-t="mapa"></span>
+            <button type="button" class="dock-b" id="mapa-toggle"></button>
+          </div>
+          <div class="dock-mapa" id="slot-ronda">
+            <button type="button" class="dock-abrir" id="mapa-abrir" data-t-aria="mapa_abrir"><span class="dock-abrir-i" aria-hidden="true">⤢</span></button>
+            <button type="button" class="dock-centro" id="mapa-centro" data-t-aria="mapa_centro" data-t-title="mapa_centro">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v5M12 16v5M3 12h5M16 12h5" /><circle cx="12" cy="12" r="2" /></svg>
+            </button>
+          </div>
+          <button type="button" class="adivinar" id="adivinar"></button>
+        </div>
+        <div class="pausa" id="pausa" hidden><span data-t="enPausa"></span></div>
+      </section>
+
+      <!-- ============ Resultado de la ronda ============ -->
+      <section class="pantalla" id="p-resultado" aria-labelledby="res-titulo">
+        <div class="res">
+          <div class="res-mapa" id="slot-res"></div>
+          <div class="res-info">
+            <p class="kicker" id="res-ronda"></p>
+            <h2 id="res-titulo" tabindex="-1"></h2>
+            <p class="res-lugar" id="res-lugar"></p>
+            <p class="res-pts"><b id="res-pts"></b> <span data-t="puntos"></span></p>
+            <div class="barra-pts" aria-hidden="true"><i id="res-barra"></i></div>
+            <p class="res-total" id="res-total"></p>
+            <div class="acciones">
+              <button type="button" class="btn primario" id="res-sig"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Resumen final ============ -->
+      <section class="pantalla" id="p-resumen" aria-labelledby="fin-titulo">
+        <div class="res">
+          <div class="res-mapa" id="slot-fin"></div>
+          <div class="res-info">
+            <p class="kicker" id="fin-modo"></p>
+            <h2 id="fin-titulo" tabindex="-1"></h2>
+            <p class="fin-total"><b id="fin-puntos"></b><span id="fin-max"></span></p>
+            <p class="res-lugar" id="fin-frase"></p>
+            <ol class="lista" id="fin-lista"></ol>
+            <div class="acciones">
+              <button type="button" class="btn" id="fin-menu" data-t="menu"></button>
+              <button type="button" class="btn" id="fin-copiar" hidden data-t="copiar"></button>
+              <button type="button" class="btn primario" id="fin-otra"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="dialogo" id="dialogo" hidden role="dialog" aria-modal="true" aria-labelledby="dlg-t" aria-describedby="dlg-d">
+      <div class="dlg">
+        <h2 id="dlg-t"></h2>
+        <p id="dlg-d"></p>
+        <div class="acciones" id="dlg-bot"></div>
+      </div>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- rutas relativas (./): dentro del portal el juego vive en /games/trotamundos/ -->
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
