@@ -180,9 +180,9 @@ export function nombreCortoLugar(place, lang, nombrePais) {
 }
 
 // ---------------------------------------------------------------- salas públicas
-/** Salas a las que se puede entrar, primero las que esperan en el lobby y con más gente. */
+/** Salas a las que se puede entrar (sin las llenas ni las que ya terminaron), primero las que esperan en el lobby y con más gente. */
 export function ordenarSalas(salas) {
-  const abiertas = (Array.isArray(salas) ? salas : []).filter((s) => s && typeof s.code === 'string' && s.n < s.max);
+  const abiertas = (Array.isArray(salas) ? salas : []).filter((s) => s && typeof s.code === 'string' && s.n < s.max && s.state !== 'finished');
   return abiertas.sort((a, b) => (a.state === 'lobby' ? 0 : 1) - (b.state === 'lobby' ? 0 : 1) || b.n - a.n || a.code.localeCompare(b.code));
 }
 

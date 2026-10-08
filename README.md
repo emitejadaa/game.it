@@ -31,7 +31,7 @@ Hay una plantilla lista en [`templates/juego-base/`](templates/juego-base/) y `n
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel y Batalla Naval): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel, Batalla Naval y Trotamundos): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
   Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
@@ -292,5 +292,26 @@ Modos: carrera contra hasta 5 autos de la compu, contrarreloj contra el fantasma
 tiempos con el largo de cada pista). El selector muestra el mapa grande con sus datos (largo, curvas, recta más
 larga, dificultad, superficie y récord). El fondo se dibuja en mosaicos cacheados, así solo se redibuja lo que se
 mueve.
+
+### Trotamundos (geografía en 360°)
+
+Te dejan en un lugar del mundo con vista de calle: mirás, caminás y marcás en un mapa dónde creés que estás; cuanto más
+cerca, más puntos (`5000 · e^(−10·km/escala)`, con la escala del mapa elegido: mundo, región o país). Modos: sitios famosos,
+lugares al azar, por país o región y desafío diario (las mismas 5 ubicaciones para todos, cambia a las 0 h de Argentina);
+tiempo por ronda opcional, "Congelado" (sin mover, girar ni zoom) y pistas con anuncio opcional (círculos que se achican).
+Online de 2 a 10 (`server/games/trotamundos.js`): salas públicas o privadas, partida rápida, "apurar", entrada tardía y
+reconexión; el servidor lleva los relojes y el puntaje. Diseño completo y decisiones en [`docs/trotamundos.md`](docs/trotamundos.md).
+
+- **Sin cuentas ni claves.** El visor es el embed de "Compartir → Insertar" de Google dentro de un iframe
+  (`google.com/maps/embed?pb=…`, con latitud, longitud y rumbo), con la tarjeta que delata el lugar fuera de la vista y la
+  atribución de Google siempre visible. Si algún día Google cambiara ese embed, `public/games/trotamundos/config.js`
+  acepta una clave propia de la Maps Embed API (`EMBED_KEY`), que es gratis y sin límite. El mapa de marcar es MapLibre con
+  los mapas gratuitos de OpenFreeMap (datos de OpenStreetMap).
+- **Datos** (`public/games/trotamundos/datos/`): sitios famosos y lugares al azar validados cargando el embed en un
+  navegador (que haya imagen y sea oficial de Google), con límites de países de Natural Earth (dominio público). Se generan
+  con `node tools/trotamundos-datos.mjs` (ver `--help`: baja las fuentes, arma candidatos, valida con pocas cargas y frena
+  si Google responde con un bloqueo). Para sumar lugares o famosos se agrega a la lista, se valida y se vuelve a armar.
+- **Pruebas:** `npm test` corre las pruebas de la lógica compartida, los datos, el servidor (con clientes `ws` reales) y el
+  cliente online (hace falta `npm ci --prefix server` una vez).
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

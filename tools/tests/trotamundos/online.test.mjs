@@ -274,12 +274,13 @@ test('ordenarSalas y elegirSalaRapida: la que espera en el lobby y tiene más ge
     { code: 'DDDDD', n: 5, max: 10, state: 'lobby' },
     { code: 'EEEEE', n: 4, max: 10, state: 'finished' },
   ];
-  assert.deepEqual(L.ordenarSalas(salas).map((s) => s.code), ['DDDDD', 'BBBBB', 'EEEEE', 'AAAAA'], 'primero el lobby con más gente; las llenas no se ofrecen');
+  assert.deepEqual(L.ordenarSalas(salas).map((s) => s.code), ['DDDDD', 'BBBBB', 'AAAAA'], 'primero el lobby con más gente; no se ofrecen las llenas ni las terminadas');
   assert.equal(L.elegirSalaRapida(salas).code, 'DDDDD');
   assert.equal(L.elegirSalaRapida([{ code: 'AAAAA', n: 2, max: 10, state: 'playing' }]), null, 'una sala en juego no es para la partida rápida');
   assert.equal(L.elegirSalaRapida([]), null);
   assert.equal(L.elegirSalaRapida(null), null);
   assert.deepEqual(L.ordenarSalas([null, { n: 1, max: 2 }, { code: 'ZZZZZ', n: 1, max: 2, state: 'lobby' }]).map((s) => s.code), ['ZZZZZ']);
+  assert.deepEqual(L.ordenarSalas([{ code: 'FFFFF', n: 2, max: 10, state: 'finished' }, { code: 'PPPPP', n: 2, max: 10, state: 'playing' }]).map((s) => s.code), ['PPPPP'], 'una sala terminada no se ofrece');
 });
 
 // ---------------------------------------------------------------- ajustes

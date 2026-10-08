@@ -136,5 +136,18 @@ Sin pistas y sin desafío diario.
 
 ## 7. Estado
 
-Rama `juego/trotamundos`. Pendiente al armar: `README.md` (sección del juego), versión de caché de `public/sw.js`, juego visible
-en el portal. Clave opcional y ampliación de lugares: ver `tools/trotamundos-datos.mjs --help`.
+Rama `juego/trotamundos`: modo de un jugador, datos y online hechos y probados (`npm test`, `npm run check`, `npm run build`, y
+recorridos con Chromium y varios navegadores contra el servidor, con el visor real de Google).
+
+- **Datos de hoy** (`datos/paises.json`, v 1, 2026-10-07): 1.057 lugares al azar en 68 países (Argentina 159; Brasil, México,
+  Chile, Colombia, Perú y Uruguay entre 43 y 50; Europa 312, Asia 138, Norteamérica 124, África 42, Oceanía 32) y 51 sitios
+  famosos con foto oficial de Google (35 de Argentina y Latinoamérica). Se usaron unas 2.950 de las 3.000 cargas del embed que se
+  fijaron como tope para validar.
+- **Límites conocidos:** África y Oceanía tienen pocos lugares (la herramienta tomaba "sin aciertos" como "sin cobertura" y
+  los candidatos salían de centros de pueblos; conviene probar puntos sobre calles de las capitales); los famosos quedaron
+  muy sudamericanos porque en Europa y Asia la panorámica más cercana a los monumentos suele ser de un usuario, que se descarta.
+  Ampliar pide más cargas del embed: es una decisión aparte (ver `tools/trotamundos-datos.mjs --help`).
+- **Otros límites:** las coordenadas viajan al navegador (se pueden ver con las herramientas del navegador), el embed sin
+  clave no es una API documentada de Google, y desde afuera del iframe no se puede saber si una ubicación no tiene
+  imágenes (de ahí el botón "¿No carga?"). Si el anfitrión online se desconecta, sigue siendo anfitrión hasta que vence la
+  gracia del núcleo (45 s).

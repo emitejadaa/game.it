@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "server": "node server/index.js",
     "check": "node tools/check-games.mjs",
-    "test": "node --test \"tools/tests/**/*.test.mjs\""
+    "test": "node --test --test-concurrency=1 \"tools/tests/**/*.test.mjs\""
   },
   "devDependencies": {
     "three": "^0.186.1",
