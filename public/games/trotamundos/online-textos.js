@@ -70,6 +70,7 @@ export const TEXTOS_ONLINE = {
   on_nocargaPedido: { es: 'Pedido', en: 'Asked' },
   on_nocargaTit: { es: 'Si no hay imagen, pedí otra ubicación: se cambia cuando la mayoría lo pide ({a}/{b})', en: "If there's no imagery, ask for another location: it changes when most players ask ({a}/{b})" },
   on_nocargaPedidoMsg: { es: 'Pediste otra ubicación. Si la mayoría coincide, la cambiamos.', en: 'You asked for another location. If most players agree, we switch it.' },
+  on_salaYaNo: { es: 'La sala ya no existe. Armá otra o entrá a una.', en: 'The room no longer exists. Create or join another.' },
   on_swap: { es: 'Cambiamos la ubicación. Volvé a marcar.', en: 'We switched the location. Mark again.' },
   on_apurarChip: { es: 'Apurar', en: 'Rush' },
   on_relojAria: { es: 'Tiempo restante: {t}', en: 'Time left: {t}' },

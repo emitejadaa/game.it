@@ -342,9 +342,15 @@ test('online.js: nada de HTML armado con datos de afuera y sin marcas ajenas', (
   const src = archivos[0];
   assert.ok(!/insertAdjacentHTML|outerHTML|document\.write/.test(src));
   assert.ok(!/innerHTML/.test(src));
-  for (const txt of archivos) for (const marca of ['geo' + 'guessr', 'world' + 'guessr']) assert.ok(!txt.toLowerCase().includes(marca));
+  const doc = readFileSync(new URL('../../../docs/trotamundos.md', import.meta.url), 'utf8');
+  for (const txt of [...archivos, doc]) for (const marca of ['geo' + 'guessr', 'world' + 'guessr']) assert.ok(!txt.toLowerCase().includes(marca));
+  // abrirOnline guarda el estado antes del primer await (sin doble armado) y la sala perdida vuelve a la entrada
+  assert.ok(/if \(O\) return abriendo/.test(src));
+  assert.ok(/code === 'not_found'[^\n]*\n?[^\n]*volverALaEntrada|volverALaEntrada\(t\('on_salaYaNo'\)\)/.test(src));
   // nada sobre la banda de Google: no hay posiciones fijas abajo del visor en la pantalla de la ronda
-  assert.ok(!/(?<![-\w])bottom:\s*0\b/.test(archivos[3]), 'online.css no fija nada contra el borde de abajo');
+  // (la barra de acciones del lobby es pegajosa, pero el lobby no tiene visor)
+  const sinLobby = archivos[3].split('\n').filter((l) => !l.includes('.on-lobby-acc')).join('\n');
+  assert.ok(!/(?<![-\w])bottom:\s*0\b/.test(sinLobby), 'online.css no fija nada contra el borde de abajo');
 });
 
 test('online.js usa solo rutas permitidas y el contrato de mensajes del servidor', () => {

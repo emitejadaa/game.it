@@ -24,6 +24,7 @@ const DESBLOQUEO_MS = 5000; // si el servidor no registró mi pin en este tiempo
 let c = null;
 /** Estado del cliente online (se reinicia cada vez que se abre). */
 let O = null;
+let abriendo = null; // promesa mientras abrirOnline termina de armarse
 
 const t = (k, v) => c.t(k, v);
 const el = (...a) => c.el(...a);
@@ -79,10 +80,22 @@ function estadoNuevo() {
 // ================================================================ entrada desde game.js
 export async function abrirOnline(ctx) {
   c = ctx;
-  if (O?.online) return mostrarSegunEstado(); // ya estaba abierto
+  if (O) return abriendo ? abriendo : mostrarSegunEstado(); // ya estaba abierto (o abriéndose)
   c.agregarTextos(TEXTOS_ONLINE);
-  O = estadoNuevo();
-  await cargarCss();
+  O = estadoNuevo(); // se guarda antes del primer await: una segunda llamada no arma otro
+  abriendo = (async () => {
+    const o = O;
+    await cargarCss();
+    if (O === o) iniciar(); // si se cerró mientras cargaba, no se arma nada
+  })();
+  try {
+    await abriendo;
+  } finally {
+    abriendo = null;
+  }
+}
+
+function iniciar() {
   construirDom();
   O.online = new OnlineRoom(JUEGO, { onRoom: alRoom, onMessage: alMensaje, onStatus: alEstadoRed, onJoined: () => {} });
   c.alTeclado = alTeclado;
@@ -174,6 +187,22 @@ function cerrar() {
 }
 
 // ================================================================ utilidades de pantalla
+/** Rehace el contenido de un contenedor sin perder el foco del teclado: vuelve al mismo control (por id, texto o posición). */
+function conFoco(cont, rehacer) {
+  const act = document.activeElement;
+  const sel = 'button, input, select, textarea, a[href], [tabindex]';
+  let clave = null;
+  if (act && act !== document.body && cont.contains(act)) {
+    const lista = [...cont.querySelectorAll(sel)];
+    clave = { id: act.id, txt: act.getAttribute('aria-label') || act.textContent, i: lista.indexOf(act) };
+  }
+  rehacer();
+  if (!clave) return;
+  const lista = [...cont.querySelectorAll(sel)];
+  const nuevo = (clave.id && lista.find((e) => e.id === clave.id)) || lista.find((e) => (e.getAttribute('aria-label') || e.textContent) === clave.txt && e.tagName === act.tagName) || lista[clave.i];
+  nuevo?.focus({ preventScroll: true });
+}
+
 /** Texto fijo que cambia con el idioma. */
 function tx(nodo, clave, atributo = 'text') {
   const f = () => (atributo === 'text' ? (nodo.textContent = t(clave)) : nodo.setAttribute(atributo, t(clave)));
@@ -489,7 +518,7 @@ function pintarLobby(room) {
   const fJ = JSON.stringify([room.players.map((p) => [p.id, p.name, p.color, p.connected]), room.host, yo(), lang()]);
   if (fJ !== O.firmaJug) {
     O.firmaJug = fJ;
-    R.lJug.replaceChildren(
+    conFoco(R.lJug, () => R.lJug.replaceChildren(
       ...room.players.map((p) => {
         const etq = [p.id === yo() ? t('on_vos') : '', p.id === room.host ? t('on_anfitrion') : '', p.connected ? '' : t('on_sinConexion')].filter(Boolean).join(' · ');
         return el(
@@ -501,7 +530,7 @@ function pintarLobby(room) {
           soyAnfi && p.id !== yo() ? el('button', { type: 'button', class: 'on-mini', text: t('on_expulsar'), 'aria-label': t('on_expulsarA', { n: p.name }), onclick: () => O.online.send({ t: 'kick', id: p.id }) }) : null,
         );
       }),
-    );
+    ));
   }
 
   const fA = JSON.stringify([room.settings, soyAnfi, lang(), O.datos ? 1 : 0, O.busquedaPais]);
@@ -509,7 +538,7 @@ function pintarLobby(room) {
     O.firmaAj = fA;
     const buscando = document.activeElement?.id === 'on-pais-q';
     const antes = buscando ? document.activeElement.selectionStart : 0;
-    R.lAjustes.replaceChildren(...(soyAnfi ? ajustesAnfitrion(room.settings) : ajustesInvitado(room.settings)));
+    conFoco(R.lAjustes, () => R.lAjustes.replaceChildren(...(soyAnfi ? ajustesAnfitrion(room.settings) : ajustesInvitado(room.settings))));
     if (buscando) {
       const q = R.lAjustes.querySelector('#on-pais-q');
       q?.focus();
@@ -721,10 +750,14 @@ function crearRonda() {
     }
   });
   // la barra de arriba puede ocupar una o dos filas: el toast y el panel del mapa se ubican debajo
+  // (y la fila de chips de quién confirmó, que va debajo de la barra, también le quita lugar al mapa grande)
   O.ro = new ResizeObserver(() => {
-    if (O.pantalla === 'ronda') document.documentElement.style.setProperty('--barra-h', `${R.barra.offsetHeight}px`);
+    if (O.pantalla !== 'ronda') return;
+    document.documentElement.style.setProperty('--barra-h', `${R.barra.offsetHeight}px`);
+    R.sec.style.setProperty('--quien-h', `${R.quien.offsetHeight + 8}px`);
   });
   O.ro.observe(R.barra);
+  O.ro.observe(R.quien);
   return R.sec;
 }
 
@@ -1124,7 +1157,7 @@ function pintarControlesMapaFin(tm) {
   if (R.finRondas.hidden) return;
   const botones = [chip({ texto: t('on_todas'), activo: O.finRonda === 0, titulo: t('on_verTodas'), onclick: () => elegirRondaFin(0) })];
   for (const h of tm.history) botones.push(chip({ texto: String(h.round), activo: O.finRonda === h.round, titulo: t('on_verRonda', { n: h.round }), onclick: () => elegirRondaFin(h.round) }));
-  R.finRondas.replaceChildren(...botones);
+  conFoco(R.finRondas, () => R.finRondas.replaceChildren(...botones));
 }
 
 function alternarMapaFin() {
@@ -1245,6 +1278,11 @@ function alError(code) {
   clearTimeout(O.timerLista);
   O.pendientePublica = false;
   const txt = textoError(code);
+  // la sala ya no existe (por ejemplo, el servidor se reinició): no queda una pantalla fantasma
+  if (O.room && O.pantalla !== 'entrada' && (code === 'not_found' || code === 'in_progress' || code === 'bad_game')) {
+    volverALaEntrada(t('on_salaYaNo'));
+    return;
+  }
   if (O.pantalla === 'entrada' || !O.room) {
     O.err = txt;
     if (O.pantalla !== 'entrada') irA('entrada');

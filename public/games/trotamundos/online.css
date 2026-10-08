@@ -3,7 +3,7 @@
  * Misma regla que el resto del juego: NADA nuestro sobre los 28 px de abajo del visor mientras se juega una ronda. */
 
 #p-online, #p-online-lobby, #p-online-rev, #p-online-fin { overflow: hidden; }
-#p-online-ronda { overflow: hidden; background: #0b0d12; }
+#p-online-ronda { overflow: hidden; background: #0b0d12; --libre-arriba: calc(var(--arriba) + var(--barra-h) + var(--quien-h, 0px) + 18px); }
 html[data-pantalla='online-ronda'] .dialogo { bottom: var(--banda); }
 .on-panel { align-self: center; }
 .on-panel input[type='text'], .on-panel input[type='search'] {

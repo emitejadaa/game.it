@@ -34,7 +34,7 @@ Maps Embed API en `config.js` (ver "Clave opcional").
 
 Lo que **no** se hace (decisiones): no se usa ninguna clave ajena ni tiles de Google para el mapa; no se llama a endpoints no
 documentados de Google (ni desde el juego ni para generar datos); no se copia código de otros proyectos de este género
-(WorldGuessr, por ejemplo, tiene licencia no comercial y este portal tiene anuncios); no se esquiva ningún bloqueo de Google.
+(varios tienen licencia no comercial y este portal tiene anuncios); no se esquiva ningún bloqueo de Google.
 
 ## 2. Reglas del juego
 
