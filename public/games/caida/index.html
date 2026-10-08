@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Caída Libre · game.it</title>
+    <link rel="stylesheet" href="/shared/arena.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <canvas id="cv"></canvas>
+
+    <!-- ============ HUD ============ -->
+    <div class="hud" id="hud" hidden>
+      <button class="hud-btn" id="btn-pause" type="button" aria-label="Pausa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" /></svg></button>
+      <div class="hud-chips" id="chips"></div>
+      <div class="score" aria-live="off">
+        <small data-t="score"></small>
+        <b id="score">0</b>
+        <span class="meta"><span id="lines"></span><span id="kos"></span></span>
+      </div>
+      <button class="alive" id="btn-alive" type="button" aria-expanded="false" aria-controls="lb"><span id="alive"></span></button>
+      <aside class="lb" id="lb" aria-label="Ranking">
+        <h3 data-t="top"></h3>
+        <ol id="lb-list"></ol>
+      </aside>
+      <button class="chip-btn" id="btn-target" type="button"></button>
+      <button class="hold-btn" id="btn-hold" type="button" aria-label="Guardar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16M8 4v16M16 4v16" /></svg><span data-t="hold"></span></button>
+      <div class="watchbar" id="watchbar" hidden>
+        <button type="button" id="watch-prev" aria-label="Anterior">‹</button>
+        <span id="watch-name"></span>
+        <button type="button" id="watch-next" aria-label="Siguiente">›</button>
+      </div>
+      <div class="count" id="count" aria-live="assertive"></div>
+      <p class="hint" id="hint"></p>
+      <ul class="feed" id="feed" aria-live="polite"></ul>
+    </div>
+
+    <!-- ============ Menú (lo arma /shared/arena-lobby.js) ============ -->
+    <div id="lobby"></div>
+
+    <!-- ============ Pausa ============ -->
+    <section class="ar-lobby" id="s-pause" hidden>
+      <div class="ar-panel" role="dialog" aria-labelledby="pause-title">
+        <h2 class="ar-h2 ar-h2-big" id="pause-title" data-t="paused"></h2>
+        <p class="ar-sub" id="pause-sub"></p>
+        <div class="ctl" id="ctl">
+          <label for="das"><span data-t="das"></span> <b id="das-v"></b></label>
+          <input id="das" type="range" min="50" max="300" step="10" />
+          <label for="arr"><span data-t="arr"></span> <b id="arr-v"></b></label>
+          <input id="arr" type="range" min="0" max="100" step="5" />
+        </div>
+        <button class="ar-btn ar-primary" id="pz-resume" type="button" data-t="resume"></button>
+        <button class="ar-btn" id="pz-share" type="button" hidden data-t="copyLink"></button>
+        <button class="ar-btn" id="pz-quit" type="button" data-t="quit"></button>
+      </div>
+    </section>
+
+    <!-- ============ Eliminación / final de ronda ============ -->
+    <section class="ar-lobby" id="s-result" hidden>
+      <div class="ar-panel" role="dialog" aria-labelledby="res-title">
+        <p class="kicker" id="res-kicker"></p>
+        <h2 class="ar-h2 ar-h2-big" id="res-title"></h2>
+        <p class="ar-sub" id="res-sub"></p>
+        <dl class="stats" id="res-stats"></dl>
+        <ol class="rank" id="res-rank"></ol>
+        <p class="note" id="res-note" aria-live="polite"></p>
+        <button class="ar-btn ar-primary ar-big" id="res-a" type="button"></button>
+        <button class="ar-btn" id="res-b" type="button"></button>
+        <button class="ar-btn" id="res-c" type="button" data-t="menu"></button>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
