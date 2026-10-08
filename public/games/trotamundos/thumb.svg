@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141826"/><stop offset="1" stop-color="#07070a"/></linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#00f0ff" stop-opacity=".28"/><stop offset="1" stop-color="#00f0ff" stop-opacity="0"/></radialGradient>
+    <filter id="neon" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <clipPath id="globo"><circle cx="160" cy="108" r="66"/></clipPath>
+  </defs>
+  <rect width="320" height="200" fill="url(#bg)"/>
+  <ellipse cx="160" cy="108" rx="130" ry="92" fill="url(#glow)"/>
+  <!-- calle en perspectiva -->
+  <g stroke="#2a3350" stroke-width="1.5" fill="none" opacity=".9">
+    <path d="M0 200L130 130M320 200L190 130M0 160L125 128M320 160L195 128"/>
+  </g>
+  <!-- globo de líneas -->
+  <g fill="none" stroke="#00f0ff" stroke-width="2.2" stroke-linecap="round" filter="url(#neon)">
+    <circle cx="160" cy="108" r="66"/>
+    <g clip-path="url(#globo)" stroke-width="1.6" opacity=".85">
+      <ellipse cx="160" cy="108" rx="28" ry="66"/>
+      <ellipse cx="160" cy="108" rx="52" ry="66"/>
+      <path d="M94 108H226M100 80H220M100 136H220M116 56H204M116 160H204"/>
+    </g>
+  </g>
+  <!-- ruta punteada y lugar real -->
+  <path d="M120 140Q165 40 214 92" fill="none" stroke="#ffb800" stroke-width="2.4" stroke-dasharray="5 6" stroke-linecap="round" filter="url(#neon)"/>
+  <circle cx="214" cy="92" r="6" fill="#12b76a" stroke="#fff" stroke-width="2"/>
+  <!-- pin -->
+  <g filter="url(#neon)" transform="translate(120 140)">
+    <path d="M0 0C-4 -9 -15 -18 -15 -30a15 15 0 0 1 30 0C15 -18 4 -9 0 0Z" fill="#ff2bd6" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/>
+    <circle cx="0" cy="-30" r="5.5" fill="#fff"/>
+  </g>
+  <ellipse cx="120" cy="143" rx="11" ry="3.2" fill="#000" opacity=".45"/>
+</svg>

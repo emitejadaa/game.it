@@ -2,7 +2,7 @@
  *
  * API pública (la usan game.js y el cliente online):
  *   RONDAS, MIN_LUGARES, TIEMPOS, TIEMPO_DIARIO, MODOS            constantes
- *   cargarDatos({ base, intentos, espera, fetchFn })              → { famosos, mundo, meta }; lanza ErrorDatos (code: 'red' | 'formato' | 'vacio')
+ *   cargarDatos({ base, intentos, espera, fetchFn })              → { famosos, mundo, meta }; lanza ErrorDatos (code: 'red' | 'falta' | 'formato' | 'vacio'; .archivo dice cuál)
  *   lugaresEnAmbito(lista, ambito, meta, excluir?)                → ubicaciones del ámbito (sin las de `excluir`, un Set de ids)
  *   paisesDisponibles(mundo, meta, { min, excluir })              → [{ cc, n }] con al menos `min` lugares, de más a menos
  *   ambitoDisponible(datos, modo, ambito, excluir?)               → cantidad de lugares con los que se juega ese modo y ámbito
@@ -39,17 +39,22 @@ export class ErrorDatos extends Error {
 // ---------------------------------------------------------------- carga
 async function pedirJson(url, { intentos, espera, fetchFn }) {
   let ultimo;
+  let falta = false;
   for (let i = 0; i < intentos; i++) {
     try {
       const r = await fetchFn(url);
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      if (!r.ok) {
+        falta = r.status === 404 || r.status === 410; // el archivo no está: reintentar no sirve
+        throw new Error(`HTTP ${r.status}`);
+      }
       return await r.json();
     } catch (e) {
       ultimo = e;
+      if (falta) break;
       if (i < intentos - 1) await pausa(espera * (i + 1));
     }
   }
-  throw new ErrorDatos('red', url, ultimo);
+  throw new ErrorDatos(falta ? 'falta' : 'red', url.split('/').pop(), ultimo);
 }
 
 const texto = (v) => typeof v === 'string' && v.length > 0;

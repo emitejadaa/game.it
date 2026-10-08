@@ -146,6 +146,43 @@ export function adaptarEstilo(base, tema) {
   return est;
 }
 
+// ---------------------------------------------------------------- encuadre (puro, se prueba en Node)
+const TILE = 512; // tamaño del mundo en px con zoom 0 (MapLibre)
+const mercY = (lat) => {
+  const f = Math.sin((acotar(lat, -85, 85) * Math.PI) / 180);
+  return 0.5 - Math.log((1 + f) / (1 - f)) / (4 * Math.PI);
+};
+/** Puntos de un arco para el encuadre: sin irse a los polos (las rutas largas se curvan mucho y alejarían el zoom). */
+const delArco = ([x, y]) => [x, acotar(y, -72, 72)];
+const mercLat = (y) => (Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * 180) / Math.PI;
+
+/**
+ * Cámara que muestra todos los puntos [lng, lat] dentro de un mapa de `ancho` × `alto` px con ese relleno.
+ * A diferencia de fitBounds, acepta longitudes continuas que pasan de una vuelta (arcos que cruzan el antimeridiano).
+ * Devuelve { center: [lng, lat], zoom, offset: [dx, dy] } para map.easeTo().
+ */
+export function camaraPara(puntos, { ancho, alto, relleno = { top: 0, bottom: 0, left: 0, right: 0 }, maxZoom = 12, minZoom = -1 }) {
+  let [w, s, e, n] = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const [x, y] of puntos) {
+    w = Math.min(w, x);
+    e = Math.max(e, x);
+    s = Math.min(s, y);
+    n = Math.max(n, y);
+  }
+  const libreX = Math.max(40, ancho - relleno.left - relleno.right);
+  const libreY = Math.max(40, alto - relleno.top - relleno.bottom);
+  const spanX = (e - w) / 360;
+  const spanY = mercY(s) - mercY(n);
+  const zx = spanX > 1e-9 ? Math.log2(libreX / (spanX * TILE)) : Infinity;
+  const zy = spanY > 1e-9 ? Math.log2(libreY / (spanY * TILE)) : Infinity;
+  const zoom = acotar(Math.min(zx, zy, maxZoom), minZoom, maxZoom);
+  return {
+    center: [(w + e) / 2, mercLat((mercY(s) + mercY(n)) / 2)],
+    zoom,
+    offset: [(relleno.left - relleno.right) / 2, (relleno.top - relleno.bottom) / 2],
+  };
+}
+
 // ---------------------------------------------------------------- estilo (se pide una sola vez por página)
 let promesaEstilo = null;
 function pedirEstilo(url) {
@@ -218,6 +255,7 @@ export class Mapa {
     this._destruido = false;
     this._okTiles = 0;
     this._errTiles = 0;
+    this._atrib = false;
 
     const raiz = document.createElement('div');
     raiz.className = 'tm-mapa';
@@ -298,9 +336,17 @@ export class Mapa {
     this.map = m;
     m.touchZoomRotate.disableRotation();
     m.addControl(new (ML().AttributionControl)({ compact: true }), 'bottom-right');
+    this.mostrarAtribucion(this._atrib); // el control nace abierto: lo dejamos como pidió el juego (cerrado durante la ronda)
     m.addControl(new (ML().NavigationControl)({ showCompass: false, visualizePitch: false }), 'top-right');
     m.on('click', (e) => this._clic(e));
     m.on('error', (e) => this._falloTiles(e));
+    m.on('sourcedata', () => {
+      // el control de atribución se arma cuando llegan los datos de las fuentes: recién ahí lo dejamos como se pidió
+      if (!this._atribOk && this.raiz.querySelector('details.maplibregl-ctrl-attrib.maplibregl-compact')) {
+        this._atribOk = true;
+        this.mostrarAtribucion(this._atrib);
+      }
+    });
     m.on('data', (e) => {
       if (e.dataType === 'source' && e.tile) {
         this._okTiles++;
@@ -464,22 +510,11 @@ export class Mapa {
   _ajustar(puntos, { padding, maxZoom = 12, animar = true } = {}) {
     const m = this.map;
     if (!m || !puntos.length) return;
-    let [w, s, e, n] = [Infinity, Infinity, -Infinity, -Infinity];
-    for (const [x, y] of puntos) {
-      w = Math.min(w, x);
-      e = Math.max(e, x);
-      s = Math.min(s, y);
-      n = Math.max(n, y);
-    }
     const r = this._relleno();
-    const pad = padding || { top: r + 34, bottom: r, left: r, right: r };
-    m.fitBounds(
-      [
-        [w, s],
-        [e, n],
-      ],
-      { padding: pad, maxZoom, duration: animar && !this.reducido() ? 700 : 0 },
-    );
+    const relleno = padding || { top: r + 34, bottom: r, left: r, right: r };
+    const { width, height } = this.raiz.getBoundingClientRect();
+    const cam = camaraPara(puntos, { ancho: width, alto: height, relleno, maxZoom });
+    m.easeTo({ ...cam, duration: animar && !this.reducido() ? 700 : 0 });
   }
 
   /** Muestra el lugar real, los pines de cada uno y una línea de cada pin al lugar real. */
@@ -493,7 +528,7 @@ export class Mapa {
       const ruta = arco(real.lat, real.lng, a.lat, a.lng);
       const fin = ruta[ruta.length - 1];
       this._lineas.push({ type: 'Feature', properties: { color: a.color || MAGENTA }, geometry: { type: 'LineString', coordinates: ruta } });
-      puntos.push(...ruta);
+      puntos.push(fin, ...ruta.map(delArco));
       this._marca(fin[1], fin[0], { color: a.color || MAGENTA, tipo: 'guess', etiqueta: a.etiqueta });
     }
     this._datos('tm-lineas', this._lineas);
@@ -516,23 +551,24 @@ export class Mapa {
         const ruta = arco(r.real.lat, r.real.lng, r.guess.lat, r.guess.lng);
         const fin = ruta[ruta.length - 1];
         this._lineas.push({ type: 'Feature', properties: { color: MAGENTA }, geometry: { type: 'LineString', coordinates: ruta } });
-        puntos.push(...ruta);
+        puntos.push(fin, ...ruta.map(delArco));
         this._marca(fin[1], fin[0], { color: MAGENTA, tipo: 'guess', numero: n });
       }
       this._marca(r.real.lat, r.real.lng, { color: VERDE, tipo: 'real', numero: n });
     });
     this._datos('tm-lineas', this._lineas);
-    const xs = puntos.map((p) => p[0]);
-    if (Math.max(...xs) - Math.min(...xs) > 340) this.encuadrar(null, { animar });
-    else this._ajustar(puntos, { padding, maxZoom: 12, animar });
+    // las longitudes son continuas (no se parten en el antimeridiano): si abarcan más de una vuelta, el mapa queda en el zoom mínimo
+    this._ajustar(puntos, { padding, maxZoom: 12, animar });
   }
 
   // ------------------------------------------------------------ vista
   /** Encuadra una caja [[oeste, sur], [este, norte]]; null = el mundo entero. */
   encuadrar(limites, { animar = false } = {}) {
     if (!this.map) return;
-    const r = this._relleno();
-    this.map.fitBounds(limites || MUNDO, { padding: Math.max(8, r / 2), maxZoom: 9, duration: animar && !this.reducido() ? 600 : 0 });
+    const r = Math.max(8, this._relleno() / 2);
+    const { width, height } = this.raiz.getBoundingClientRect();
+    const cam = camaraPara(limites || MUNDO, { ancho: width, alto: height, relleno: { top: r, bottom: r, left: r, right: r }, maxZoom: 9 });
+    this.map.easeTo({ ...cam, duration: animar && !this.reducido() ? 600 : 0 });
   }
 
   vistaMundo(animar = false) {
@@ -549,6 +585,7 @@ export class Mapa {
   }
 
   mostrarAtribucion(si) {
+    this._atrib = !!si;
     this.raiz.querySelector('.maplibregl-ctrl-attrib')?.classList.toggle('maplibregl-compact-show', !!si);
     const d = this.raiz.querySelector('details.maplibregl-ctrl-attrib');
     if (d) d.open = !!si;

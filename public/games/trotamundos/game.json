@@ -1,0 +1,19 @@
+{
+  "id": "trotamundos",
+  "title": { "es": "Trotamundos", "en": "Globetrotter" },
+  "description": {
+    "es": "Te dejamos en un lugar del mundo en vista de calle 360°: mirá, caminá y marcá en el mapa dónde creés que estás. Sitios famosos, lugares al azar, por país o región, desafío diario y online de 2 a 10 jugadores.",
+    "en": "We drop you somewhere in the world in 360° street view: look around, walk and mark on the map where you think you are. Famous places, random spots, by country or region, a daily challenge and online for 2 to 10 players."
+  },
+  "categories": ["aventura", "casual", "online", "multijugador"],
+  "tags": ["geografía", "geography", "mapa", "map", "calle", "street view", "adivinar", "guess", "viajes", "travel", "países", "countries", "mundo", "world", "diario", "daily"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom + maplibre",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 10, "story": false },
+  "order": 22
+}

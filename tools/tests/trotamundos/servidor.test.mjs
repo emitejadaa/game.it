@@ -867,6 +867,26 @@ test('si quedan menos de 2 conectados la partida termina con el podio (sin colga
     assert.ok(!rev.room.tm.scores[c.id] && !(c.id in rev.room.tm.scores));
     await closeAll([a, b, c]);
   }
+  // 4) se van todos los que juegan la ronda y quedan solo espectadores: la ronda no espera al reloj (180 s = 9 s en la prueba)
+  {
+    const [a, b] = await makeRoom(quick, 2, { rounds: 3, time: 180 });
+    const from = a.mark();
+    a.send({ t: 'start' });
+    await a.untilTm((tm) => tm.phase === 'look' && tm.round === 1, { from });
+    const c = await joinRoom(quick, a.code, 'Tarde1');
+    const d = await joinRoom(quick, a.code, 'Tarde2');
+    await c.untilTm((tm) => tm.round === 1);
+    const t = Date.now();
+    a.close();
+    b.close();
+    const rev = await c.untilTm((tm) => tm.phase === 'reveal' && tm.round === 1, { ms: 4000 });
+    assert.ok(Date.now() - t < 4000, 'cerró la ronda sin esperar los 9 s');
+    assert.ok(rev.room.tm.reveal.results.every((r) => r.pts === 0));
+    // en la ronda siguiente juegan los espectadores
+    const look2 = await c.untilTm((tm) => tm.phase === 'look' && tm.round === 2);
+    assert.ok(look2.room.tm.playing.includes(c.id) && look2.room.tm.playing.includes(d.id));
+    await closeAll([c, d]);
+  }
   assert.deepEqual(quick.errors(), []);
   await quick.stop();
 });

@@ -93,14 +93,14 @@
           </div>
           <div class="acciones">
             <button type="button" class="btn" id="op-volver" data-t="volver"></button>
-            <button type="button" class="btn primario" id="op-jugar" data-t="jugar"></button>
+            <button type="button" class="btn primario" id="op-jugar"></button>
           </div>
         </div>
       </section>
 
       <!-- ============ Ronda ============ -->
       <section class="pantalla ronda" id="p-ronda" tabindex="-1" data-t-aria="r_aria">
-        <div class="visor-host" id="visor-host"></div>
+        <!-- el visor va al final del DOM (Tab llega primero a nuestros botones y recién después al visor); se ve debajo por z-index -->
         <div class="barra" id="barra">
           <div class="hud" id="hud">
             <span class="chip" id="hud-ronda"></span>
@@ -137,6 +137,7 @@
           </div>
           <button type="button" class="adivinar" id="adivinar"></button>
         </div>
+        <div class="visor-host" id="visor-host"></div>
         <div class="pausa" id="pausa" hidden><span data-t="enPausa"></span></div>
       </section>
 

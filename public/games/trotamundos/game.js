@@ -4,7 +4,7 @@
  *   ctx.G                      el SDK del portal (window.GameIt)
  *   ctx.t(clave, vars)         texto en el idioma actual (es/en); ctx.agregarTextos({ clave: { es, en } }) suma los propios
  *   ctx.lang()                 'es' | 'en'
- *   ctx.el(tag, props, …hijos) crea elementos sin innerHTML (props: class, text, dataset, onclick…, el resto son atributos)
+ *   ctx.el(tag, props, …hijos) crea elementos sin HTML dinámico (props: class, text, dataset, onclick…, el resto son atributos)
  *   ctx.$(id)                  document.getElementById
  *   ctx.pantalla(id, { juego }) muestra la sección #p-<id> (cualquier <section class="pantalla" id="p-…"> dentro de #app);
  *                              juego: true avisa GameIt.gameplay(true) (solo mientras se juega; en menús y resultados, false)
@@ -84,6 +84,7 @@ const S = {
   pantalla: 'menu',
   opc: D.leerOpciones(),
   datos: null,
+  errorDatos: null,
   malas: D.leerMalas(),
   // partida
   modo: 'famosos',
@@ -183,19 +184,23 @@ const mensaje = (titulo, texto) => dialogo({ titulo, texto, botones: [{ texto: t
 
 // ---------------------------------------------------------------- datos
 let pidiendoDatos = null;
+const textoErrorDatos = () => (S.errorDatos?.code === 'red' ? t('datosRed') : t('datosFaltan', { archivo: S.errorDatos?.archivo || '' }));
 function cargarDatosJuego() {
   if (S.datos) return Promise.resolve(S.datos);
   pidiendoDatos ||= D.cargarDatos()
     .then((d) => {
       S.datos = d;
+      S.errorDatos = null;
       $('datos-aviso').hidden = true;
       if (S.pantalla === 'opciones') pintarOpciones();
       return d;
     })
     .catch((e) => {
       pidiendoDatos = null;
-      $('datos-msg').textContent = e?.code === 'red' ? t('datosRed') : t('datosFaltan', { archivo: e?.archivo || '' });
+      S.errorDatos = e || { code: 'red' };
+      $('datos-msg').textContent = textoErrorDatos();
       $('datos-aviso').hidden = false;
+      if (S.pantalla === 'opciones') pintarOpciones();
       throw e;
     });
   return pidiendoDatos;
@@ -337,8 +342,18 @@ function pintarOpciones() {
 
   const lista = datos && (modo === 'famosos' ? datos.famosos : datos.mundo);
   const n = datos ? D.ambitoDisponible(datos, modo === 'diario' ? 'azar' : modo, modo === 'famosos' || modo === 'pais' ? ambitoActual() : 'mundo', S.malas) : 0;
-  $('op-jugar').disabled = !datos || (!esDiario && n < D.MIN_LUGARES) || (modo === 'famosos' && !lista?.length);
   const err = $('op-error');
+  const jugar = $('op-jugar');
+  if (!datos && S.errorDatos) {
+    // no se pudieron cargar los lugares: el botón principal pasa a ser "Reintentar"
+    err.hidden = false;
+    err.textContent = textoErrorDatos();
+    jugar.disabled = false;
+    jugar.textContent = t('reintentar');
+    return;
+  }
+  jugar.textContent = t('jugar');
+  jugar.disabled = !datos || (!esDiario && n < D.MIN_LUGARES) || (modo === 'famosos' && !lista?.length);
   err.hidden = !datos || esDiario || n >= D.MIN_LUGARES;
   err.textContent = t('faltanLugaresMsg');
 }
@@ -381,7 +396,15 @@ $('congelado').addEventListener('click', () => {
   pintarOpciones();
 });
 $('op-volver').addEventListener('click', irMenu);
-$('op-jugar').addEventListener('click', () => nuevaPartida());
+$('op-jugar').addEventListener('click', () => {
+  if (!S.datos && S.errorDatos) {
+    S.errorDatos = null;
+    pidiendoDatos = null;
+    pintarOpciones();
+    return cargarDatosJuego().catch(() => {});
+  }
+  nuevaPartida();
+});
 
 // ---------------------------------------------------------------- partida
 /** Arma y empieza una partida con S.opc (o con la configuración de la partida anterior si `repetir`). */
@@ -812,6 +835,15 @@ async function otraVez() {
 $('fin-otra').addEventListener('click', otraVez);
 $('fin-menu').addEventListener('click', irMenu);
 $('fin-copiar').addEventListener('click', copiarResultado);
+
+// con el mouse o el dedo el botón suelta el foco: así Espacio/Enter vuelven a significar "adivinar" (con el teclado, el foco queda)
+$('p-ronda').addEventListener('click', (e) => {
+  const b = e.target.closest?.('button');
+  if (b && e.detail > 0 && b !== $('adivinar')) {
+    b.blur();
+    $('p-ronda').focus({ preventScroll: true });
+  }
+});
 
 // ---------------------------------------------------------------- teclado
 addEventListener('keydown', (e) => {

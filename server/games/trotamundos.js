@@ -224,9 +224,9 @@ function startClock(room, api) {
 /** Los jugadores de la ronda que siguen conectados. */
 const presentPlayers = (room, api) => connected(api).filter((p) => room.data.eligible.has(p.id));
 
+/** ¿Ya confirmaron todos los de la ronda que siguen conectados? (sin ninguno conectado, no hay nada que esperar) */
 function allConfirmed(room, api) {
-  const present = presentPlayers(room, api);
-  return present.length > 0 && present.every((p) => room.data.guesses.has(p.id));
+  return presentPlayers(room, api).every((p) => room.data.guesses.has(p.id));
 }
 
 function endLook(room, api) {

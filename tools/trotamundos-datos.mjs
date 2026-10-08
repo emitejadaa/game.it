@@ -725,16 +725,21 @@ const probadosDe = (e) => e.triedR + e.triedC;
 const buenosDe = (e) => e.hitR + e.hitC;
 const promovido = (e) => e.estado === 'prueba' && probadosDe(e) >= PROMOCION.minProbados && buenosDe(e) >= PROMOCION.minOk;
 const cuotaDe = (e) => (promovido(e) ? PROMOCION.cuota : e.cuota);
-const rutasSirven = (e) => !(e.triedR >= 6 && e.hitR / e.triedR < 0.2);
+// Las rutas de Natural Earth están generalizadas: solo caen sobre la calle real en algunos países (EE. UU., Europa occidental, México…).
+// Se prueban de a poco y se dejan si fallan 2 de 2 o si, después de 6, aciertan menos de 1 de cada 5.
+const rutasSirven = (e) => !(e.triedR >= 2 && e.hitR === 0) && !(e.triedR >= 6 && e.hitR / e.triedR < 0.2);
+const rutasBuenas = (e) => e.triedR >= 2 && e.hitR / e.triedR >= 0.4;
 
-/** Próximo candidato de un país (3 de cada 4 sobre rutas mientras las rutas den resultado; el resto, pueblos), sin tocar lo que queda cerca de un lugar ya aceptado. */
+/** Próximo candidato de un país (pueblos primero y una ruta de cada 4 para medir), sin tocar lo que queda cerca de un lugar ya aceptado. */
 function elegirCandidato(e) {
   const intentos = probadosDe(e) + e.enCurso;
   if (e.estado === 'prueba' && !promovido(e) && intentos >= CANDIDATOS_PRUEBA) return null;
-  if (!rutasSirven(e) && e.triedC >= 10 && e.hitC / e.triedC < 0.15) return null; // casi sin cobertura oficial: no se gastan más cargas
+  if (probadosDe(e) >= 6 && buenosDe(e) === 0) return null; // 6 intentos sin un solo acierto: casi sin cobertura oficial, no se gastan más cargas
+  if (!rutasSirven(e) && e.triedC >= 10 && e.hitC / e.triedC < 0.15) return null;
   if (rutasSirven(e) && probadosDe(e) >= 16 && buenosDe(e) / probadosDe(e) < 0.1) return null;
-  const quieroRuta = rutasSirven(e) && e.r.length > 0 && intentos % 4 !== 3;
-  const tipos = quieroRuta ? ['r', 'c'] : rutasSirven(e) ? ['c', 'r'] : ['c'];
+  // pueblos primero; una ruta de cada 4 para medir (o una de cada 2 si las rutas del país andan bien)
+  const quieroRuta = rutasSirven(e) && e.r.length > 0 && (rutasBuenas(e) ? intentos % 2 === 1 : intentos % 4 === 3);
+  const tipos = quieroRuta ? ['r', 'c'] : ['c', 'r'];
   for (const t of tipos) {
     const lista = t === 'r' ? e.r : e.c;
     const usado = t === 'r' ? e.usadoR : e.usadoC;
@@ -839,12 +844,18 @@ const idFamoso = (i) => `f-${String(i + 1).padStart(3, '0')}`;
 async function validarFamosos(o, max, conc) {
   const recs = leerJsonl(F.validacion);
   const hechos = new Map(recs.filter((r) => r.t === 'f').map((r) => [r.id, r]));
-  const conCaptura = new Set(recs.filter((r) => r.t === 'fs').map((r) => r.id));
+  const capTs = new Map(recs.filter((r) => r.t === 'fs').map((r) => [r.id, r.ts]));
+  const tieneCaptura = (id, rec) => capTs.has(id) && capTs.get(id) >= rec.ts; // la captura es posterior a la última lectura
   let usadas = cargasUsadas();
   const sel = o.id ? new Set(String(o.id).split(',')) : null;
   const pendientes = FAMOSOS.map((f, i) => ({ f, i, id: idFamoso(i) })).filter((x) => !x.f[5]?.x && (!sel || sel.has(x.id)));
-  let cola = pendientes.filter((x) => o.rehacer || !hechos.has(x.id) || (hechos.get(x.id).estado === 'ok' && !conCaptura.has(x.id)));
-  if (o.rehacer && sel) cola = pendientes;
+  // falta: nunca se cargó, cambió el punto de búsqueda (opción v), o está bien pero sin captura
+  const falta = ({ f, id }) => {
+    const rec = hechos.get(id);
+    const [vlat, vlng] = f[5]?.v || [f[3], f[4]];
+    return !rec || rec.lat !== vlat || rec.lng !== vlng || (rec.estado === 'ok' && !tieneCaptura(id, rec));
+  };
+  const cola = pendientes.filter((x) => o.rehacer || falta(x));
   const siguiente = () => (usadas + 2 > max ? null : cola.shift() || null);
   let n = 0;
   await pool(conc, siguiente, async (ctx, { f, i, id }) => {
@@ -853,8 +864,13 @@ async function validarFamosos(o, max, conc) {
     let prev = hechos.get(id);
     if (!prev || o.rehacer || prev.lat !== vlat || prev.lng !== vlng) {
       let rec;
+      let conShot = null;
       try {
-        const l = await cargarVisor(ctx, { lat: vlat, lng: vlng, h: op.h ?? 0 });
+        // una sola carga, con imágenes y captura (para revisar a ojo); mira hacia el sitio si se busca desde otro punto
+        const h0 = op.h ?? (distanceKm(vlat, vlng, lat, lng) > 0.02 ? Math.round(bearingDeg(vlat, vlng, lat, lng)) % 360 : 0);
+        const arch = join(F.shots, `${id}.jpg`);
+        const l = await cargarVisor(ctx, { lat: vlat, lng: vlng, h: h0 }, { imagenes: true, captura: arch });
+        conShot = l.estado === 'ok' ? { t: 'fs', id, estado: 'ok', attr: l.attr, oficial: l.oficial, card: l.card, h: h0, shot: `shots/${id}.jpg`, cargas: 0 } : null;
         rec = { t: 'f', id, k: claveDe('f', vlat, vlng), cc, lat: vlat, lng: vlng, estado: l.estado, attr: l.attr ?? null, oficial: l.oficial ?? false, card: l.card ?? null, pano: l.pano ?? null, cargas: 1, ts: ahora() };
         if (l.pano) {
           rec.dist = Math.round(distanceKm(vlat, vlng, l.pano.lat, l.pano.lng) * 1000) / 1000;
@@ -870,8 +886,12 @@ async function validarFamosos(o, max, conc) {
       usadas++;
       hechos.set(id, rec);
       prev = rec;
+      if (conShot) {
+        guardar({ ...conShot, ts: ahora() });
+        capTs.set(id, ahora());
+      }
     }
-    if (prev.estado === 'ok' && (!conCaptura.has(id) || o.rehacer)) {
+    if (prev.estado === 'ok' && (!tieneCaptura(id, prev) || o.rehacer)) {
       // captura con imágenes, mirando hacia el sitio, para revisarla a ojo
       const arch = join(F.shots, `${id}.jpg`);
       let l;
@@ -1141,8 +1161,9 @@ Pasos, en orden. Todo lo que baja o calcula queda en tools/.cache/trotamundos/ (
                --forzar    vuelve a bajar aunque ya estén.
   candidatos   Arma los puntos candidatos de cada país con cobertura oficial conocida (lista en tools/trotamundos-semillas.mjs):
                sobre rutas (rutas de Natural Earth) y en ciudades y pueblos (Natural Earth y GeoNames), al azar; los lugares aceptados quedan a
-               15 km o más entre sí (5 km en países chicos). Al validar, se usan 3 de cada 4 sobre rutas mientras las rutas del país den resultado
-               (si fallan 6 de 6 seguidas, se pasa a pueblos solamente).
+               15 km o más entre sí (5 km en países chicos). Al validar, van primero los pueblos y ciudades (casi siempre
+               tienen panorámica sobre una calle) y una ruta de cada 4 para medir (una de cada 2 si las rutas del país andan bien; si fallan
+               2 de 2, se pasa a pueblos solamente).
                Incluye unos países dudosos con 3 candidatos de prueba. --semilla TEXTO cambia el azar (otro conjunto de candidatos).
   validar      Carga cada candidato en el visor sin clave (google.com/maps/embed dentro de un iframe) en Chromium con Playwright.
                Sirve si hay imagen, la atribución dice "© <año> Google" (no el nombre de una persona) y no es un país vecino ni
