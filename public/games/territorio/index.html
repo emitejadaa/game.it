@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Territorio · game.it</title>
+    <link rel="stylesheet" href="/shared/arena.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js"></script>
+  </head>
+  <body>
+    <canvas id="cv"></canvas>
+
+    <!-- ============ HUD ============ -->
+    <div class="hud" id="hud" hidden>
+      <button class="hud-btn" id="btn-pause" type="button" aria-label="Pausa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" /></svg></button>
+      <div class="hud-chips" id="chips"></div>
+      <div class="score" aria-live="off">
+        <small data-t="score"></small>
+        <b id="score">0%</b>
+        <span class="meta"><span id="rank"></span><span id="kos"></span></span>
+      </div>
+      <aside class="lb" id="lb" aria-label="Ranking">
+        <h3 data-t="top"></h3>
+        <ol id="lb-list"></ol>
+      </aside>
+      <canvas class="mini" id="mini" width="112" height="112" aria-hidden="true"></canvas>
+      <button class="dpad-toggle" id="dpad-toggle" type="button" aria-pressed="false" aria-label="Cruceta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z" /></svg></button>
+      <div class="dpad" id="dpad" hidden>
+        <button type="button" data-d="0" aria-label="Arriba"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg></button>
+        <button type="button" data-d="3" aria-label="Izquierda"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg></button>
+        <button type="button" data-d="1" aria-label="Derecha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></button>
+        <button type="button" data-d="2" aria-label="Abajo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg></button>
+      </div>
+      <p class="hint" id="hint"></p>
+      <ul class="feed" id="feed" aria-live="polite"></ul>
+    </div>
+
+    <!-- ============ Menú (lo arma /shared/arena-lobby.js) ============ -->
+    <div id="lobby"></div>
+
+    <!-- ============ Pausa ============ -->
+    <section class="ar-lobby" id="s-pause" hidden>
+      <div class="ar-panel" role="dialog" aria-labelledby="pause-title">
+        <h2 class="ar-h2 ar-h2-big" id="pause-title" data-t="paused"></h2>
+        <p class="ar-sub" id="pause-sub"></p>
+        <button class="ar-btn ar-primary" id="pz-resume" type="button" data-t="resume"></button>
+        <button class="ar-btn" id="pz-share" type="button" hidden data-t="copyLink"></button>
+        <button class="ar-btn" id="pz-quit" type="button" data-t="quit"></button>
+      </div>
+    </section>
+
+    <!-- ============ Eliminado ============ -->
+    <section class="ar-lobby" id="s-dead" hidden>
+      <div class="ar-panel" role="dialog" aria-labelledby="dead-title">
+        <p class="kicker" data-t="out"></p>
+        <h2 class="ar-h2 ar-h2-big" id="dead-title"></h2>
+        <dl class="stats" id="dead-stats"></dl>
+        <button class="ar-btn ar-primary ar-big" id="dead-again" type="button"></button>
+        <button class="ar-btn" id="dead-menu" type="button" data-t="menu"></button>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

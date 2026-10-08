@@ -1,0 +1,19 @@
+{
+  "id": "territorio",
+  "title": { "es": "Territorio", "en": "Turf" },
+  "description": {
+    "es": "Salí de tu territorio, rodeá una zona y volvé para quedártela. Si alguien pisa tu rastro, perdés todo. Online con gente y bots, sala privada o sin conexión.",
+    "en": "Leave your turf, loop around an area and come back to claim it. If anyone crosses your trail you lose everything. Online with people and bots, private room or offline."
+  },
+  "categories": ["arcade", "accion", "online", "multijugador", "casual"],
+  "tags": ["territorio", "turf", "captura", "capture", "area", "estela", "trail", "io", "arena", "bots", "conquista", "neon"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 10, "bots": true, "story": false },
+  "order": 36
+}
