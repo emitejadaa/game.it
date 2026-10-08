@@ -62,7 +62,7 @@ const CFG = {
   heartbeatMs: num('HEARTBEAT_MS', 20e3),
 };
 
-const COLORS = ['#ff5a5f', '#3ec1ff', '#ffc93c', '#7bd389', '#c77dff', '#ff9f43', '#2de2e6', '#f15bb5'];
+const COLORS = ['#ff5a5f', '#3ec1ff', '#ffc93c', '#7bd389', '#c77dff', '#ff9f43', '#2de2e6', '#f15bb5', '#8ac926', '#1982c4'];
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin 0/O ni 1/I
 const rooms = new Map();
 const ipConns = new Map();

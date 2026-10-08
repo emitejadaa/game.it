@@ -1,0 +1,16 @@
+Trotamundos — créditos de los datos
+
+Estos archivos los genera tools/trotamundos-datos.mjs (ver "node tools/trotamundos-datos.mjs --help").
+
+- Natural Earth (https://www.naturalearthdata.com/): países, rutas y lugares poblados a escala 1:10m. Dominio público.
+  Se usaron para elegir puntos candidatos, calcular las escalas de cada país y nombrar el lugar poblado más cercano ("p").
+- GeoNames (https://www.geonames.org/), licencia CC BY 4.0, a través de https://github.com/lutangar/cities.json: pueblos y ciudades que
+  se usaron solo para elegir puntos candidatos. Las rutas de Natural Earth están generalizadas y casi nunca caen a menos de ~50 m de
+  la calle real, así que en la mayoría de los países los candidatos salen de pueblos y ciudades.
+- Los lugares de mundo.json se validaron cargando el visor de Street View de Google ("Compartir → Insertar") como lo haría una persona,
+  aceptando solo imágenes oficiales (© Google). Las imágenes en sí no se guardan ni se redistribuyen: el juego las muestra desde el visor de Google.
+  Se guardan solo coordenadas (la posición de la panorámica) y datos propios.
+- famosos.json: la lista de sitios, los nombres y el rumbo son propios. Las coordenadas salen de la posición de la panorámica
+  más cercana al sitio (hechos geográficos, sin derechos de autor).
+- El mapa donde se marca la respuesta es OpenFreeMap (https://openfreemap.org/) con datos de OpenStreetMap (© colaboradores de OpenStreetMap, ODbL).
+  No forma parte de estos archivos.

@@ -1,9 +1,9 @@
 /* Trotamundos — mapa de marcar, pistas y resultados (MapLibre GL JS + estilo vectorial de OpenFreeMap).
  *
  * API pública (la usan game.js y el cliente online). Requiere /vendor/maplibre-gl.js (window.maplibregl) y su .css.
- *   const mapa = new Mapa(host, { tema, reducido, textos, estilo })
+ *   const mapa = new Mapa(host, { tema, lang, reducido, textos, estilo })
  *       host: elemento con tamaño; el mapa lo llena y se redimensiona solo (ResizeObserver).
- *       tema: 'dark' | 'light'.  reducido: () => bool (¿"reducir movimiento"?, sin animaciones si da true).
+ *       tema: 'dark' | 'light'.  lang: 'es' | 'en' (idioma de los rótulos del mapa).  reducido: () => bool (¿"reducir movimiento"?, sin animaciones si da true).
  *       textos: { error, reintentar, etiqueta, centro } para los mensajes (por defecto en español).
  *   mapa.listo                       Promise<boolean>: true si el mapa cargó (false: se mostró el aviso con "Reintentar").
  *   mapa.on(evento, fn) → off        eventos: 'pin' ({ lat, lng } | null), 'error' (motivo), 'listo'.
@@ -14,7 +14,7 @@
  *       muestra el lugar real, los pines de cada uno y una línea de cada pin al lugar real; encuadra con animación corta.
  *   mapa.resumen([{ real: { lat, lng }, guess: { lat, lng } | null }], { padding })   todas las rondas con números.
  *   mapa.limpiarRevelacion() · mapa.encuadrar(limites | null, { animar }) (null = el mundo) · mapa.vistaMundo(animar)
- *   mapa.redimensionar() · mapa.cambiarTema('dark' | 'light') · mapa.mostrarAtribucion(bool) · mapa.proyectar(lat, lng) → { x, y } en px del mapa
+ *   mapa.redimensionar() · mapa.cambiarTema('dark' | 'light') · mapa.cambiarIdioma('es' | 'en') · mapa.mostrarAtribucion(bool) · mapa.proyectar(lat, lng) → { x, y } en px del mapa
  *   mapa.reintentar() · mapa.destruir()
  *   mapa.map                          la instancia de maplibregl.Map (para casos especiales; null si no cargó).
  * Atribución de OpenFreeMap / OpenMapTiles / OpenStreetMap: control compacto de MapLibre, siempre dentro del mapa.
@@ -135,11 +135,18 @@ function mapear(v, fn) {
   return v;
 }
 
-/** Copia del estilo (JSON de OpenFreeMap) con los colores del tema pedido. */
-export function adaptarEstilo(base, tema) {
+/** Campo de texto de una capa en el idioma pedido: 'es' usa name:es si el lugar lo tiene; el resto, el nombre en inglés del estilo. */
+export function campoTexto(original, lang) {
+  if (lang !== 'es' || !Array.isArray(original)) return original;
+  return ['coalesce', ['get', 'name:es'], original];
+}
+
+/** Copia del estilo (JSON de OpenFreeMap) con los colores del tema pedido y los rótulos en el idioma pedido. */
+export function adaptarEstilo(base, tema, lang = 'en') {
   const est = JSON.parse(JSON.stringify(base));
   const f = tema === 'dark' ? colorOscuro : colorClaro;
   for (const capa of est.layers || []) {
+    if (capa.layout?.['text-field'] && capa.type === 'symbol' && !/shield/.test(capa.id)) capa.layout['text-field'] = campoTexto(capa.layout['text-field'], lang);
     if (!capa.paint) continue;
     for (const k of Object.keys(capa.paint)) if (/-color$/.test(k)) capa.paint[k] = mapear(capa.paint[k], (c) => f(c, k, capa));
   }
@@ -238,8 +245,9 @@ const vacio = () => ({ type: 'FeatureCollection', features: [] });
 const ML = () => window.maplibregl;
 
 export class Mapa {
-  constructor(host, { tema = 'dark', reducido = () => false, textos = {}, estilo = ESTILO_MAPA } = {}) {
+  constructor(host, { tema = 'dark', lang = 'es', reducido = () => false, textos = {}, estilo = ESTILO_MAPA } = {}) {
     this.host = host;
+    this.lang = lang === 'en' ? 'en' : 'es';
     this.tema = tema === 'light' ? 'light' : 'dark';
     this.reducido = reducido;
     this.textos = { error: 'No se pudo cargar el mapa.', reintentar: 'Reintentar', etiqueta: 'Mapa para marcar dónde estás', centro: 'Poner el pin en el centro', ...textos };
@@ -256,6 +264,7 @@ export class Mapa {
     this._okTiles = 0;
     this._errTiles = 0;
     this._atrib = false;
+    this._alListo = []; // pedidos hechos antes de que el mapa cargue (encuadre, revelación…): se aplican al cargar
 
     const raiz = document.createElement('div');
     raiz.className = 'tm-mapa';
@@ -285,7 +294,13 @@ export class Mapa {
 
     this._ro = new ResizeObserver(() => {
       cancelAnimationFrame(this._rf);
-      this._rf = requestAnimationFrame(() => this.map?.resize());
+      this._rf = requestAnimationFrame(() => {
+        this.map?.resize();
+        // si nadie movió el mapa, al cambiar de tamaño (minimapa → grande) se vuelve a encuadrar el ámbito
+        if (this._auto && this._encuadre !== undefined) this.encuadrar(this._encuadre);
+        // revelación, resumen o pista: si nadie movió el mapa, se repite el último ajuste con el tamaño nuevo
+        else if (this._ajusteAuto && this._ajuste) this._ajustar(this._ajuste.puntos, { ...this._ajuste.opts, animar: false });
+      });
     });
     this._ro.observe(raiz);
     this.listo = this._crear();
@@ -321,7 +336,7 @@ export class Mapa {
     if (this._destruido) return false;
     const m = new (ML().Map)({
       container: this._lienzo,
-      style: adaptarEstilo(this._base, this.tema),
+      style: adaptarEstilo(this._base, this.tema, this.lang),
       center: [-20, 25],
       zoom: 0,
       minZoom: -1,
@@ -339,6 +354,9 @@ export class Mapa {
     this.mostrarAtribucion(this._atrib); // el control nace abierto: lo dejamos como pidió el juego (cerrado durante la ronda)
     m.addControl(new (ML().NavigationControl)({ showCompass: false, visualizePitch: false }), 'top-right');
     m.on('click', (e) => this._clic(e));
+    m.on('movestart', (e) => {
+      if (e.originalEvent) this._auto = this._ajusteAuto = false; // lo movió la persona: no se vuelve a encuadrar sola
+    });
     m.on('error', (e) => this._falloTiles(e));
     m.on('sourcedata', () => {
       // el control de atribución se arma cuando llegan los datos de las fuentes: recién ahí lo dejamos como se pidió
@@ -348,7 +366,8 @@ export class Mapa {
       }
     });
     m.on('data', (e) => {
-      if (e.dataType === 'source' && e.tile) {
+      // solo cuentan los tiles del mapa base que llegaron bien (un tile con error también dispara 'data')
+      if (e.dataType === 'source' && e.tile && e.tile.state === 'loaded' && !String(e.sourceId).startsWith('tm-')) {
         this._okTiles++;
         if (!this._aviso.hidden && this._okTiles > 0) this._ocultarAviso();
       }
@@ -359,7 +378,8 @@ export class Mapa {
         this._capas();
         if (hecho) return;
         hecho = true;
-        this.vistaMundo(false);
+        if (!this._vistaPedida && !this._alListo.length) this.vistaMundo(false); // si ya se pidió un encuadre, no se pisa
+        for (const fn of this._alListo.splice(0)) fn();
         this._emitir('listo');
         resolve(true);
         // si a los 12 s no llegó ni un tile, avisamos (el juego no se rompe: se puede reintentar)
@@ -389,6 +409,13 @@ export class Mapa {
     if (e?.sourceId === 'openmaptiles' || e?.tile) {
       this._errTiles++;
       if (this._okTiles === 0 && this._errTiles >= 3) this._mostrarAviso();
+      else if (!this._tErr && !this._destruido) {
+        // con un solo error y ningún tile bueno a los pocos segundos, también se avisa
+        this._tErr = setTimeout(() => {
+          this._tErr = null;
+          if (!this._destruido && this._okTiles === 0 && this._errTiles > 0) this._mostrarAviso();
+        }, 4000);
+      }
     }
   }
 
@@ -397,11 +424,13 @@ export class Mapa {
     this._ocultarAviso();
     this._okTiles = 0;
     this._errTiles = 0;
+    clearTimeout(this._tErr);
+    this._tErr = null;
     if (!this.map) {
       this.listo = this._crear();
       return this.listo;
     }
-    this.map.setStyle(adaptarEstilo(this._base, this.tema)); // 'style.load' vuelve a poner nuestras capas
+    this.map.setStyle(adaptarEstilo(this._base, this.tema, this.lang), { diff: false }); // sin diff: se piden los tiles de nuevo; 'style.load' vuelve a poner nuestras capas
     return this.listo;
   }
 
@@ -420,6 +449,13 @@ export class Mapa {
       layout: { 'line-cap': 'round' },
       paint: { 'line-color': ['coalesce', ['get', 'color'], MAGENTA], 'line-width': 3, 'line-dasharray': [1.5, 1.5], 'line-opacity': 0.95 },
     });
+  }
+
+  /** Corre `fn` cuando el mapa cargue (queda solo el último pedido de cada tipo: el estado final es el que cuenta). */
+  _cuandoListo(fn) {
+    if (this._destruido) return;
+    this._alListo.push(fn);
+    if (this._alListo.length > 6) this._alListo.shift();
   }
 
   _datos(fuente, features) {
@@ -480,7 +516,7 @@ export class Mapa {
     for (const f of this._pistas.values()) f.properties.actual = 0;
     this._pistas.set(nivel, { type: 'Feature', properties: { nivel, actual: 1 }, geometry: { type: 'Polygon', coordinates: [ring] } });
     this._datos('tm-pistas', [...this._pistas.values()]);
-    if (ajustar) this._ajustar(ring, { maxZoom: 13, animar: true });
+    if (ajustar) this._ajustar(ring.map(delArco), { maxZoom: 13, animar: true }); // un círculo que pasa por un polo no se encuadra entero
   }
 
   limpiarPistas() {
@@ -510,6 +546,11 @@ export class Mapa {
   _ajustar(puntos, { padding, maxZoom = 12, animar = true } = {}) {
     const m = this.map;
     if (!m || !puntos.length) return;
+    this._vistaPedida = true;
+    this._auto = false;
+    this._ajuste = { puntos, opts: { padding, maxZoom } };
+    this._ajusteAuto = true;
+    m.resize(); // el contenedor pudo cambiar de tamaño hace un instante (minimapa → grande)
     const r = this._relleno();
     const relleno = padding || { top: r + 34, bottom: r, left: r, right: r };
     const { width, height } = this.raiz.getBoundingClientRect();
@@ -518,8 +559,10 @@ export class Mapa {
   }
 
   /** Muestra el lugar real, los pines de cada uno y una línea de cada pin al lugar real. */
-  revelar({ real, adivinanzas = [], etiquetaReal, padding, animar = true } = {}) {
-    if (!this.map) return;
+  revelar(opts = {}) {
+    if (!this.map) return this._cuandoListo(() => this.revelar(opts));
+    const { real, adivinanzas = [], etiquetaReal, padding, animar = true } = opts;
+    this._auto = false;
     this._quitarPin();
     this.permitirPin(false);
     this.limpiarRevelacion();
@@ -539,7 +582,7 @@ export class Mapa {
 
   /** Todas las rondas de la partida: lugar real (verde) y pin de cada una, con su número. */
   resumen(rondas, { padding, animar = true } = {}) {
-    if (!this.map) return;
+    if (!this.map) return this._cuandoListo(() => this.resumen(rondas, { padding, animar }));
     this._quitarPin();
     this.permitirPin(false);
     this.limpiarRevelacion();
@@ -564,7 +607,13 @@ export class Mapa {
   // ------------------------------------------------------------ vista
   /** Encuadra una caja [[oeste, sur], [este, norte]]; null = el mundo entero. */
   encuadrar(limites, { animar = false } = {}) {
-    if (!this.map) return;
+    if (!this.map) return this._cuandoListo(() => this.encuadrar(limites, { animar: false }));
+    this._vistaPedida = true;
+    this._encuadre = limites;
+    this._auto = true;
+    this._ajuste = null;
+    this._ajusteAuto = false;
+    this.map.resize();
     const r = Math.max(8, this._relleno() / 2);
     const { width, height } = this.raiz.getBoundingClientRect();
     const cam = camaraPara(limites || MUNDO, { ancho: width, alto: height, relleno: { top: r, bottom: r, left: r, right: r }, maxZoom: 9 });
@@ -610,8 +659,26 @@ export class Mapa {
     }
   }
 
+  /** Rótulos del mapa en 'es' o 'en' (los lugares sin nombre en español quedan con el de siempre). */
+  cambiarIdioma(lang) {
+    lang = lang === 'en' ? 'en' : 'es';
+    if (lang === this.lang) return;
+    this.lang = lang;
+    const m = this.map;
+    if (!m || !this._base) return;
+    for (const capa of adaptarEstilo(this._base, this.tema, lang).layers) {
+      const tf = capa.layout?.['text-field'];
+      if (tf && capa.type === 'symbol' && m.getLayer(capa.id)) {
+        try {
+          m.setLayoutProperty(capa.id, 'text-field', tf);
+        } catch {}
+      }
+    }
+  }
+
   destruir() {
     this._destruido = true;
+    clearTimeout(this._tErr);
     cancelAnimationFrame(this._rf);
     this._ro.disconnect();
     this._subs.clear();

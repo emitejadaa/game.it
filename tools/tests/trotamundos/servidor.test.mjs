@@ -29,6 +29,7 @@ const FAST = {
   TM_RUSH_MS: '500',
   TM_NOIMG_WINDOW_MS: '1200',
   TM_TIME_FACTOR: '0.05',
+  TM_GONE_MS: '1', // sin espera de gracia, salvo en la prueba que la usa
 };
 
 async function startServer(env = {}, cwd = ROOT, entry = 'server/index.js') {
@@ -681,6 +682,48 @@ test('reconexión con token: sigue en la sala, sus rondas sin confirmar valen 0 
   await closeAll([a, b3, c]);
 });
 
+test('una caída breve no le saca la ronda: se lo espera un rato y si vuelve conserva su turno', async () => {
+  const gone = await startServer({ TM_GONE_MS: '700', RECONNECT_GRACE_MS: '5000' });
+  servers.push(gone);
+  // 1) vuelve a tiempo: la ronda sigue abierta y puede confirmar
+  {
+    const [a, b] = await makeRoom(gone, 2, { rounds: 3, time: 180 });
+    const from = a.mark();
+    a.send({ t: 'start' });
+    await b.untilTm((tm) => tm.phase === 'look' && tm.round === 1);
+    const token = a.token;
+    const aId = a.id;
+    b.send({ t: 'guess', lat: 10, lng: 10 });
+    a.close();
+    await sleep(250);
+    assert.equal(b.room.tm.phase, 'look', 'la ronda no se cierra en el acto');
+    const a2 = await new Client(gone.port, 'A2').open();
+    a2.send({ t: 'join', code: b.code, token, game: 'trotamundos' });
+    await a2.until((m) => m.t === 'joined');
+    await sleep(700);
+    assert.equal(b.room.tm.phase, 'look', 'sigue abierta tras vencer la espera, porque volvió');
+    a2.send({ t: 'guess', lat: 20, lng: 20 });
+    const rev = await b.untilTm((tm) => tm.phase === 'reveal' && tm.round === 1, { from });
+    assert.ok(rev.room.tm.reveal.results.find((r) => r.id === aId).pts > 0);
+    await closeAll([a2, b]);
+  }
+  // 2) no vuelve: al vencer la espera, la ronda cierra con 0 para él
+  {
+    const [a, b] = await makeRoom(gone, 2, { rounds: 3, time: 180 });
+    const from = a.mark();
+    a.send({ t: 'start' });
+    await b.untilTm((tm) => tm.phase === 'look' && tm.round === 1);
+    const aId = a.id;
+    b.send({ t: 'guess', lat: 10, lng: 10 });
+    a.close();
+    await sleep(250);
+    assert.equal(b.room.tm.phase, 'look');
+    const rev = await b.untilTm((tm) => tm.phase === 'reveal' && tm.round === 1, { from });
+    assert.equal(rev.room.tm.reveal.results.find((r) => r.id === aId).pts, 0);
+    await closeAll([b]);
+  }
+});
+
 test('view: no filtra los pines de los demás antes de la revelación', async () => {
   const [a, b, c] = await makeRoom(srv, 3, { rounds: 3, time: 180, mode: 'random' });
   const from = a.mark();
@@ -723,6 +766,7 @@ test('sala de 10 jugadores: partida completa; el 11.º no entra', async () => {
   host.send({ t: 'start' });
   const end = await waitEnd(host, { from, ms: 15000 });
   assert.equal(end.ranking.length, 10);
+  assert.equal(new Set(host.room.players.map((p) => p.color)).size, 10, 'colores distintos con 10 jugadores');
   for (const tm of reveals(host)) assert.equal(tm.reveal.results.length, 10);
   const sum = reveals(host).reduce((s, tm) => s + tm.reveal.results.find((r) => r.id === host.id).pts, 0);
   assert.equal(end.ranking.find((r) => r.id === host.id).pts, sum);

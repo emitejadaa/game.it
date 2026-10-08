@@ -212,7 +212,7 @@ const visor = new Visor($('visor-host'), { lang: lang(), titulo: t('visorTitulo'
 const mapaEl = el('div', { class: 'mapa-ancla' });
 let mapa = null;
 function crearMapa(host, opts = {}) {
-  return new Mapa(host, { tema: G.prefs.theme, reducido: () => G.prefs.reducedMotion, textos: textosMapa(), ...opts });
+  return new Mapa(host, { tema: G.prefs.theme, lang: lang(), reducido: () => G.prefs.reducedMotion, textos: textosMapa(), ...opts });
 }
 const textosMapa = () => ({ error: t('mapaError'), reintentar: t('reintentar'), etiqueta: t('mapaEtiqueta'), centro: t('mapa_centro') });
 const crearVisor = (host, opts = {}) => new Visor(host, { lang: lang(), titulo: t('visorTitulo'), textoCargando: t('cargandoVista'), ...opts });
@@ -272,7 +272,7 @@ function nombreAmbito(a) {
 }
 
 function chip({ texto, activo, desactivado, sub, onclick, titulo }) {
-  return el('button', { type: 'button', class: 'chip-op', role: 'radio', 'aria-checked': activo ? 'true' : 'false', disabled: desactivado, title: titulo, onclick }, el('span', { text: texto }), sub ? el('small', { text: sub }) : null);
+  return el('button', { type: 'button', class: 'chip-op', 'aria-pressed': activo ? 'true' : 'false', disabled: desactivado, title: titulo, onclick }, el('span', { text: texto }), sub ? el('small', { text: sub }) : null);
 }
 
 function abrirOpciones(modo) {
@@ -698,6 +698,7 @@ function finalizar(agotado) {
   visor.ocultar();
   mapa.permitirPin(false);
   cerrarDialogo(null);
+  S.resultadoDesde = performance.now(); // guarda contra teclas repetidas y dobles toques que saltarían el resultado
   pantalla('resultado');
   colocarMapa($('slot-res'));
   pintarResultado();
@@ -748,6 +749,7 @@ function pintarResultado() {
 
 function siguiente() {
   if (S.pantalla !== 'resultado') return;
+  if (performance.now() - (S.resultadoDesde || 0) < 600) return;
   if (S.res.length >= D.RONDAS) return resumen();
   S.r++;
   iniciarRonda();
@@ -828,8 +830,14 @@ async function copiarResultado() {
 }
 
 async function otraVez() {
+  if (S.pantalla !== 'resumen' || S.otraEnCurso) return;
+  S.otraEnCurso = true; // evita un doble disparo mientras espera el anuncio
+  try {
+    await G.commercialBreak('otra-partida'); // pausa natural para un anuncio (si hay)
+  } finally {
+    S.otraEnCurso = false;
+  }
   if (S.pantalla !== 'resumen') return;
-  await G.commercialBreak('otra-partida'); // pausa natural para un anuncio (si hay)
   nuevaPartida({ repetir: true });
 }
 $('fin-otra').addEventListener('click', otraVez);
@@ -864,9 +872,13 @@ addEventListener('keydown', (e) => {
   if (S.pantalla.startsWith('online') && ctx.alTeclado?.(e)) return;
   const tag = e.target?.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-  const enBoton = tag === 'BUTTON' || tag === 'A' || e.target?.getAttribute?.('role') === 'radio';
+  const enBoton = tag === 'BUTTON' || tag === 'A';
   const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
   const activar = (e.code === 'Space' || e.key === 'Enter') && !enBoton;
+  if (e.repeat && (activar || k === 'n')) {
+    if (activar) e.preventDefault();
+    return; // mantener apretada la tecla no confirma ni salta pantallas
+  }
   switch (S.pantalla) {
     case 'menu':
       break;
@@ -916,6 +928,7 @@ G.onPrefs(() => {
   visor.titulo = t('visorTitulo');
   if (mapa) {
     mapa.cambiarTema(G.prefs.theme);
+    mapa.cambiarIdioma(lang());
     mapa.ponerTextos(textosMapa());
   }
   if (S.pantalla === 'opciones') pintarOpciones();

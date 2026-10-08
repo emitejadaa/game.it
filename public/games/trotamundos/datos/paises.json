@@ -1,85 +1,89 @@
 {
-  "v": 0,
-  "generado": "semilla",
-  "metodo": "SEMILLA de desarrollo: la reemplaza tools/trotamundos-datos.mjs",
+  "v": 1,
+  "generado": "2026-10-08",
+  "metodo": "Natural Earth 1:10m (dominio público). d de cada país = diagonal (km) del rectángulo que contiene sus polígonos sin islas lejanas (se parte del polígono más grande y se suman los de al menos 1 % de su área cuyo centro queda a menos de max(600 km, su diagonal); Estados Unidos = zona continental y Rusia = zona europea, hasta 60° E; mínimo 250). d de latam y de cada continente = diagonal del rectángulo que contiene los lugares de mundo.json de ese ámbito sin valores extremos (se descartan el 2 % menor y el 2 % mayor de latitudes y de longitudes por separado); mundo = 14916,862 (shared/geo.js). n = lugares de mundo.json, f = famosos. latam = 1: de México a Argentina y Chile, más Cuba, Haití y República Dominicana, con Brasil. cont: AF, AS, EU, NA (incluye Centroamérica y el Caribe), SA, OC.",
   "paises": {
-    "AR": {
-      "cont": "SA",
-      "latam": 1,
-      "d": 3900
-    },
-    "BR": {
-      "cont": "SA",
-      "latam": 1,
-      "d": 4300
-    },
-    "MX": {
-      "cont": "NA",
-      "latam": 1,
-      "d": 3300
-    },
-    "US": {
-      "cont": "NA",
-      "d": 4600
-    },
-    "FR": {
-      "cont": "EU",
-      "d": 1100
-    },
-    "GB": {
-      "cont": "EU",
-      "d": 1200
-    },
-    "ES": {
-      "cont": "EU",
-      "d": 1100
-    },
-    "IT": {
-      "cont": "EU",
-      "d": 1200
-    },
-    "AU": {
-      "cont": "OC",
-      "d": 4100
-    },
-    "ZA": {
-      "cont": "AF",
-      "d": 1900
-    },
-    "KE": {
-      "cont": "AF",
-      "d": 1000
-    },
-    "TH": {
-      "cont": "AS",
-      "d": 1700
-    },
-    "JP": {
-      "cont": "AS",
-      "d": 2800
-    }
+    "AE": {"cont":"AS","d":621,"n":6,"f":0},
+    "AR": {"cont":"SA","latam":1,"d":3806,"n":159,"f":18},
+    "AT": {"cont":"EU","d":641,"n":8,"f":0},
+    "AU": {"cont":"OC","d":5096,"n":22,"f":1},
+    "BD": {"cont":"AS","d":806,"n":7,"f":0},
+    "BE": {"cont":"EU","d":352,"n":6,"f":0},
+    "BG": {"cont":"EU","d":610,"n":8,"f":0},
+    "BO": {"cont":"SA","latam":1,"d":1961,"n":0,"f":2},
+    "BR": {"cont":"SA","latam":1,"d":5983,"n":50,"f":5},
+    "CA": {"cont":"NA","d":5394,"n":19,"f":1},
+    "CH": {"cont":"EU","d":408,"n":7,"f":1},
+    "CL": {"cont":"SA","latam":1,"d":4229,"n":46,"f":2},
+    "CO": {"cont":"SA","latam":1,"d":2292,"n":46,"f":1},
+    "CR": {"cont":"NA","latam":1,"d":512,"n":7,"f":0},
+    "CZ": {"cont":"EU","d":558,"n":8,"f":0},
+    "DE": {"cont":"EU","d":1062,"n":19,"f":0},
+    "DK": {"cont":"EU","d":562,"n":7,"f":0},
+    "EC": {"cont":"SA","latam":1,"d":963,"n":13,"f":2},
+    "EE": {"cont":"EU","d":439,"n":5,"f":0},
+    "ES": {"cont":"EU","d":1378,"n":19,"f":0},
+    "FI": {"cont":"EU","d":1248,"n":10,"f":0},
+    "FR": {"cont":"EU","d":1540,"n":19,"f":0},
+    "GB": {"cont":"EU","d":1162,"n":16,"f":1},
+    "GH": {"cont":"AF","d":866,"n":7,"f":0},
+    "GR": {"cont":"EU","d":1044,"n":9,"f":0},
+    "GT": {"cont":"NA","latam":1,"d":626,"n":7,"f":1},
+    "HR": {"cont":"EU","d":656,"n":7,"f":0},
+    "HU": {"cont":"EU","d":601,"n":8,"f":0},
+    "ID": {"cont":"AS","d":2947,"n":14,"f":1},
+    "IE": {"cont":"EU","d":529,"n":8,"f":0},
+    "IL": {"cont":"AS","d":462,"n":6,"f":0},
+    "IN": {"cont":"AS","d":4256,"n":10,"f":0},
+    "IS": {"cont":"EU","d":624,"n":5,"f":0},
+    "IT": {"cont":"EU","d":1519,"n":19,"f":1},
+    "JP": {"cont":"AS","d":2142,"n":22,"f":2},
+    "KE": {"cont":"AF","d":1398,"n":7,"f":0},
+    "KH": {"cont":"AS","d":747,"n":5,"f":0},
+    "KR": {"cont":"AS","d":679,"n":10,"f":0},
+    "LK": {"cont":"AS","d":497,"n":6,"f":0},
+    "LT": {"cont":"EU","d":463,"n":7,"f":0},
+    "LV": {"cont":"EU","d":515,"n":5,"f":0},
+    "MG": {"cont":"AF","d":1700,"n":0,"f":1},
+    "MN": {"cont":"AS","d":2683,"n":0,"f":1},
+    "MX": {"cont":"NA","latam":1,"d":3674,"n":50,"f":1},
+    "MY": {"cont":"AS","d":1281,"n":10,"f":0},
+    "NG": {"cont":"AF","d":1695,"n":7,"f":0},
+    "NL": {"cont":"EU","d":400,"n":6,"f":0},
+    "NO": {"cont":"EU","d":2649,"n":13,"f":0},
+    "NZ": {"cont":"OC","d":1753,"n":10,"f":1},
+    "PA": {"cont":"NA","latam":1,"d":702,"n":7,"f":1},
+    "PE": {"cont":"SA","latam":1,"d":2461,"n":43,"f":1},
+    "PH": {"cont":"AS","d":1475,"n":9,"f":0},
+    "PL": {"cont":"EU","d":944,"n":13,"f":0},
+    "PR": {"cont":"NA","d":250,"n":5,"f":0},
+    "PT": {"cont":"EU","d":640,"n":10,"f":0},
+    "PY": {"cont":"SA","latam":1,"d":1259,"n":7,"f":0},
+    "RO": {"cont":"EU","d":893,"n":10,"f":0},
+    "RS": {"cont":"EU","d":548,"n":7,"f":0},
+    "RU": {"cont":"EU","d":3706,"n":13,"f":0},
+    "SE": {"cont":"EU","d":1658,"n":13,"f":0},
+    "SI": {"cont":"EU","d":291,"n":6,"f":0},
+    "SK": {"cont":"EU","d":466,"n":6,"f":0},
+    "SN": {"cont":"AF","d":823,"n":5,"f":1},
+    "TH": {"cont":"AS","d":1875,"n":12,"f":0},
+    "TN": {"cont":"AF","d":876,"n":0,"f":1},
+    "TR": {"cont":"AS","d":1762,"n":13,"f":0},
+    "TW": {"cont":"AS","d":426,"n":8,"f":0},
+    "UA": {"cont":"EU","d":1535,"n":8,"f":0},
+    "US": {"cont":"NA","d":5610,"n":29,"f":1},
+    "UY": {"cont":"SA","latam":1,"d":737,"n":45,"f":1},
+    "XK": {"cont":"EU","d":250,"n":7,"f":0},
+    "ZA": {"cont":"AF","d":2132,"n":16,"f":2}
   },
   "regiones": {
-    "latam": {
-      "d": 9000
-    },
-    "EU": {
-      "d": 5200
-    },
-    "SA": {
-      "d": 5600
-    },
-    "NA": {
-      "d": 7000
-    },
-    "AS": {
-      "d": 9500
-    },
-    "AF": {
-      "d": 7600
-    },
-    "OC": {
-      "d": 5000
-    }
+    "mundo": {"d":14916.862},
+    "latam": {"d":10389},
+    "AF": {"d":8014},
+    "AS": {"d":12257},
+    "EU": {"d":4769},
+    "NA": {"d":7160},
+    "SA": {"d":7210},
+    "OC": {"d":6102}
   }
 }

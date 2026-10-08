@@ -109,7 +109,7 @@ h2 { font-size: clamp(22px, 4.5vw, 30px); line-height: 1.15; }
 }
 .chip-op small { font-size: 11px; font-weight: 500; color: var(--gi-mute, #9a9aae); }
 .chip-op:hover:not(:disabled) { border-color: var(--gi-accent, #00f0ff); }
-.chip-op[aria-checked='true'] { border-color: var(--gi-accent, #00f0ff); background: color-mix(in oklab, var(--gi-accent, #00f0ff) 20%, transparent); box-shadow: inset 0 0 0 1px var(--gi-accent, #00f0ff); }
+.chip-op[aria-pressed='true'] { border-color: var(--gi-accent, #00f0ff); background: color-mix(in oklab, var(--gi-accent, #00f0ff) 20%, transparent); box-shadow: inset 0 0 0 1px var(--gi-accent, #00f0ff); }
 .chip-op:disabled { opacity: 0.45; }
 .buscar { display: flex; flex-direction: column; gap: 6px; }
 .buscar input {
@@ -213,7 +213,10 @@ h2 { font-size: clamp(22px, 4.5vw, 30px); line-height: 1.15; }
 #p-resultado, #p-resumen { overflow: hidden; }
 .res { position: absolute; inset: 0; padding: calc(var(--arriba) + 4px) var(--lado-d) 12px var(--lado); display: flex; gap: 12px; }
 .res-mapa { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--borde); background: #1a1d28; }
-.res-info { flex: 0 0 min(390px, 36vw); min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 6px 4px; overflow-y: auto; scrollbar-width: thin; }
+.res-info { flex: 0 0 min(390px, 36vw); min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 6px 4px; overflow-y: auto; scrollbar-width: thin; }
+/* centrado vertical que, si no entra, deja ver el principio (con justify-content: center se cortaría arriba) */
+.res-info > :first-child { margin-top: auto; }
+.res-info > :last-child { margin-bottom: auto; }
 .res-info h2 { font-size: clamp(24px, 3.6vw, 34px); }
 .res-lugar { color: var(--gi-mute, #9a9aae); }
 .res-pts { font-size: 15px; color: var(--gi-mute, #9a9aae); }
@@ -251,7 +254,7 @@ html[data-pantalla='ronda'] .dialogo { bottom: var(--banda); }
   background: color-mix(in oklab, var(--gi-bg, #07070a) 86%, transparent); font-size: 14px; font-weight: 600;
 }
 .tm-mapa__aviso button { min-height: 40px; padding: 6px 18px; border-radius: 10px; border: 1.5px solid var(--gi-accent, #00f0ff); background: var(--gi-accent, #00f0ff); color: #06121a; font-weight: 800; }
-.tm-marca { position: relative; width: 28px; height: 36px; cursor: grab; }
+.tm-marca { width: 28px; height: 36px; cursor: grab; } /* position: la pone MapLibre (absolute): no pisarla */
 .tm-marca--real { width: 30px; height: 39px; cursor: default; }
 .tm-marca--guess { cursor: default; }
 .tm-marca svg { display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5)); }
@@ -296,7 +299,9 @@ html[data-pantalla='ronda'] .dialogo { bottom: var(--banda); }
 @media (max-width: 700px), (max-aspect-ratio: 1/1) {
   .res { flex-direction: column; gap: 8px; }
   .res-mapa { flex: 1 1 0; min-height: 130px; }
-  .res-info { flex: 0 0 auto; max-height: calc(100% - 140px); justify-content: flex-start; }
+  .res-info { flex: 0 0 auto; max-height: calc(100% - 140px); }
+  .res-info > :first-child { margin-top: 0; }
+  .res-info > :last-child { margin-bottom: 0; }
   .res-info .acciones { justify-content: stretch; }
   .res-info .acciones .btn { flex: 1 1 auto; }
   .lista li { padding: 4px 8px; font-size: 13px; }
@@ -347,13 +352,40 @@ html[data-pantalla='ronda'] .dialogo { bottom: var(--banda); }
   .lista li { padding: 3px 8px; }
   .dlg { padding: 14px; }
 }
+/* alto muy poco (por ejemplo celular horizontal con el banner del portal): la información se compacta */
+@media (max-height: 620px) and (max-width: 700px) {
+  .res-info .kicker, #fin-frase { display: none; }
+}
+/* opciones y menú con muy poco alto: el título del modo y la bajada quedan solo para lectores de pantalla */
+@media (max-height: 340px), (max-height: 600px) and (max-width: 560px) {
+  #op-titulo, #op-sub, .cab .lema { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .chip-op { min-height: 30px; padding: 2px 10px; font-size: 13px; }
+  .chips { gap: 4px 6px; }
+  .buscar input { min-height: 32px; padding: 3px 10px; }
+  .interruptor { min-height: 38px; padding-block: 3px; }
+  .panel { padding: 8px 10px; gap: 6px; }
+  .grupo { gap: 4px; }
+}
+@media (max-height: 340px) {
+  .res-info .kicker, #fin-frase { display: none; }
+  #fin-titulo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* sigue para los lectores de pantalla */
+  .res-info { gap: 3px; }
+  .res-info h2 { font-size: 20px; }
+  .res-pts b, .fin-total b { font-size: 28px; }
+  .lista li { padding: 1px 8px; font-size: 12px; }
+  .lista .n { width: 18px; height: 18px; font-size: 11px; }
+  .btn { min-height: 36px; padding: 4px 16px; }
+  .res { padding-bottom: 6px; }
+  .res-info { padding-block: 0; }
+}
 @media (min-width: 640px) and (max-height: 480px) {
   /* opciones en dos columnas para que entren sin scroll */
   .panel { display: grid; grid-template-columns: 1fr 1fr; align-items: start; width: min(820px, 100%); }
   #p-opciones .acciones { width: min(820px, 100%); }
   .panel .nota.error { grid-column: 1 / -1; }
   #g-ambito { grid-column: 1; grid-row: 1 / span 2; }
-  #g-azar, #g-diario { grid-column: 1 / -1; }
+  #g-azar { grid-column: 1; grid-row: 1 / span 2; }
+  #g-diario { grid-column: 1 / -1; }
   #g-tiempo { grid-column: 2; grid-row: 1; }
   #g-congelado { grid-column: 2; grid-row: 2; }
 }

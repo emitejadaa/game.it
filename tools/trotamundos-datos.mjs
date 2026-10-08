@@ -734,7 +734,9 @@ const rutasBuenas = (e) => e.triedR >= 2 && e.hitR / e.triedR >= 0.4;
 function elegirCandidato(e) {
   const intentos = probadosDe(e) + e.enCurso;
   if (e.estado === 'prueba' && !promovido(e) && intentos >= CANDIDATOS_PRUEBA) return null;
-  if (probadosDe(e) >= 6 && buenosDe(e) === 0) return null; // 6 intentos sin un solo acierto: casi sin cobertura oficial, no se gastan más cargas
+  // 12 intentos sin un solo acierto: se corta para no gastar cargas. NO significa que el país no tenga cobertura oficial
+  // (los candidatos pueden caer fuera del radio del visor): hay que probar puntos sobre calles de la capital antes de darlo por vacío.
+  if (probadosDe(e) >= 12 && buenosDe(e) === 0) return null;
   if (!rutasSirven(e) && e.triedC >= 10 && e.hitC / e.triedC < 0.15) return null;
   if (rutasSirven(e) && probadosDe(e) >= 16 && buenosDe(e) / probadosDe(e) < 0.1) return null;
   // pueblos primero; una ruta de cada 4 para medir (o una de cada 2 si las rutas del país andan bien)
@@ -985,6 +987,15 @@ async function hojas(o) {
 
 // ================================================================ paso: armar
 
+/** Por qué un famoso no entra al conjunto (null = entra): tiene que haberse validado, tener imagen oficial (© Google) y estar cerca del sitio. */
+export function motivoFamoso(r, op = {}) {
+  if (!r) return 'sin validar';
+  if (r.estado !== 'ok') return r.estado;
+  if (!r.oficial) return `panorámica de usuario (${r.attr ?? 'sin atribución'}), no © Google`;
+  const d = r.distSitio ?? r.dist;
+  return d > (op.max ?? 2) ? `la panorámica más cercana está a ${d} km` : null;
+}
+
 function datosFinales(o) {
   const { paises, lugares } = cargarNE();
   const cand = leerJson(F.candidatos);
@@ -1001,7 +1012,7 @@ function datosFinales(o) {
     const [cc, es, en, lat, lng, op = {}] = f;
     const id = idFamoso(i);
     const r = ult.get(id);
-    const motivo = op.x ? `descartado a mano: ${op.x}` : !r ? 'sin validar' : r.estado !== 'ok' ? r.estado : (r.distSitio ?? r.dist) > (op.max ?? 2) ? `la panorámica más cercana está a ${r.distSitio ?? r.dist} km` : null;
+    const motivo = op.x ? `descartado a mano: ${op.x}` : motivoFamoso(r, op);
     if (motivo) return famDescartados.push({ id, cc, nombre: en, motivo });
     const e = { id, lat: r5(r.pano.lat), lng: r5(r.pano.lng), cc, n: { es, en } };
     if (r.h != null) e.h = r.h;
@@ -1014,6 +1025,12 @@ function datosFinales(o) {
   const idPrevio = new Map(prev.map((m) => [`${m.lat},${m.lng}`, m.id]));
   const ordenCc = Object.keys(cand.paises).sort();
   const crudos = [];
+  const lugaresPorCc = new Map();
+  for (const l of lugares) {
+    const cc = geoCc(l.lng, l.lat);
+    if (!lugaresPorCc.has(cc)) lugaresPorCc.set(cc, []);
+    lugaresPorCc.get(cc).push(l);
+  }
   for (const cc of ordenCc) {
     const c = cand.paises[cc];
     const mios = recs.filter((r) => r.t === 'm' && r.cc === cc && r.estado !== 'error');
@@ -1043,7 +1060,8 @@ function datosFinales(o) {
     const lng = r5(x.r.pano.lng);
     const e = { id: x.id, lat, lng, cc: x.cc };
     if (x.r.h != null) e.h = x.r.h;
-    const p = lugarMasCercano(lat, lng, lugares, 100);
+    // solo pueblos del mismo país y a menos de 40 km; si no hay, no se pone `p`
+    const p = lugarMasCercano(lat, lng, lugaresPorCc.get(x.cc) || [], 40);
     if (p) e.p = p;
     mundo.push(e);
   }

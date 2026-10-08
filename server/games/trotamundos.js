@@ -81,6 +81,7 @@ const REVEAL_MS = tune('TM_REVEAL_MS', 12e3); // revelación antes de pasar sola
 const LOOK_CAP_MS = tune('TM_LOOK_CAP_MS', 6 * 60e3); // tope de 'look' cuando no hay límite de tiempo
 const RUSH_MS = tune('TM_RUSH_MS', 15e3); // lo que les queda a los demás cuando alguien confirma con rush
 const NOIMG_WINDOW_MS = tune('TM_NOIMG_WINDOW_MS', 25e3); // margen para pedir otra ubicación
+const GONE_MS = tune('TM_GONE_MS', 10e3); // a quien se cae se lo espera este rato antes de darlo por ausente
 const TIME_FACTOR = tune('TM_TIME_FACTOR', 1); // multiplica el tiempo por ronda del ajuste (solo pruebas)
 const MAX_SWAPS = 2;
 
@@ -221,8 +222,9 @@ function startClock(room, api) {
   api.setTimer('phase', limit, () => endLook(room, api));
 }
 
-/** Los jugadores de la ronda que siguen conectados. */
-const presentPlayers = (room, api) => connected(api).filter((p) => room.data.eligible.has(p.id));
+/** Los jugadores de la ronda que siguen conectados o se cayeron hace muy poco (microcortes, cambio de app). */
+const presentPlayers = (room, api) =>
+  api.players().filter((p) => room.data.eligible.has(p.id) && (p.connected || (p.goneAt && Date.now() - p.goneAt < GONE_MS)));
 
 /** ¿Ya confirmaron todos los de la ronda que siguen conectados? (sin ninguno conectado, no hay nada que esperar) */
 function allConfirmed(room, api) {
@@ -434,9 +436,15 @@ export default {
     if (g) api.send(pid, { t: 'mine', round: d.round, lat: g.lat, lng: g.lng });
   },
 
-  onDisconnect(room, api) {
+  onDisconnect(room, api, pid) {
     const d = room.data;
     if (!d || room.state !== 'playing' || d.phase !== 'look') return;
+    // al vencer la espera, se reevalúa sin él si no volvió
+    api.setTimer(`gone:${pid}`, GONE_MS + 20, () => {
+      if (room.data !== d || d.phase !== 'look') return;
+      if (allConfirmed(room, api)) endLook(room, api);
+      else maybeSwap(room, api);
+    });
     if (allConfirmed(room, api)) endLook(room, api);
     else maybeSwap(room, api);
   },

@@ -29,4 +29,5 @@
     <circle cx="0" cy="-30" r="5.5" fill="#fff"/>
   </g>
   <ellipse cx="120" cy="143" rx="11" ry="3.2" fill="#000" opacity=".45"/>
+  <text x="160" y="186" text-anchor="middle" font-family="Trebuchet MS, Verdana, sans-serif" font-size="19" font-weight="800" letter-spacing="3" fill="#eafcff" filter="url(#neon)">TROTAMUNDOS</text>
 </svg>

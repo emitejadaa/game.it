@@ -4,9 +4,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import * as D from '../../../public/games/trotamundos/datos.js';
-import { desenvolver, arco, anillo, parsearColor, colorOscuro, colorClaro, adaptarEstilo, camaraPara } from '../../../public/games/trotamundos/mapa.js';
+import { desenvolver, arco, anillo, parsearColor, colorOscuro, colorClaro, adaptarEstilo, campoTexto, camaraPara } from '../../../public/games/trotamundos/mapa.js';
 import { TEXTOS, traducir } from '../../../public/games/trotamundos/textos.js';
 import { distanceKm, dailyKey } from '../../../public/games/trotamundos/shared/geo.js';
+
+// nombres de otros juegos del género que no pueden aparecer (armados por partes para no escribirlos acá)
+const MARCAS_AJENAS = ['geo' + 'guessr', 'world' + 'guessr'];
 
 const DIR = new URL('../../../public/games/trotamundos/', import.meta.url);
 const json = (n) => JSON.parse(readFileSync(new URL(`datos/${n}`, DIR), 'utf8'));
@@ -330,7 +333,7 @@ test('textos: todo en español e inglés, con las mismas variables, y traducir()
     const vars = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join();
     assert.equal(vars(v.es), vars(v.en), `${k}: las variables de es y en no coinciden`);
     assert.ok(!/<[a-z]/i.test(v.es + v.en), `${k}: sin HTML en los textos`);
-    for (const marca of ['geoguessr', 'worldguessr']) assert.ok(!(v.es + v.en).toLowerCase().includes(marca), `${k}: nombre de otro juego`);
+    for (const marca of MARCAS_AJENAS) assert.ok(!(v.es + v.en).toLowerCase().includes(marca), `${k}: nombre de otro juego`);
   }
   assert.equal(traducir('es', 'ronda', { n: 2, total: 5 }), 'Ronda 2/5');
   assert.equal(traducir('en', 'ronda', { n: 2, total: 5 }), 'Round 2/5');
@@ -355,7 +358,7 @@ test('el cliente no usa innerHTML ni marcas ajenas, y localStorage va siempre co
   for (const f of ['game.js', 'visor.js', 'mapa.js', 'datos.js', 'online.js', 'textos.js', 'config.js', 'index.html', 'style.css', 'game.json']) {
     const src = readFileSync(new URL(f, DIR), 'utf8');
     assert.ok(!/innerHTML|outerHTML|insertAdjacentHTML|document\.write/.test(src), `${f}: HTML dinámico`);
-    assert.ok(!/geoguessr|worldguessr/i.test(src), `${f}: nombre de otro juego`);
+    assert.ok(!new RegExp(MARCAS_AJENAS.join('|'), 'i').test(src), `${f}: nombre de otro juego`);
     for (const m of src.matchAll(/localStorage\.(?:get|set|remove)Item\(\s*['"`]([^'"`]+)/g)) assert.ok(m[1].startsWith('gameit:trotamundos:'), `${f}: clave de localStorage sin prefijo (${m[1]})`);
   }
   const html = readFileSync(new URL('index.html', DIR), 'utf8');
@@ -375,4 +378,16 @@ test('visor.js: constantes del truco de la tarjeta', async () => {
   const { MARGEN_TARJETA, BANDA_ABAJO } = await import('../../../public/games/trotamundos/visor.js');
   assert.equal(MARGEN_TARJETA, 120);
   assert.equal(BANDA_ABAJO, 28);
+});
+
+test('rótulos del mapa: en español usa name:es y cae al nombre de siempre; en inglés no toca nada', () => {
+  const orig = ['coalesce', ['get', 'name_en'], ['get', 'name']];
+  assert.deepEqual(campoTexto(orig, 'es'), ['coalesce', ['get', 'name:es'], orig]);
+  assert.equal(campoTexto(orig, 'en'), orig);
+  const base = { layers: [{ id: 'label_country_1', type: 'symbol', layout: { 'text-field': orig }, paint: { 'text-color': '#111' } }, { id: 'highway-shield-us-interstate', type: 'symbol', layout: { 'text-field': ['to-string', ['get', 'ref']] }, paint: {} }] };
+  const es = adaptarEstilo(base, 'dark', 'es');
+  assert.deepEqual(es.layers[0].layout['text-field'], campoTexto(orig, 'es'));
+  assert.deepEqual(es.layers[1].layout['text-field'], ['to-string', ['get', 'ref']], 'los escudos de rutas no se traducen');
+  assert.deepEqual(adaptarEstilo(base, 'dark', 'en').layers[0].layout['text-field'], orig);
+  assert.deepEqual(base.layers[0].layout['text-field'], orig, 'no modifica el estilo original');
 });
