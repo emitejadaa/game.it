@@ -236,3 +236,12 @@ button { cursor: pointer; }
   .bar { min-height: 46px; }
 }
 :root[data-gi-motion='reduced'] * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+
+/* el balde ya no tiene rellenos disponibles en este dibujo */
+.tb.nope {
+  animation: tb-nope 360ms var(--ease, ease) both;
+}
+@keyframes tb-nope {
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}

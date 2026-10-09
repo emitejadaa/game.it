@@ -1008,7 +1008,7 @@ function applyRoom(room) {
     }
     $('lobby-info').textContent = t('lobbyInfo', { n: room.players.length + bots, t: st.target ? t('toPts', { n: st.target }) : t('oneRound') });
     $('lobby-start').hidden = !online.isHost;
-    $('lobby-status').textContent = online.isHost ? (room.players.length + bots < 2 ? t('needPlayers') : '') : t('waitingHost');
+    $('lobby-status').textContent = online.isHost ? (room.players.filter((p) => p.connected).length + bots < 2 ? t('needPlayers') : '') : t('waitingHost');
     $('lobby-status').style.color = online.isHost ? '' : 'var(--muted)';
     show('lobby');
   }

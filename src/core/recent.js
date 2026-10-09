@@ -10,7 +10,17 @@ const MAX = 12;
 function read() {
   try {
     const list = JSON.parse(localStorage.getItem(KEY));
-    return Array.isArray(list) ? list.filter((r) => r && byId(r.id)) : [];
+    if (!Array.isArray(list)) return [];
+    const seen = new Map();
+    for (const r of list) {
+      const g = r && byId(r.id);
+      if (!g) continue;
+      const prev = seen.get(g.id);
+      // un juego renombrado (alias) puede tener dos entradas: se juntan en la del id actual
+      if (prev) prev.plays += Number(r.plays) || 0;
+      else seen.set(g.id, { ...r, id: g.id, plays: Number(r.plays) || 0 });
+    }
+    return [...seen.values()];
   } catch {
     return [];
   }

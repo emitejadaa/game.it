@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "server": "node server/index.js",
     "check": "node tools/check-games.mjs",
-    "test": "node --test --test-concurrency=1 \"tools/tests/**/*.test.mjs\""
+    "test": "node --import ./tests/register.mjs --test \"tests/*.test.mjs\"",
+    "test:trotamundos": "node --test --test-concurrency=1 \"tools/tests/**/*.test.mjs\""
   },
   "devDependencies": {
     "three": "^0.186.1",

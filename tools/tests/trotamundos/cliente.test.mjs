@@ -1,4 +1,4 @@
-// Pruebas de la lógica pura del cliente de Trotamundos (datos.js, mapa.js, textos.js, visor.js)  ·  npm test
+// Pruebas de la lógica pura del cliente de Trotamundos (datos.js, mapa.js, textos.js, visor.js)  ·  npm run test:trotamundos
 // Sin navegador: lo que toca el DOM (visor, mapa dibujado, pantallas) se prueba en un Chromium aparte.
 import test from 'node:test';
 import assert from 'node:assert/strict';

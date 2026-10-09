@@ -1,0 +1,6 @@
+Datos de países (Banderín, Silueta, Rumbo). Se regeneran con: node tools/daily/countries.mjs <ne_50m_admin_0_countries.geojson>
+
+- Nombres, centros y contornos: Natural Earth (https://www.naturalearthdata.com), dominio público.
+- Banderas (public/games/banderin/flags): paquete flag-icons de Lipis, licencia MIT (ver public/games/banderin/flags/LICENSE.txt).
+- Las posibles respuestas son los 193 miembros de la ONU; también se aceptan como intento (nunca como respuesta)
+  Taiwán, Ciudad del Vaticano, Palestina, Kosovo, Groenlandia, Puerto Rico, Hong Kong y Sáhara Occidental.

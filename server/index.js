@@ -10,9 +10,12 @@
  * Opcionales por módulo: `lateJoin` (se puede entrar con la partida en curso), `onJoin`,
  * `removed` (sale un jugador, en cualquier estado), `command` (mensajes propios en cualquier
  * estado: devuelve true si lo manejó, false si era inválido), `canStart` (código de error o null)
- * y `listable` + `listInfo` (aparece en la lista de salas públicas si settings.public).
+ * y `listable` + `listInfo` (aparece en la lista de salas públicas si settings.public). `realtime: true` marca a los juegos que
+ * simulan a ritmo fijo: comparten el tope MAX_RT_ROOMS (crear otra devuelve `server_full_rt`) y pueden informar el costo de su
+ * paso en `room.avgTickMs` (sale en /health y en la lista de salas). `create` acepta `settings` (opciones iniciales).
  */
 import { createServer } from 'node:http';
+import { isIP } from 'node:net';
 import { randomBytes, randomInt } from 'node:crypto';
 import { WebSocketServer } from 'ws';
 import minigolf from './games/minigolf.js';
@@ -31,11 +34,23 @@ import garabato from './games/garabato.js';
 import telefono from './games/telefono.js';
 import padel from './games/padel.js';
 import naval from './games/naval.js';
+import estela from './games/estela.js';
+import sumo from './games/sumo.js';
+import rey from './games/rey.js';
+import territorio from './games/territorio.js';
+import caida from './games/caida.js';
+import voleyball from './games/voleyball.js';
 import trotamundos from './games/trotamundos.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono, padel, naval, trotamundos };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono, padel, naval, estela, sumo, rey, territorio, caida, voleyball, trotamundos };
 /** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
 const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
+/**
+ * Juegos en tiempo real (simulan en el servidor a ritmo fijo): comparten el tope MAX_RT_ROOMS. Un módulo se declara con
+ * `realtime: true`; esta lista cubre a los que todavía no lo declaran.
+ */
+const RT_LEGACY = new Set(['ameba', 'serpentina', 'clashball', 'padel']);
+const isRealtime = (game) => !!(GAMES[game]?.realtime || RT_LEGACY.has(game));
 
 const env = (k, d) => (process.env[k] !== undefined ? process.env[k] : d);
 const num = (k, d) => Number(env(k, d));
@@ -46,8 +61,12 @@ const CFG = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
-  trustProxy: env('TRUST_PROXY', '1') === '1',
+  // IP del cliente (ver clientIp): por defecto es automática. Opcional: CLIENT_IP_HEADER (encabezado que escribe el proxy, p. ej.
+  // cf-connecting-ip) o TRUST_PROXY_HOPS (cantidad de proxies que agregan una entrada a X-Forwarded-For, contando desde la derecha).
+  proxyHops: num('TRUST_PROXY_HOPS', 0),
+  ipHeader: env('CLIENT_IP_HEADER', '').toLowerCase(),
   maxRooms: num('MAX_ROOMS', 300),
+  maxRtRooms: num('MAX_RT_ROOMS', 4), // salas en tiempo real a la vez (el servidor gratis de Render tiene 0,1 CPU)
   maxConnPerIp: num('MAX_CONN_PER_IP', 6),
   roomsPerIpWindow: num('ROOMS_PER_IP', 6),
   roomsWindowMs: num('ROOMS_WINDOW_MS', 10 * 60e3),
@@ -71,9 +90,56 @@ const ipJoins = new Map();
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 
 // ---------------- utilidades ----------------
+/** IPv6: una casa o un celular reciben un /64 entero, así que se limita por prefijo y no por dirección. */
+function normIp(ip) {
+  ip = String(ip || '').trim().replace(/^::ffff:(?=\d+\.)/, '');
+  if (isIP(ip) !== 6) return ip || '?';
+  const [head, tail = ''] = ip.split('::');
+  const h = head ? head.split(':') : [];
+  const t = tail ? tail.split(':') : [];
+  const full = [...h, ...Array(Math.max(0, 8 - h.length - t.length)).fill('0'), ...t];
+  return `${full.slice(0, 4).map((x) => x.toLowerCase().replace(/^0+(?=.)/, '')).join(':')}::/64`;
+}
+
+const unmap = (ip) => String(ip || '').trim().replace(/^::ffff:(?=\d+\.)/i, '');
+const PRIVATE_V4 = [/^10\./, /^127\./, /^0\./, /^169\.254\./, /^192\.168\./, /^172\.(1[6-9]|2\d|3[01])\./, /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./];
+/** ¿Es una dirección interna (privada, loopback, enlace local, CGNAT)? Esas nunca son un jugador de internet. */
+function isPrivate(ip) {
+  ip = unmap(ip);
+  if (isIP(ip) === 4) return PRIVATE_V4.some((r) => r.test(ip));
+  if (isIP(ip) === 6) return /^(::1?$|f[cd]|fe[89ab])/i.test(ip);
+  return true;
+}
+
+/**
+ * IP del cliente para los límites (conexiones, salas y uniones por IP).
+ *  1. Si quien se conecta por TCP es una dirección pública, no hay un proxy nuestro delante: los encabezados los escribe el
+ *     propio cliente y no se les cree.
+ *  2. Detrás de un proxy (el par TCP es privado, como el balanceador de Render), en este orden: CLIENT_IP_HEADER si está;
+ *     TRUST_PROXY_HOPS si está (entrada N desde la derecha de X-Forwarded-For); cf-connecting-ip (Cloudflare lo pisa);
+ *     y si no, la primera dirección pública de X-Forwarded-For contando desde la derecha (se saltean los saltos internos).
+ *     La entrada de más a la izquierda la escribe el cliente, así que nunca se usa sola.
+ */
 function clientIp(req) {
-  const fwd = CFG.trustProxy && req.headers['x-forwarded-for'];
-  return (fwd ? String(fwd).split(',')[0] : req.socket.remoteAddress || '?').trim();
+  const peer = unmap(req.socket.remoteAddress || '?');
+  if (!isPrivate(peer)) return normIp(peer);
+  const header = (name) => {
+    const v = String(req.headers[name] || '').trim();
+    return isIP(v) ? v : '';
+  };
+  if (CFG.ipHeader && header(CFG.ipHeader)) return normIp(header(CFG.ipHeader));
+  const list = String(req.headers['x-forwarded-for'] || '')
+    .split(',')
+    .map(unmap)
+    .filter(Boolean);
+  if (CFG.proxyHops) {
+    const ip = list.length >= CFG.proxyHops ? list[list.length - CFG.proxyHops] : '';
+    if (isIP(ip)) return normIp(ip);
+  } else {
+    if (header('cf-connecting-ip')) return normIp(header('cf-connecting-ip'));
+    for (let i = list.length - 1; i >= 0; i--) if (isIP(list[i]) && !isPrivate(list[i])) return normIp(list[i]);
+  }
+  return normIp(peer);
 }
 
 function windowHit(map, ip, limit, windowMs) {
@@ -110,10 +176,19 @@ function makeApi(room) {
   return {
     broadcast: (msg, exceptId) => broadcast(room, msg, exceptId),
     send: (pid, msg) => send(room.players.get(pid)?.ws, msg),
+    /** Manda un texto JSON ya armado (para payloads grandes que se reparten a varios jugadores sin volver a serializarlos). */
+    sendRaw: (pid, text) => {
+      const ws = room.players.get(pid)?.ws;
+      if (ws && ws.readyState === 1) ws.send(text);
+    },
     sync: () => sync(room),
+    /** Cierra la sala (los clientes reciben { t: 'closed', reason }): para errores graves del módulo. */
+    close: (reason) => closeRoom(room, reason),
     touch: () => touch(room),
     players: () => [...room.players.values()],
     connected: (pid) => !!room.players.get(pid)?.connected,
+    /** Bytes que esperan en el socket de un jugador (para saltear snapshots descartables si el cliente no da abasto). */
+    bufferedAmount: (pid) => room.players.get(pid)?.ws?.bufferedAmount || 0,
     setTimer(name, ms, fn) {
       clearTimeout(room.timers.get(name));
       room.timers.set(
@@ -181,10 +256,27 @@ function closeRoom(room, reason) {
   log('room closed', room.code, room.game, reason, 'rooms:', rooms.size);
 }
 
-function createRoom(ws, name, game) {
+/** Salas en tiempo real abiertas y el costo medio de su paso (lo informan los módulos en `room.avgTickMs`). */
+function rtStats() {
+  let n = 0;
+  let sum = 0;
+  let timed = 0;
+  for (const r of rooms.values()) {
+    if (!isRealtime(r.game)) continue;
+    n++;
+    if (r.avgTickMs > 0) {
+      sum += r.avgTickMs;
+      timed++;
+    }
+  }
+  return { rooms: n, max: CFG.maxRtRooms, avgTickMs: timed ? Math.round((sum / timed) * 1000) / 1000 : 0 };
+}
+
+function createRoom(ws, name, game, settings) {
   const mod = gameMod(game);
   if (!mod) return send(ws, { t: 'error', code: 'bad_game' });
   if (rooms.size >= CFG.maxRooms) return send(ws, { t: 'error', code: 'server_full' });
+  if (isRealtime(game) && rtStats().rooms >= CFG.maxRtRooms) return send(ws, { t: 'error', code: 'server_full_rt' });
   if (!windowHit(ipRooms, ws.ip, CFG.roomsPerIpWindow, CFG.roomsWindowMs)) return send(ws, { t: 'error', code: 'too_many_rooms' });
   const code = newCode();
   if (!code) return send(ws, { t: 'error', code: 'server_full' });
@@ -200,6 +292,14 @@ function createRoom(ws, name, game) {
     data: null, // estado propio del juego
     settings: mod.defaults ? { ...mod.defaults } : {},
   };
+  // opciones elegidas al crear (para los juegos que arrancan solos y no pasan por el lobby)
+  if (mod.settings && settings && typeof settings === 'object') {
+    try {
+      room.settings = mod.settings(room.settings, settings);
+    } catch (e) {
+      log('error', game, 'create settings', e?.stack || e);
+    }
+  }
   room.api = makeApi(room);
   rooms.set(code, room);
   log('room created', code, game, 'rooms:', rooms.size);
@@ -256,6 +356,12 @@ function joinRoom(ws, code, name, token, game) {
   }
   const mod = GAMES[room.game];
   if (room.state !== 'lobby' && !mod.lateJoin) return send(ws, { t: 'error', code: 'in_progress' });
+  if (room.players.size >= mod.maxPlayers && (room.state !== 'playing' || mod.lateJoin)) {
+    // alguien que se desconectó (y espera volver) no puede dejar afuera a quien quiere entrar: se libera el lugar del que hace más que se fue (nunca el del anfitrión)
+    const ghost = [...room.players.values()].filter((p) => !p.connected && p.id !== room.host).sort((a, b) => a.goneAt - b.goneAt)[0];
+    if (ghost) removePlayer(room, ghost.id);
+    if (rooms.get(room.code) !== room) return send(ws, { t: 'error', code: 'not_found' });
+  }
   if (room.players.size >= mod.maxPlayers) return send(ws, { t: 'error', code: 'room_full' });
   addPlayer(room, ws, name);
 }
@@ -266,11 +372,13 @@ function leave(ws, reason = 'left') {
   const p = room.players.get(ws.pid);
   ws.room = null;
   if (!p) return;
-  if (reason === 'disconnect' && room.state === 'playing') {
+  if (reason === 'disconnect') {
+    // En cualquier estado se espera la reconexión (graceMs): en el lobby, compartir el link desde el celular
+    // suspende la pestaña y corta el socket. El barrido del heartbeat lo saca si no vuelve a tiempo.
     p.connected = false;
     p.ws = null;
     p.goneAt = Date.now();
-    GAMES[room.game].onDisconnect?.(room, room.api, p.id);
+    if (room.state === 'playing') GAMES[room.game].onDisconnect?.(room, room.api, p.id);
     sync(room);
     return;
   }
@@ -279,8 +387,12 @@ function leave(ws, reason = 'left') {
 
 function removePlayer(room, id) {
   room.players.delete(id);
-  if (!room.players.size || ![...room.players.values()].some((p) => p.connected)) return closeRoom(room, 'empty');
-  if (room.host === id) room.host = [...room.players.values()].find((p) => p.connected)?.id;
+  if (!room.players.size) return closeRoom(room, 'empty');
+  // quedan solo desconectados dentro de su gracia: la sala espera (el barrido los saca y la última baja la cierra)
+  if (room.host === id) {
+    const rest = [...room.players.values()];
+    room.host = (rest.find((p) => p.connected) || rest[0]).id;
+  }
   GAMES[room.game].removed?.(room, room.api, id);
   if (room.state === 'playing') GAMES[room.game].leave?.(room, room.api, id);
   sync(room);
@@ -311,10 +423,10 @@ function onMessage(ws, raw) {
 
   switch (msg.t) {
     case 'ping':
-      return send(ws, { t: 'pong', now });
+      return send(ws, { t: 'pong', now, ...(Number.isFinite(msg.c) ? { c: msg.c } : {}) }); // `c` es el reloj del cliente: sirve para medir el ping
     case 'create':
       if (room) leave(ws);
-      return createRoom(ws, msg.name, typeof msg.game === 'string' ? msg.game : 'minigolf');
+      return createRoom(ws, msg.name, typeof msg.game === 'string' ? msg.game : 'minigolf', msg.settings);
     case 'join':
       if (room) leave(ws);
       return joinRoom(ws, msg.code, msg.name, typeof msg.token === 'string' ? msg.token.slice(0, 64) : null, typeof msg.game === 'string' ? msg.game : null);
@@ -323,12 +435,12 @@ function onMessage(ws, raw) {
     case 'list': {
       // salas públicas de un juego (solo módulos con `listable`)
       const mod = gameMod(msg.game);
-      if (!mod?.listable) return send(ws, { t: 'list', game: msg.game, rooms: [] });
+      if (!mod?.listable) return send(ws, { t: 'list', game: msg.game, rooms: [], rt: rtStats() });
       const list = [...rooms.values()]
         .filter((r) => r.game === msg.game && r.settings?.public)
         .slice(0, 60)
         .map((r) => ({ code: r.code, n: r.players.size, max: mod.maxPlayers, state: r.state, ...mod.listInfo?.(r) }));
-      return send(ws, { t: 'list', game: msg.game, rooms: list });
+      return send(ws, { t: 'list', game: msg.game, rooms: list, rt: rtStats() });
     }
     case 'settings': {
       // el anfitrión cambia opciones en el lobby (pista, vueltas, hoyos…)
@@ -346,14 +458,26 @@ function onMessage(ws, raw) {
       if (room.host !== ws.pid) return send(ws, { t: 'error', code: 'not_host' });
       if (room.state === 'playing') return;
       const mod = GAMES[room.game];
-      const active = [...room.players.values()].filter((p) => p.connected);
-      if (active.length < (mod.minPlayers || 1)) return send(ws, { t: 'error', code: 'need_players' });
+      // primero se valida con los que están conectados; solo si se va a empezar se saca a quien se desconectó y no volvió (no ocupa lugar en la partida)
+      if ([...room.players.values()].filter((p) => p.connected).length < (mod.minPlayers || 1)) return send(ws, { t: 'error', code: 'need_players' });
+      for (const p of [...room.players.values()]) if (!p.connected) removePlayer(room, p.id);
+      if (rooms.get(room.code) !== room) return;
       if (mod.settings) room.settings = mod.settings(room.settings, msg.settings || msg);
       const why = mod.canStart?.(room);
       if (why) return send(ws, { t: 'error', code: why });
       room.state = 'playing';
       touch(room);
-      mod.start(room, room.api);
+      try {
+        mod.start(room, room.api);
+      } catch (e) {
+        // un error al arrancar no deja la sala trabada en 'playing' sin partida
+        log('error', room.game, room.code, 'start', e?.stack || e);
+        for (const t of room.timers.values()) clearTimeout(t);
+        room.timers.clear();
+        room.state = 'lobby';
+        room.data = null;
+        send(ws, { t: 'error', code: 'start_failed' });
+      }
       sync(room);
       return;
     }
@@ -383,11 +507,13 @@ function onMessage(ws, raw) {
       if (mod.command) {
         const handled = mod.command(room, room.api, p, msg);
         if (handled === false) ws.strikes++;
+        else if (handled !== undefined && room.state === 'playing') touch(room);
         if (handled !== undefined) return;
       }
       if (room.state !== 'playing') return;
       const ok = mod.message?.(room, room.api, p, msg);
       if (ok === false) ws.strikes++;
+      else touch(room); // jugar cuenta como actividad: la sala no se cierra por 'idle' en pleno partido
     }
   }
 }
@@ -396,7 +522,14 @@ function onMessage(ws, raw) {
 const http = createServer((req, res) => {
   if (req.url === '/health') {
     res.writeHead(200, { 'content-type': 'application/json', 'access-control-allow-origin': '*' });
-    res.end(JSON.stringify({ ok: true, rooms: rooms.size, conns: wss.clients.size, games: Object.keys(GAMES) }));
+    res.end(JSON.stringify({ ok: true, rooms: rooms.size, conns: wss.clients.size, games: Object.keys(GAMES), rt: rtStats() }));
+    return;
+  }
+  if (req.url === '/whoami') {
+    // diagnóstico: la dirección que el servidor usa para los límites por IP (solo la de quien consulta). Sirve para
+    // comprobar en producción que, detrás del proxy del hosting, cada jugador cuenta con su IP y no todos con la del proxy.
+    res.writeHead(200, { 'content-type': 'application/json', 'access-control-allow-origin': '*', 'cache-control': 'no-store' });
+    res.end(JSON.stringify({ ip: clientIp(req), internalPeer: isPrivate(unmap(req.socket.remoteAddress || '?')) }));
     return;
   }
   res.writeHead(404, { 'content-type': 'text/plain' });
@@ -437,7 +570,11 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     const n = (ipConns.get(ws.ip) || 1) - 1;
     n ? ipConns.set(ws.ip, n) : ipConns.delete(ws.ip);
-    leave(ws, 'disconnect');
+    try {
+      leave(ws, 'disconnect');
+    } catch (e) {
+      log('error', ws.room?.game, ws.room?.code, 'close', e?.stack || e);
+    }
   });
   ws.on('error', () => {});
   send(ws, { t: 'hello', now: Date.now() });
@@ -455,16 +592,42 @@ setInterval(() => {
   }
   const now = Date.now();
   for (const room of [...rooms.values()]) {
-    const idle = now - room.lastActivity;
-    if (now - room.createdAt > CFG.roomMaxLifeMs) closeRoom(room, 'max_life');
-    else if (room.state !== 'playing' && idle > CFG.lobbyIdleMs) closeRoom(room, 'idle');
-    else if (room.state === 'playing' && idle > CFG.roomIdleMs) closeRoom(room, 'idle');
-    else
-      for (const p of [...room.players.values()])
-        if (!p.connected && p.goneAt && now - p.goneAt > CFG.graceMs) removePlayer(room, p.id);
+    try {
+      const idle = now - room.lastActivity;
+      if (now - room.createdAt > CFG.roomMaxLifeMs) closeRoom(room, 'max_life');
+      else if (room.state !== 'playing' && idle > CFG.lobbyIdleMs) closeRoom(room, 'idle');
+      else if (room.state === 'playing' && idle > CFG.roomIdleMs) closeRoom(room, 'idle');
+      else
+        for (const p of [...room.players.values()])
+          if (!p.connected && p.goneAt && now - p.goneAt > CFG.graceMs && rooms.get(room.code) === room) removePlayer(room, p.id);
+    } catch (e) {
+      // un módulo que falla al sacar a un jugador no frena el barrido de las demás salas
+      log('error', room.game, room.code, 'sweep', e?.stack || e);
+    }
   }
   for (const map of [ipRooms, ipJoins])
     for (const [ip, list] of map) if (!list.some((t) => now - t < CFG.roomsWindowMs)) map.delete(ip);
 }, CFG.heartbeatMs);
+
+// Último recurso: se registra y se sigue (reiniciar el proceso cortaría todas las salas). Si los errores
+// se disparan, se sale y Render levanta uno nuevo.
+let fatal = [];
+const onFatal = (kind) => (e) => {
+  log('fatal', kind, e?.stack || e);
+  const now = Date.now();
+  fatal = fatal.filter((t) => now - t < 60e3);
+  fatal.push(now);
+  if (fatal.length > 20) process.exit(1);
+};
+process.on('uncaughtException', onFatal('uncaughtException'));
+process.on('unhandledRejection', onFatal('unhandledRejection'));
+
+const onListenError = (e) => {
+  // puerto ocupado o sin permiso: si el proceso siguiera vivo (el heartbeat lo mantiene) quedaría colgado sin escuchar
+  log('fatal', 'listen', e?.message || e);
+  process.exit(1);
+};
+http.on('error', onListenError);
+wss.on('error', onListenError);
 
 http.listen(CFG.port, () => log(`game.it server en :${CFG.port}`, `juegos: ${Object.keys(GAMES).join(', ')}`, CFG.origins.length ? `orígenes: ${CFG.origins.join(', ')}` : 'orígenes: todos'));

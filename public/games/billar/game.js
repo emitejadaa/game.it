@@ -370,6 +370,7 @@ function finishRoll() {
     S.phase = 'wait';
     S.simDone = true;
     if (S.pending) applyPending();
+    else syncFinished();
     return;
   }
   const { state, summary } = judge(S.game, sim.balls, sim.ev, sim.call);
@@ -1050,14 +1051,15 @@ function applyRoom(room) {
     S.mode = null;
     $('lobby-code').textContent = room.code;
     $('lobby-players').innerHTML = room.players.map((p, i) => `<li><i style="background:${i ? '#1f4fd6' : '#f5b301'}"></i>${esc(p.name)}<small>${[p.id === net.myId ? t('you') : '', p.id === room.host ? t('host') : ''].filter(Boolean).join(' · ')}</small></li>`).join('');
-    const full = room.players.length >= 2;
+    const full = room.players.filter((p) => p.connected).length >= 2; // un desconectado en gracia sigue en la lista pero no cuenta
     $('lobby-start').hidden = !net.isHost || !full;
     $('lobby-status').textContent = !full ? t('waiting') : net.isHost ? '' : t('waitingHost');
     if (S.screen !== 'lobby') show('lobby');
     return;
   }
   S.myIdx = Math.max(0, d.order.indexOf(net.myId));
-  S.names = d.order.map((id) => (id === net.myId ? t('you') : room.players.find((p) => p.id === id)?.name ?? '?'));
+  // si el rival ya salió de la sala se conserva el nombre que se vio durante la partida
+  S.names = d.order.map((id, i) => (id === net.myId ? t('you') : room.players.find((p) => p.id === id)?.name ?? (S.onlineN === d.n ? S.names?.[i] : null) ?? '?'));
   S.deadline = d.left > 0 ? performance.now() + d.left : 0;
   S.turnMs = d.turnMs || 40000;
   const prevAgain = S.again || [];
@@ -1082,6 +1084,7 @@ function applyRoom(room) {
     S.balls = S.game.balls;
     nextTurn();
   }
+  syncFinished();
   const opp = room.players.find((p) => p.id !== net.myId);
   if (opp && !opp.connected && !S.offWarned) {
     S.offWarned = true;
@@ -1114,6 +1117,18 @@ function applyPending() {
   sum.by = m.p;
   announce(sum);
   nextTurn();
+  syncFinished();
+}
+
+/** El servidor cerró la partida sin un tiro (el rival se fue o se desconectó) y todavía no se mostró el resultado. */
+function syncFinished() {
+  const st = net?.room?.pool?.st;
+  if (S.mode !== 'online' || !st || st.w === null || st.w === undefined) return;
+  if (S.game?.winner !== null && S.game?.winner !== undefined) return;
+  if (S.phase === 'roll' || S.pending) return;
+  S.game = des(st);
+  S.balls = S.game.balls;
+  nextTurn(); // con ganador, termina en gameOver()
 }
 
 let lastAimSent = 0;

@@ -1,0 +1,50 @@
+{
+  "id": "ecuacion",
+  "title": {
+    "es": "Ecuación",
+    "en": "Ecuación"
+  },
+  "description": {
+    "es": "Adiviná la ecuación oculta de 8 caracteres en 6 intentos. Un desafío nuevo todos los días.",
+    "en": "Guess the hidden 8-character equation in 6 tries. A new puzzle every day."
+  },
+  "categories": [
+    "diarios",
+    "puzzle",
+    "casual"
+  ],
+  "tags": [
+    "matematica",
+    "math",
+    "ecuacion",
+    "equation",
+    "cuentas",
+    "diario",
+    "daily",
+    "numeros",
+    "numbers"
+  ],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": [
+    "desktop",
+    "mobile"
+  ],
+  "orientation": "any",
+  "input": [
+    "keyboard",
+    "touch"
+  ],
+  "features": {
+    "online": false,
+    "multiplayer": false,
+    "story": false,
+    "daily": true
+  },
+  "daily": {
+    "epoch": "2026-10-06"
+  },
+  "order": 25
+}

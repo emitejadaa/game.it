@@ -6,7 +6,8 @@
  *
  * Errores (hacen fallar la revisión): game.json inválido, id distinto de la carpeta, falta la
  * entrada o la miniatura, categorías o plataformas que no existen, rutas absolutas que se rompen
- * dentro del portal, módulo online que no carga.
+ * dentro del portal (o que apuntan a un archivo de public/ que no existe), módulo online que no carga,
+ * fecha de lanzamiento de un juego diario mal escrita.
  * Avisos (no la hacen fallar): textos sin inglés, carpeta muy pesada, juego online sin servidor.
  */
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
@@ -63,6 +64,7 @@ const dirs = readdirSync(GAMES, { withFileTypes: true })
 
 console.log(`Revisando ${dirs.length} juego(s)…`);
 const ids = new Set();
+const aliasList = [];
 for (const dir of dirs) {
   const base = join(GAMES, dir);
   const mf = join(base, 'game.json');
@@ -94,6 +96,15 @@ for (const dir of dirs) {
   if (!external && !existsSync(join(base, entry))) err(id, `no existe el archivo de entrada "${entry}"`);
   if (!g.thumbnail) warn(id, 'sin "thumbnail": en el menú se ve una tarjeta vacía');
   else if (!/^https?:\/\//.test(g.thumbnail) && !existsSync(join(base, g.thumbnail))) err(id, `no existe la miniatura "${g.thumbnail}"`);
+  if (g.aliases !== undefined) {
+    if (!Array.isArray(g.aliases) || g.aliases.some((a) => typeof a !== 'string' || !/^[a-z0-9-]+$/.test(a))) err(id, '"aliases" tiene que ser una lista de ids (minúsculas, números y guiones) de los nombres anteriores del juego');
+    else for (const a of g.aliases) aliasList.push([a, id]);
+  }
+  // juegos diarios: el día de lanzamiento (desafío n.º 1) y la categoría que los junta en el estante del menú
+  if (g.daily !== undefined) {
+    if (!g.daily || typeof g.daily.epoch !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(g.daily.epoch) || Number.isNaN(Date.parse(g.daily.epoch))) err(id, '"daily.epoch" tiene que ser una fecha "AAAA-MM-DD" (el día del desafío n.º 1)');
+    if (!g.categories?.includes('diarios')) warn(id, 'es un juego diario: falta la categoría "diarios"');
+  } else if (g.categories?.includes('diarios')) warn(id, 'tiene la categoría "diarios" pero falta "daily": { "epoch": "AAAA-MM-DD" }');
   if (g.hidden) console.log(`  · ${id}: oculto ("hidden": true)`);
 
   if (!external && existsSync(join(base, entry))) {
@@ -106,11 +117,14 @@ for (const dir of dirs) {
     const txt = readFileSync(f, 'utf8');
     const rel = f.slice(base.length + 1);
     const bad = new Set();
+    const missing = new Set();
     for (const m of txt.matchAll(/(?:src|href)\s*=\s*["'](\/[^"'/][^"']*)["']|url\(\s*["']?(\/[^"')/][^"')]*)["']?\s*\)|(?:import|from)\s*\(?\s*["'](\/[^"'/][^"']*)["']/g)) {
       const p = m[1] || m[2] || m[3];
       if (!/^\/(sdk|shared|vendor|games)\//.test(p)) bad.add(p);
+      else if (!existsSync(join(ROOT, 'public', p.split(/[?#]/)[0]))) missing.add(p); // por ejemplo, un módulo compartido que se renombró
     }
     for (const p of bad) err(id, `${rel}: ruta absoluta "${p}" (usar una relativa: "./${p.slice(1)}")`);
+    for (const p of missing) err(id, `${rel}: "${p}" no existe en public/`);
   }
   // juegos online: el nombre que usan con OnlineRoom tiene que tener su módulo en server/games/
   const rooms = new Set();
@@ -120,6 +134,15 @@ for (const dir of dirs) {
   if (mb > MAX_MB) err(id, `pesa ${mb.toFixed(1)} MB (máximo ${MAX_MB})`);
   else if (mb > WARN_MB) warn(id, `pesa ${mb.toFixed(1)} MB: tarda en cargar en celular (ideal menos de ${WARN_MB})`);
   if (g.features?.online && !rooms.size && !existsSync(join(SERVER, `${id}.js`))) warn(id, `dice "online" pero no se encontró su módulo en server/games/`);
+}
+
+// los alias no pueden pisar el id de otro juego ni repetirse
+const allIds = new Set([...readdirSync(GAMES, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)]);
+const seenAlias = new Map();
+for (const [a, owner] of aliasList) {
+  if (allIds.has(a)) err(owner, `el alias "${a}" ya es el id de un juego`);
+  if (seenAlias.has(a)) err(owner, `el alias "${a}" ya lo usa ${seenAlias.get(a)}`);
+  seenAlias.set(a, owner);
 }
 
 // módulos del servidor online: tienen que cargar y exportar al menos start()

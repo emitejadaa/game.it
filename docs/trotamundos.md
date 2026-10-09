@@ -127,7 +127,7 @@ Sin pistas y sin desafío diario.
 
 ## 6. Pruebas
 
-- `npm test` → `node --test "tools/tests/**/*.test.mjs"` (puro y rápido): `geo.test.mjs`, datos (esquema y coherencia),
+- `npm run test:trotamundos` → `node --test --test-concurrency=1 "tools/tests/**/*.test.mjs"` (puro y rápido): `geo.test.mjs`, datos (esquema y coherencia),
   servidor (partidas completas con clientes `ws` reales y relojes acelerados por variable de entorno **solo en pruebas**).
 - `npm run check -- trotamundos` y `npm run build` tienen que pasar.
 - Recorridos en Chromium con Playwright (global en este entorno: `/opt/node22/lib/node_modules/playwright`, con
@@ -136,7 +136,7 @@ Sin pistas y sin desafío diario.
 
 ## 7. Estado
 
-Rama `juego/trotamundos`: modo de un jugador, datos y online hechos y probados (`npm test`, `npm run check`, `npm run build`, y
+Rama `juego/trotamundos`: modo de un jugador, datos y online hechos y probados (`npm run test:trotamundos`, `npm run check`, `npm run build`, y
 recorridos con Chromium y varios navegadores contra el servidor, con el visor real de Google).
 
 - **Datos de hoy** (`datos/paises.json`, v 1, 2026-10-07): 1.057 lugares al azar en 68 países (Argentina 159; Brasil, México,

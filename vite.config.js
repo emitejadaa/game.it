@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const GAMES_DIR = resolve(import.meta.dirname, 'public/games');
@@ -50,7 +51,40 @@ function gamesRegistry() {
   };
 }
 
+/**
+ * Sella el service worker con un hash de todo lo publicado: la versión del caché cambia solo cuando cambia algún archivo,
+ * así cada deploy limpia el caché viejo y nadie queda con un juego nuevo mezclado con módulos compartidos viejos.
+ */
+function swVersion() {
+  let outDir = '';
+  return {
+    name: 'gameit-sw-version',
+    apply: 'build',
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir);
+    },
+    closeBundle() {
+      const sw = join(outDir, 'sw.js');
+      if (!existsSync(sw)) return;
+      const hash = createHash('sha1');
+      const walk = (dir) => {
+        const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1));
+        for (const e of entries) {
+          const path = join(dir, e.name);
+          if (e.isDirectory()) walk(path);
+          else if (path !== sw) hash.update(path.slice(outDir.length)).update(readFileSync(path));
+        }
+      };
+      walk(outDir);
+      const src = readFileSync(sw, 'utf8');
+      const out = src.replace(/const VERSION = '[^']*';/, `const VERSION = '${hash.digest('hex').slice(0, 10)}';`);
+      if (out === src) throw new Error('[sw] no encontré "const VERSION = \'…\';" en public/sw.js');
+      writeFileSync(sw, out);
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [gamesRegistry()],
+  plugins: [gamesRegistry(), swVersion()],
   build: { target: 'es2022' },
 });

@@ -12,7 +12,7 @@
 import { performance } from 'node:perf_hooks';
 import { Match } from '../../public/games/clashball/shared/match.js';
 import { brain, think } from '../../public/games/clashball/shared/ai.js';
-import { MODES, STADIUMS, resolveStadium } from '../../public/games/clashball/shared/stadiums.js';
+import { resolveStadium, hasMode, hasStadium } from '../../public/games/clashball/shared/stadiums.js';
 
 const MAX_PEOPLE = 12;
 const MAX_TEAM = 6;
@@ -149,8 +149,8 @@ export default {
     const out = { ...cur };
     if (typeof s.name === 'string') out.name = clean(s.name, 28);
     if (typeof s.public === 'boolean') out.public = s.public;
-    if (MODES[s.mode]) out.mode = s.mode;
-    if (s.stadium === 'auto' || STADIUMS[s.stadium]) out.stadium = s.stadium;
+    if (hasMode(s.mode)) out.mode = s.mode;
+    if (s.stadium === 'auto' || hasStadium(s.stadium)) out.stadium = s.stadium;
     const score = Number(s.score);
     if (Number.isInteger(score) && score >= 0 && score <= 14) out.score = score;
     const time = Number(s.time);

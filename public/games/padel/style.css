@@ -144,3 +144,8 @@ h2.big { font-size: 30px; color: var(--pelota); }
   #bPausa { top: calc(8px + env(safe-area-inset-top)); right: calc(60px + env(safe-area-inset-right)); }
 }
 :root[data-gi-motion='reduced'] * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+
+/* crédito del proyecto original en la portada */
+.credito { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+.credito a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.credito a:hover { color: var(--text); }

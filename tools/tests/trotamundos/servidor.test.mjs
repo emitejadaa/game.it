@@ -1,4 +1,4 @@
-// Pruebas del módulo online de Trotamundos (server/games/trotamundos.js)  ·  npm test
+// Pruebas del módulo online de Trotamundos (server/games/trotamundos.js)  ·  npm run test:trotamundos
 // Levantan server/index.js como proceso (NODE_ENV=test, tiempos acelerados) y conectan clientes 'ws' reales.
 import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';

@@ -1,0 +1,20 @@
+{
+  "id": "vinculos",
+  "title": { "es": "Vínculos", "en": "Vínculos" },
+  "description": {
+    "es": "16 palabras, 4 grupos escondidos: encontrá qué tienen en común sin pasarte de 4 errores. Un desafío nuevo todos los días.",
+    "en": "16 words, 4 hidden groups: find what they have in common without making more than 4 mistakes. A new puzzle every day."
+  },
+  "categories": ["diarios", "puzzle", "palabras", "casual"],
+  "tags": ["palabras", "words", "grupos", "groups", "asociar", "connect", "categorias", "categories", "diario", "daily", "ingenio", "brain"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": false, "multiplayer": false, "story": false, "daily": true },
+  "daily": { "epoch": "2026-10-06" },
+  "order": 30
+}

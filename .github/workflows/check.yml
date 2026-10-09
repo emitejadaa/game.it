@@ -21,7 +21,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm ci
+        working-directory: server
       - name: Revisar los juegos (game.json, rutas, servidor online)
         run: npm run check
+      - name: Pruebas (núcleo de salas del servidor)
+        run: npm test
       - name: Compilar el portal
         run: npm run build

@@ -3,6 +3,7 @@ import { pick } from './i18n.js';
 import { platform } from './device.js';
 
 export const CATEGORIES = [
+  'diarios',
   'arcade',
   'aventura',
   'accion',
@@ -40,7 +41,11 @@ export const ALL_GAMES = games
   }))
   .sort((a, b) => a.order - b.order || String(pick(a.title)).localeCompare(pick(b.title)));
 
-export const byId = (id) => ALL_GAMES.find((g) => g.id === id);
+/** Busca por id o por alias (un juego renombrado conserva sus enlaces viejos con `aliases` en game.json). */
+/** Juegos con un desafío nuevo por día (los que declaran "daily" en su game.json) y se pueden jugar acá. */
+export const dailyGames = () => available().filter((g) => g.daily);
+
+export const byId = (id) => ALL_GAMES.find((g) => g.id === id || g.aliases?.includes(id));
 
 /** ¿Se puede jugar en este dispositivo? */
 export const playable = (g) => g.platforms.includes(platform());

@@ -1,0 +1,20 @@
+{
+  "id": "cuarteto",
+  "title": { "es": "Cuarteto", "en": "Cuarteto" },
+  "description": {
+    "es": "Cuatro palabras de 5 letras a la vez, en 9 intentos. Un desafío nuevo todos los días.",
+    "en": "Four 5-letter words at once, in 9 tries. A new puzzle every day."
+  },
+  "categories": ["diarios", "palabras", "puzzle", "casual"],
+  "tags": ["palabra", "word", "diario", "daily", "adivinar", "guess", "letras", "letters", "cuatro", "four"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "dom",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": false, "multiplayer": false, "story": false, "daily": true },
+  "daily": { "epoch": "2026-10-06" },
+  "order": 23
+}

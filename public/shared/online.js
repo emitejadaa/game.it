@@ -22,14 +22,17 @@ const TXT = {
     room_full: 'La sala está llena.',
     in_progress: 'La partida ya empezó.',
     server_full: 'El servidor está lleno, probá en un rato.',
+    server_full_rt: 'Hay muchas partidas en vivo. Probá en un rato o jugá contra la compu.',
     too_many_rooms: 'Creaste demasiadas salas. Esperá unos minutos.',
     too_many_joins: 'Demasiados intentos. Esperá un minuto.',
     not_host: 'Solo el anfitrión puede hacer eso.',
     need_players: 'Faltan jugadores para empezar.',
+    start_failed: 'No se pudo empezar la partida. Probá de nuevo.',
     not_your_turn: 'No es tu turno.',
     closed_idle: 'La sala se cerró por inactividad.',
     closed_max_life: 'La sala alcanzó su tiempo máximo.',
     closed_empty: 'La sala se cerró.',
+    closed_error: 'La sala se cerró por un error del servidor. Probá de nuevo.',
     kicked: 'El anfitrión te sacó de la sala.',
     opponent_left: 'Tu rival se fue de la sala.',
     bad_place: 'La blanca no puede ir ahí.',
@@ -45,14 +48,17 @@ const TXT = {
     room_full: 'The room is full.',
     in_progress: 'The match already started.',
     server_full: 'Server is full, try again soon.',
+    server_full_rt: 'Lots of live games right now. Try again soon or play the computer.',
     too_many_rooms: 'Too many rooms created. Wait a few minutes.',
     too_many_joins: 'Too many attempts. Wait a minute.',
     not_host: 'Only the host can do that.',
     need_players: 'Not enough players to start.',
+    start_failed: 'The match could not start. Try again.',
     not_your_turn: 'Not your turn.',
     closed_idle: 'Room closed due to inactivity.',
     closed_max_life: 'Room reached its maximum time.',
     closed_empty: 'The room was closed.',
+    closed_error: 'The room was closed because of a server error. Try again.',
     kicked: 'The host removed you from the room.',
     opponent_left: 'Your opponent left the room.',
     bad_place: 'The cue ball can’t go there.',
@@ -98,8 +104,9 @@ export async function share(game, code) {
 }
 
 export class OnlineRoom {
-  constructor(game, { onRoom, onMessage, onStatus, onJoined } = {}) {
+  constructor(game, { onRoom, onMessage, onStatus, onJoined, onPong } = {}) {
     this.game = game;
+    this.onPong = onPong || null; // el kit de red (net/clock.js) mide el ping con los pong
     this.onRoom = onRoom || (() => {});
     this.onMessage = onMessage || (() => {});
     this.onStatus = onStatus || (() => {});
@@ -112,6 +119,8 @@ export class OnlineRoom {
     this.myId = null;
     this.room = null;
     this.key = `gameit:session:${game}`;
+    // salida a propósito desde el portal (botón Menú): se avisa al servidor para no dejar un "fantasma" en la sala
+    window.GameIt?.onLeave?.(() => this.wanted && this.leave());
   }
 
   get session() {
@@ -182,7 +191,7 @@ export class OnlineRoom {
       this.offset = msg.now - (sentAt + Date.now()) / 2;
       return;
     }
-    if (msg.t === 'pong') return;
+    if (msg.t === 'pong') return void this.onPong?.(msg);
     if (msg.t === 'joined') {
       this.myId = msg.id;
       this.session = { code: msg.code, token: msg.token, name: this.name };
@@ -213,11 +222,12 @@ export class OnlineRoom {
     this.raw(msg);
   }
 
-  create(name) {
+  /** `settings`: opciones iniciales de la sala (los juegos que arrancan solos no pasan por el lobby). */
+  create(name, settings) {
     this.name = name;
     saveName(name);
     this.session = null;
-    this.send({ t: 'create', game: this.game, name });
+    this.send({ t: 'create', game: this.game, name, ...(settings ? { settings } : {}) });
   }
 
   join(code, name) {

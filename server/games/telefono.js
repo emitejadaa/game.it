@@ -21,6 +21,9 @@ import { PROMPTS } from '../../public/games/telefono/shared/prompts.js';
 
 const MAX_OPS = 3000;
 const MAX_POINTS = 60000;
+const MAX_FILLS = 40; // un relleno repinta toda la hoja en cada visor: sin tope se podía congelar las pestañas ajenas
+const FILL_GAP_MS = 250;
+const ALBUMS_MS = 5000; // cooldown por jugador del pedido de álbumes
 const MAX_TEXT = 90;
 const COLORS = 18;
 const SIZES = 4;
@@ -60,14 +63,15 @@ function randomPrompt(room, used) {
 }
 
 function start(room, api) {
-  const prev = room.data?.game || 0;
+  // el número de partida es monótono por sala (sobrevive a toLobby): los clientes descartan mensajes de partidas anteriores
+  const seq = (room.tgSeq = (room.tgSeq || 0) + 1);
   const ids = shuffle(connected(api).map((p) => p.id));
   const st = room.settings;
   const n = ids.length;
   const offset = st.start === 'random' ? 1 : 0;
   const steps = st.chain ? Math.min(n, st.chain) : n;
   const d = {
-    game: prev + 1,
+    game: seq,
     order: ids,
     names: Object.fromEntries(ids.map((id) => [id, room.players.get(id).name])),
     colors: Object.fromEntries(ids.map((id) => [id, room.players.get(id).color])),
@@ -245,6 +249,9 @@ function op(w, o) {
   if (o.k === 'f') {
     const { x, y, c } = o;
     if (![x, y, c].every(Number.isInteger) || x < 0 || x > 1000 || y < 0 || y > 750 || c < 0 || c >= COLORS) return false;
+    const now = Date.now();
+    if (now - (w.lastFill || 0) < FILL_GAP_MS || w.ops.filter((q) => q.k === 'f').length >= MAX_FILLS) return true; // se descarta sin castigo: el cliente ya aplica el mismo límite
+    w.lastFill = now;
     w.ops.push({ k: 'f', x, y, c });
     return true;
   }
@@ -366,7 +373,13 @@ export default {
     if (msg.t === 'albums') {
       // al terminar, cualquiera puede volver a ver todos los álbumes
       if (!d || d.phase !== 'end') return true;
-      api.send(p.id, { t: 'albums', game: d.game, albums: d.chains.map((ch) => ch.map((e) => itemOf(d, e))) });
+      // los álbumes pesan varios MB: se serializan una sola vez y cada jugador puede pedirlos cada ALBUMS_MS
+      const now = Date.now();
+      d.lastAlbums ||= new Map();
+      if (now - (d.lastAlbums.get(p.id) || 0) < ALBUMS_MS) return true;
+      d.lastAlbums.set(p.id, now);
+      d.albumsText ||= JSON.stringify({ t: 'albums', game: d.game, albums: d.chains.map((ch) => ch.map((e) => itemOf(d, e))) });
+      api.sendRaw(p.id, d.albumsText);
       return true;
     }
     if (msg.t === 'again') {

@@ -1,0 +1,20 @@
+{
+  "id": "rumbo",
+  "title": { "es": "Rumbo", "en": "Rumbo" },
+  "description": {
+    "es": "Hay un país escondido en el globo: probá países y mirá qué tan cerca está su frontera por el color. Girá el mundo y deducí dónde está. Un desafío nuevo todos los días.",
+    "en": "A country is hidden on the globe: guess countries and read how close their border is by colour. Spin the world and work out where it is. A new puzzle every day."
+  },
+  "categories": ["diarios", "puzzle", "casual"],
+  "tags": ["globo", "globe", "mapa", "map", "pais", "country", "geografia", "geography", "frontera", "border", "diario", "daily", "adivinar", "guess"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": false, "multiplayer": false, "story": false, "daily": true },
+  "daily": { "epoch": "2026-10-06" },
+  "order": 29
+}

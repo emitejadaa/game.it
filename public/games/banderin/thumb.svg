@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+<defs><filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><clipPath id="f"><rect x="52.0" y="19.0" width="216" height="162" rx="8"/></clipPath></defs>
+<rect width="320" height="200" fill="#07070a"/>
+<g clip-path="url(#f)">
+<rect x="52.0" y="19.0" width="216" height="54.0" fill="#4db8ff"/><rect x="52.0" y="73.0" width="216" height="54.0" fill="#f4f4ff"/><rect x="52.0" y="127.0" width="216" height="54.0" fill="#4db8ff"/>
+<circle cx="160.0" cy="100.0" r="19" fill="#ffb800" filter="url(#g)"/>
+<rect x="52.0" y="19.0" width="54.0" height="54.0" fill="#0d0d13" stroke="#00f0ff" stroke-opacity=".35" stroke-width="1"/>
+<text x="79.0" y="52.0" font-family="JetBrains Mono, monospace" font-weight="700" font-size="17" text-anchor="middle" fill="#00f0ff" fill-opacity=".6">?</text>
+<rect x="214.0" y="19.0" width="54.0" height="54.0" fill="#0d0d13" stroke="#00f0ff" stroke-opacity=".35" stroke-width="1"/>
+<text x="241.0" y="52.0" font-family="JetBrains Mono, monospace" font-weight="700" font-size="17" text-anchor="middle" fill="#00f0ff" fill-opacity=".6">?</text>
+<rect x="52.0" y="73.0" width="54.0" height="54.0" fill="#0d0d13" stroke="#00f0ff" stroke-opacity=".35" stroke-width="1"/>
+<text x="79.0" y="106.0" font-family="JetBrains Mono, monospace" font-weight="700" font-size="17" text-anchor="middle" fill="#00f0ff" fill-opacity=".6">?</text>
+<rect x="214.0" y="73.0" width="54.0" height="54.0" fill="#0d0d13" stroke="#00f0ff" stroke-opacity=".35" stroke-width="1"/>
+<text x="241.0" y="106.0" font-family="JetBrains Mono, monospace" font-weight="700" font-size="17" text-anchor="middle" fill="#00f0ff" fill-opacity=".6">?</text>
+<rect x="52.0" y="127.0" width="54.0" height="54.0" fill="#0d0d13" stroke="#00f0ff" stroke-opacity=".35" stroke-width="1"/>
+<text x="79.0" y="160.0" font-family="JetBrains Mono, monospace" font-weight="700" font-size="17" text-anchor="middle" fill="#00f0ff" fill-opacity=".6">?</text>
+<rect x="214.0" y="127.0" width="54.0" height="54.0" fill="#0d0d13" stroke="#00f0ff" stroke-opacity=".35" stroke-width="1"/>
+<text x="241.0" y="160.0" font-family="JetBrains Mono, monospace" font-weight="700" font-size="17" text-anchor="middle" fill="#00f0ff" fill-opacity=".6">?</text>
+</g>
+<rect x="52.0" y="19.0" width="216" height="162" rx="8" fill="none" stroke="#00f0ff" stroke-width="2.5" filter="url(#g)"/>
+</svg>

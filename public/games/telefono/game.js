@@ -189,6 +189,9 @@ function toCanvas(e) {
   const r = cv.getBoundingClientRect();
   return [Math.round(((e.clientX - r.left) / r.width) * W), Math.round(((e.clientY - r.top) / r.height) * H)];
 }
+const MAX_FILLS = 40;
+// el cliente es más estricto que el servidor (250 ms): así un relleno que el cliente deja pasar nunca llega al servidor "demasiado pronto"
+const FILL_GAP_MS = 350;
 const clampPt = ([x, y]) => [Math.max(-10, Math.min(W + 10, x)), Math.max(-10, Math.min(H + 10, y))];
 cv.addEventListener('pointerdown', (e) => {
   if (!canDraw()) return;
@@ -196,10 +199,23 @@ cv.addEventListener('pointerdown', (e) => {
   unlock();
   const [x, y] = clampPt(toCanvas(e));
   if (S.tool === 'fill') {
+    // mismo límite que el servidor (40 rellenos por dibujo, 250 ms entre uno y otro): si no, lo que ves no coincidiría con lo que ven los demás
+    const nowF = performance.now();
+    const fills = S.ops.filter((q) => q.k === 'f').length;
+    if (fills >= MAX_FILLS || nowF - (S.lastFill || 0) < FILL_GAP_MS) {
+      if (fills >= MAX_FILLS) {
+        const b = document.querySelector('.tb[data-tool="fill"]');
+        b?.classList.remove('nope');
+        void b?.offsetWidth;
+        b?.classList.add('nope');
+      }
+      return;
+    }
+    S.lastFill = nowF;
     const op = { k: 'f', x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)), c: S.color };
     S.ops.push(op);
+    online.send({ t: 'op', o: op }); // antes de aplicarlo: el relleno tarda en pintarse y el servidor mide cuándo llega
     apply(g, op);
-    online.send({ t: 'op', o: op });
     return;
   }
   cv.setPointerCapture(e.pointerId);
@@ -691,13 +707,18 @@ async function saveAlbum(items) {
   sfx('ui');
 }
 
-function leave() {
-  online?.leave();
+/** Sale de la sala (por voluntad propia, porque se cerró o porque te sacaron): sin esto, una sala nueva (partida 1) se ignoraba por ser "más vieja" que la anterior. */
+function resetSession() {
   S.room = null;
   S.tl = null;
-  S.task = null;
+  newGame(0);
   stopReplays();
   $('app').hidden = true;
+}
+
+function leave() {
+  online?.leave();
+  resetSession();
   show('home');
   refreshRooms();
 }
@@ -780,10 +801,7 @@ function onMessage(m) {
   }
   if (m.t === 'closed' || m.t === 'kicked') {
     $('h-status').textContent = netText(m.t === 'kicked' ? 'kicked' : `closed_${m.reason}`);
-    S.room = null;
-    S.tl = null;
-    $('app').hidden = true;
-    stopReplays();
+    resetSession();
     show('home');
   }
 }

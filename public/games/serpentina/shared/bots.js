@@ -5,7 +5,7 @@
  */
 import { CFG, bodyR, foodR } from './world.js';
 
-export const BOT_NAMES = ['Víbora', 'Fideo', 'Slinky', 'Culebra', 'Zigzag', 'Manguera', 'Tallarín', 'Cordón', 'Neón', 'Ñandú', 'Espiral', 'Chicle', 'Sierpe', 'Anaconda', 'Rulo', 'Pixel', 'Lombriz', 'Serpen', 'Kraken', 'Cometa', 'Onda', 'Tren', 'Fleco', 'Hilo', 'Bucle', 'Laser', 'Mambo', 'Cascabel', 'Ovillo', 'Trenza'];
+export const BOT_NAMES = ['Víbora', 'Fideo', 'Resorte', 'Culebra', 'Zigzag', 'Manguera', 'Tallarín', 'Cordón', 'Neón', 'Ñandú', 'Espiral', 'Chicle', 'Sierpe', 'Anaconda', 'Rulo', 'Pixel', 'Lombriz', 'Serpen', 'Kraken', 'Cometa', 'Onda', 'Tren', 'Fleco', 'Hilo', 'Bucle', 'Laser', 'Mambo', 'Cascabel', 'Ovillo', 'Trenza'];
 
 const CAND = [0, 0.35, -0.35, 0.75, -0.75, 1.2, -1.2, 1.7, -1.7, 2.4, -2.4, Math.PI];
 

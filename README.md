@@ -7,6 +7,8 @@ npm install
 npm run dev      # desarrollo en http://localhost:5173
 npm run build    # sitio estático en dist/ (se puede subir a Vercel, Netlify, GitHub Pages…)
 npm run preview  # prueba el build
+npm run check    # revisa los juegos (game.json, rutas, módulos online)
+npm test         # pruebas: núcleo de salas del servidor, juegos diarios, reglas compartidas (necesita `npm ci` también en server/)
 ```
 
 ## ¿Querés sumar tu juego?
@@ -31,8 +33,8 @@ Hay una plantilla lista en [`templates/juego-base/`](templates/juego-base/) y `n
 
 **Publicado en Render** (cada push a `main` se despliega solo):
 - Web: https://game-it-63r9.onrender.com (sitio estático: `npm ci && npm run build` → `dist/`)
-- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel, Batalla Naval y Trotamundos): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
-  Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma), `TRUST_PROXY=1`; límites ajustables en `server/index.js` (`CFG`).
+- Servidor online (salas de Minigolf, Tateti, 4 en línea, Drift, Sky Hop, Clashball, Ajedrez, Ameba, Serpentina, Billar, Chispa, Mecha Corta, Garabato, Teléfono Loco, La Cabra · Pádel, Batalla Naval, Voleyball y Trotamundos): https://gameit-server-fy2t.onrender.com — `node server/index.js`.
+  Variables: `ALLOWED_ORIGINS` (orígenes permitidos, separados por coma). La IP de cada cliente (para los límites por IP) se detecta sola cuando hay un proxy delante (solo se confía en los encabezados si quien se conecta por TCP es una dirección interna); se puede fijar con `CLIENT_IP_HEADER` (p. ej. `cf-connecting-ip`) o `TRUST_PROXY_HOPS` (cuántos proxies agregan una entrada a `X-Forwarded-For`, contando desde la derecha). `MAX_RT_ROOMS` (4 por defecto) es el tope de salas en tiempo real a la vez (Ameba, Serpentina, Clashball, Pádel y las arenas nuevas): el servidor gratis de Render tiene 0,1 CPU; al llegar al tope, crear otra devuelve `server_full_rt`. `/health` informa `rt: { rooms, max, avgTickMs }`. Límites ajustables en `server/index.js` (`CFG`).
 - En desarrollo: `npm run server` levanta el servidor local en `ws://localhost:8787`, que los juegos online usan automáticamente.
 
 ## Anuncios (Google AdSense)
@@ -64,7 +66,10 @@ src/
   ui/loader.js          pantalla de carga general (menú y juegos)
   ui/search.js          panel de búsqueda que baja desde arriba, con categorías
   ui/prefs-panel.js     popup de preferencias (esquina superior derecha)
-  ui/player.js          reproductor: iframe aislado + puente con el SDK
+  ui/report.js          popup "Reportar un problema" (correo → código → dónde → tipo → detalle → gracias)
+  ui/report-flow.js     la lógica pura de esos pasos (se prueba sin DOM)
+  core/report-api.js    envío del reporte: hoy un simulacro (cualquier código vale); el contrato HTTP está en el encabezado
+  ui/player.js          reproductor: iframe aislado + puente con el SDK; pausa por razones (hold/release)
   styles/               tokens (colores, curvas de animación), menú, paneles
 public/
   sdk/gameit.js         SDK que usa cada juego
@@ -73,7 +78,7 @@ public/
 ```
 
 - **Sin cuentas.** Preferencias e historial se guardan en `localStorage`. Los juegos no guardan progreso.
-- **Caché.** En producción un service worker guarda el portal y los juegos ya jugados.
+- **Caché.** En producción un service worker guarda el portal y los juegos ya jugados. Su versión sale de un hash del build (`vite.config.js`), así que cada deploy renueva el caché solo.
 - **Aislamiento.** Cada juego corre en su propio `iframe`: puede ser canvas, WebGL, Phaser, Three.js, Unity, Godot, React… Al salir, el iframe se destruye y se libera memoria, audio y GPU.
 
 ## Reglas comunes para todos los juegos
@@ -174,6 +179,24 @@ paso fijo de 60 ticks/s, jugador radio 15 / aceleración 0,1 (0,07 con la patada
 pelota radio 10 / amortiguación 0,99, patada de fuerza 5 a menos de 4 px, saque con barrera en el círculo, gol de oro.
 Online: el servidor simula y manda el estado 30 veces por segundo; cada cliente manda sus teclas solo cuando cambian,
 predice su jugador y corrige con las confirmaciones del servidor (se nota como si jugara en local).
+
+### Voleyball (tiempo real)
+
+Vóley de costado como los servidores de vóley de HaxBall, armado sobre Clashball: los jugadores son discos que flotan y se
+mueven con la misma física de HaxBall (`shared/physics.js`, 60 ticks/s) y no pueden pasar al otro lado de la red (abajo
+la red, arriba una barrera invisible). La pelota cae con gravedad, atraviesa a los jugadores y solo se le pega con la
+patada (Espacio/X): sale desde el centro del jugador hacia la pelota, así que desde abajo sube y desde arriba es un
+remate. Rebota en las paredes de los costados y en la red; arriba no hay techo (si sale del mapa, una flecha en el borde
+la sigue). Reglas en `public/games/voleyball/shared/match.js` (las mismas en el navegador y en el servidor): es punto
+cuando la pelota toca el piso, punto por jugada, saca el equipo que hizo el punto (si recupera el saque, rota quién saca),
+3 toques por equipo (el saque cuenta como el primero y el bloqueo no cuenta), ganar por 2 opcional y tiempo con punto de
+oro. Modos Clásico, Playa (pelota que flota) y Turbo; canchas Chica, Clásica y Grande. Los bots (`shared/ai.js`) simulan
+la trayectoria con la misma física, eligen quién va y buscan dónde pararse respecto de la pelota para que el golpe salga
+como quieren (recepción alta hacia la red, armado y remate desde arriba, bloqueo en la red y defensa abajo; 3 niveles).
+Si un equipo queda vacío (práctica), saca una máquina. Online igual que Clashball (`server/games/voleyball.js`): el
+servidor simula, manda el estado 30 veces por segundo con los golpes, piques y puntos como eventos y el cliente predice
+su jugador; salas públicas, bots, espectadores y chat con el relato de cada punto (remate, bombazo, ace, bloqueo, punto de
+17 toques…).
 
 ### Ajedrez
 
@@ -276,6 +299,69 @@ compu y en el servidor online, que baraja, valida cada jugada y a cada jugador l
 "¡Última!" con una carta; si otro te agarra antes de que juegue el siguiente, robás 2. Opcional: acumular +2/+4.
 Online de 2 a 6 (el anfitrión puede sumar compu); si alguien se desconecta juega solo hasta que vuelve.
 
+### Arenas en tiempo real (base común) y Estela
+
+Las arenas FFA con bots comparten una base para que cada juego nuevo sean unas ~100 líneas en el servidor:
+
+- `server/games/_arena.js`: `arenaGame({ World, tps, viewer, brain, think, command, settings, … })` devuelve el módulo completo para
+  `server/index.js` (el contrato está documentado en el encabezado del archivo). Pone el bucle de paso fijo con recuperación de atraso
+  y protegido con try/catch, el arranque automático al crear la sala (así "Partida rápida" no cae en un lobby que nadie empezó),
+  los bots que completan la arena, un gobernador de CPU (saca bots si el costo por paso pasa del 25 % del intervalo), un snapshot por
+  jugador con backpressure (se saltea si el socket tiene más de 64 KB sin enviar), ranking a 1 Hz, y el mensaje `reset` al entrar o reconectar.
+  Los jugadores desconectados siguen en el mundo manejados por un bot hasta que vence la gracia. Un juego declara `realtime: true`
+  para contar en `MAX_RT_ROOMS`.
+- `public/shared/net/`: kit de red del cliente. `clock.js` (RTT y reloj del servidor con la muestra de menor RTT), `interp.js` (buffer de
+  snapshots con retardo adaptativo según el jitter), `predict.js` (entradas con número de secuencia y reconciliación suave),
+  `input.js` y `status.js` (chip con el ping y "Reconectando…"). Todo es lógica pura testeable en Node.
+- `public/shared/arena-lobby.js` + `arena.css`: el menú común (nombre y color, Partida rápida, Sala privada con código y link, Sin conexión
+  contra bots, lista de salas en vivo). Su encabezado documenta cómo usarlo.
+- `tools/netsim/delay-proxy.mjs` pone latencia, jitter y paradas entre el navegador y el servidor para probar con ~160 ms de RTT
+  (`?server=ws://localhost:<puerto del proxy>` en el link del juego, solo en localhost); `tools/load-bots.mjs` simula N jugadores y mide
+  ms por paso del servidor y KB/s por cliente.
+
+**Estela**: motos de luz en una grilla (160×160 por defecto, 20 pasos/s). Avanzás una celda por paso dejando una estela de largo máximo que
+crece con el puntaje; chocar con una estela o una pared te hace explotar (el derribo suma al dueño de la estela; chocarte solo no da puntos a nadie), y dos
+cabezas en la misma celda mueren las dos. El turbo gasta energía que se recarga rozando paredes y estelas. Se reaparece con escudo.
+El mundo (`shared/world.js`) es determinista y corre igual en el servidor y sin conexión; la moto propia se predice y se reconcilia con
+el servidor (responde en un cuadro aun con 250 ms de RTT) y las demás se interpolan. Cada cliente recibe solo lo cercano (interés de ±72 celdas).
+Medido con 10 jugadores en la máquina de desarrollo: ~0,6 ms por paso del servidor y ~3,5 KB/s por cliente.
+
+### Sumo y Rey de la Colina (arenas de discos)
+
+Comparten la física de `public/shared/arena-physics.js` (discos con masa, amortiguación y choques elásticos, paso fijo de 1/30 s,
+determinista y sin ganancia de energía). Los dos corren a 30 pasos/s con snapshots a 15 Hz; el disco propio se predice y se reconcilia
+(mezcla de 150 ms, salto sobre 40 px) y los demás se interpolan con el retardo adaptativo del kit de red. Hasta 10 personas más bots.
+
+- **Sumo** (`public/games/sumo/`): discos de radio 18 que se empujan sobre una plataforma que se achica del 100 % al 35 % en 75 s (después hay
+  muerte súbita, así ninguna ronda queda trabada). Quien sale de la plataforma mira; el último en pie gana la ronda (+3) y cada caída suma +1 a
+  quien te tocó en los 2 s previos. Rondas continuas, Empujón con recarga de 1,2 s. Medido con 10 jugadores: 0,44 ms por paso y 9 KB/s por cliente.
+- **Rey de la Colina** (`public/games/rey/`): arena cuadrada con paredes que rebotan y 3 pozos; la colina (radio 70) se muda cada 25 s y avisa 3 s
+  antes. Sumás 1 punto por segundo si estás solo adentro (disputada no suma nadie); Empujón y Onda (6 s de recarga, radio 120). Caer a un pozo = reaparecer
+  a los 2 s. Gana quien llega a 100 o lidera a los 3 minutos. 0,6 ms por paso con 10 jugadores.
+
+En el celular, joystick flotante a la izquierda y botones a la derecha (Empujón; y Onda en Rey). Los bots tienen tres niveles y predicen su posición
+con la velocidad para frenar antes del borde o de un pozo.
+
+### Territorio (captura de territorio)
+
+Salís de tu territorio dejando un rastro y, si volvés, te quedás con lo que encerraste (relleno desde el borde dentro de la caja del territorio más
+el rastro; un lazo de 100x100 cuesta ~3,5 ms). Si alguien pisa tu rastro (o vos el tuyo) perdés el territorio y el otro suma un derribo; de frente
+mueren los dos; adentro de lo tuyo estás a salvo. Grilla de 120x120 a 10 pasos/s, hasta 10 personas más bots. El territorio viaja por deltas RLE por fila
+dentro del área de interés; la cabeza y la captura propias se predicen con el mismo algoritmo y se reconcilian con el servidor. El cliente dibuja el
+territorio en una capa cacheada actualizada por deltas. Controles: flechas/WASD, deslizar o cruceta opcional. 1,3 ms por paso y ~2 KB/s por cliente.
+
+### Caída Libre (bloques que caen, último en pie)
+
+Hasta 16 personas más bots, cada una con su tablero de 10x20 y piezas de una bolsa de 7 compartida por toda la ronda. Limpiar líneas manda basura (2 = 1,
+3 = 2, 4 = 4, más racha) con un hueco por ataque, que se cancela con tus líneas y entra 1 s después; "la marea" evita que una ronda se eternice. Se elige a
+quién atacar (azar, quien te ataca, el más débil, el líder). **Autoridad distinta a las demás arenas:** no hay física por paso en el servidor; el cliente
+simula su tablero (respuesta inmediata) y manda cada fijado `lk`, el servidor lo reaplica con `shared/rules.js` (pieza de la bolsa, posición legal, apoyada
+y alcanzable), calcula líneas, basura y derribos y contesta `ak`; si algo no valida manda `bd` con el tablero real y a las 4 faltas en un minuto saca al
+jugador. Los rivales llegan como resúmenes a 2 Hz. Módulo propio sobre la API de salas (no `arenaGame`) y no cuenta en `MAX_RT_ROOMS`. Sin conexión:
+Maratón y Contra la compu. En el celular: tocar gira, arrastrar mueve por columnas, deslizar abajo = caída suave o dura. ~1,7 KB/s por cliente con 16.
+
+Pruebas con `npm test`; para medir cada arena: `node tools/load-bots.mjs --game sumo|rey|territorio|caida|estela --clients 10`.
+
 ### Drift Neon
 
 Física arcade propia en `public/games/drift/shared/car.js` (paso fijo de 1/120 s): el volante define una velocidad de
@@ -311,7 +397,47 @@ reconexión; el servidor lleva los relojes y el puntaje. Diseño completo y deci
   navegador (que haya imagen y sea oficial de Google), con límites de países de Natural Earth (dominio público). Se generan
   con `node tools/trotamundos-datos.mjs` (ver `--help`: baja las fuentes, arma candidatos, valida con pocas cargas y frena
   si Google responde con un bloqueo). Para sumar lugares o famosos se agrega a la lista, se valida y se vuelve a armar.
-- **Pruebas:** `npm test` corre las pruebas de la lógica compartida, los datos, el servidor (con clientes `ws` reales) y el
-  cliente online (hace falta `npm ci --prefix server` una vez).
+- **Pruebas:** `npm run test:trotamundos` corre las pruebas de la lógica compartida, los datos, el servidor (con clientes `ws`
+  reales) y el cliente online (hace falta `npm ci --prefix server` una vez; tarda unos 40 s y va aparte de `npm test`).
+
+## Juegos diarios
+
+Un desafío nuevo por día, igual para todos y a la misma hora: **cambia a las 00:00 de Argentina** (UTC−3 fijo). Cada juego
+guarda su día, sus estadísticas y su racha por idioma en `localStorage` (`gameit:<id>:…`) y deja un resumen en
+`gameit:daily:<id>` que el menú usa para mostrar "Nuevo" o "✓ racha N" en el estante **Desafíos de hoy** (los juegos con
+`"daily": { "epoch": "AAAA-MM-DD" }` en su `game.json`; `epoch` es el día del desafío n.º 1 y la categoría es `diarios`).
+
+Todo lo común está en `public/shared/` y se usa con rutas absolutas (`/shared/…`):
+
+| Módulo | Qué hace |
+| --- | --- |
+| `daily.js` | Día de Argentina, n.º de desafío, generador con semilla (`rng`), estado del día, estadísticas y racha, compartir. |
+| `daily-ui.js` + `daily.css` | Ventanas, avisos, estadísticas con histograma, resultado con cuenta regresiva y compartir, alto contraste para daltonismo. |
+| `guess-grid.js` | Motor de los juegos de adivinar en grilla (casillas que giran, teclado en pantalla y físico): Quinteto, Cuarteto, Dígitos, Ecuación y Cálculo solo aportan sus reglas y textos. |
+| `daily-shell.js` | `createDailyApp({ id, epoch, rows, t, load, build })`: cabecera, ayuda, estadísticas, resultado, modo práctica, cambio de idioma y de día a medianoche; el juego arma su pantalla en `build`. |
+| `math-expr.js` | Cuentas exactas con fracciones (sin `eval` ni decimales), validación de ecuaciones, forma canónica y generadores con semilla. |
+| `countries/` + `country-input.js` | 193 países con nombres es/en y alias, centros, distancia y rumbo, y el campo con autocompletado. |
+| `words5/` | Palabras de 5 letras: válidas (de los diccionarios de Mecha Corta) y respuestas curadas. |
+
+Datos generados con herramientas de `tools/daily/` (`words5.mjs`, `countries.mjs` desde Natural Earth y `flag-icons`, y las de cada juego);
+cada carpeta de datos tiene su `LEEME.txt` con las fuentes y licencias. Para sumar un diario nuevo, copiar `public/games/banderin/` (con
+`createDailyApp`) o `public/games/quinteto/` (con `createGuessGame`).
+
+### Los diarios, uno por uno
+
+| Juego | Qué se juega | De dónde salen los datos |
+| --- | --- | --- |
+| Quinteto, Cuarteto | Palabra de 5 letras en 6 intentos (Cuarteto: 4 tableros a la vez, 9 intentos). | `words5/`, de los diccionarios de Mecha Corta. |
+| Dígitos, Ecuación, Cálculo | Número, ecuación o cuenta secreta con pistas por casilla. | Se generan con la semilla del día (`math-expr.js`). |
+| Banderín | Bandera tapada con bloques que se destapan en 6 intentos. | `flag-icons` (MIT), solo se baja la bandera del día. |
+| Silueta | País por su silueta, con km, flecha y % de cercanía por intento. | Natural Earth (dominio público), `shapes.json` armado con `tools/daily/countries.mjs`. |
+| Rumbo | Globo que se gira: cada país probado se pinta según qué tan cerca está su frontera de la del país del día (intentos ilimitados). | Mismo dataset, `world.json`; proyección y distancias en `geo.js`. |
+| Vínculos | 16 palabras en 4 grupos ocultos, 4 errores. | `data/puzzles-<idioma>.json` (60 por idioma, escritos para el juego); `node tools/daily/vinculos-check.mjs` los valida. |
+| Colmena | 7 letras en un panal: palabras de 4 o más con la letra central; rangos por % del máximo. | `tools/daily/colmena-gen.mjs` arma 730 panales por idioma con los diccionarios de Mecha; las "rebuscadas" valen sin sumar. |
+| Tibio | Palabra secreta; cada intento devuelve su puesto por cercanía de significado. | Vectores fastText common-crawl (CC BY-SA 3.0, ver `tibio/data/LICENSE.txt`) reducidos con PCA a 96 dimensiones e int8 (≈3 MB por idioma); `tools/daily/tibio-build.py` los regenera. El ranking se calcula en el navegador. |
+
+El texto para compartir de cada uno es `game.it · <Juego> #N …` con cuadraditos de colores y el link; en modo práctica no se
+suma nada a las estadísticas. Las listas de respuestas y de puzzles se pueden ampliar sin tocar el código (los desafíos
+siguen en orden y vuelven a empezar al agotarse: `vinculos-check` informa hasta qué fecha alcanzan los puzzles cargados).
 
 El registro se genera solo: al agregar la carpeta con `game.json`, el juego aparece en el menú, la búsqueda y las categorías.

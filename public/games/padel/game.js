@@ -16,6 +16,7 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
 // ================================================================ textos
 const TXT = {
+  basedOn: { es: 'Adaptación del partido de', en: 'Adapted from the match of' },
   tagline: { es: 'Pádel 2 contra 2 en la pista: cristal, malla, bandeja, víbora y remate por 3.', en: '2 vs 2 padel on court: glass, fence, bandeja, víbora and smashes out of the court.' },
   vsCpu: { es: 'PARTIDO CONTRA LA COMPU', en: 'MATCH VS CPU' },
   vsCpuSub: { es: 'Vos y tu pareja contra dos rivales', en: 'You and your partner vs two rivals' },

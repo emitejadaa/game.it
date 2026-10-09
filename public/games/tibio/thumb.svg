@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+<defs><filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="320" height="200" fill="#07070a"/>
+<rect x="34" y="22" width="252" height="40" rx="9" fill="#b6ff00" fill-opacity=".14" stroke="#b6ff00" stroke-width="2" filter="url(#g)"/>
+<rect x="34" y="22" width="236" height="40" rx="9" fill="#b6ff00" fill-opacity=".22"/>
+<rect x="50" y="36" width="82" height="12" rx="6" fill="#eaeaf0"/>
+<rect x="236" y="36" width="34" height="12" rx="6" fill="#07070a"/>
+<rect x="34" y="72" width="252" height="30" rx="8" fill="none" stroke="#ffb800" stroke-opacity=".7" stroke-width="1.5"/>
+<rect x="34" y="72" width="170" height="30" rx="8" fill="#ffb800" fill-opacity=".2"/>
+<rect x="50" y="82" width="64" height="10" rx="5" fill="#eaeaf0" fill-opacity=".85"/>
+<rect x="232" y="82" width="38" height="10" rx="5" fill="#ffb800"/>
+<rect x="34" y="110" width="252" height="30" rx="8" fill="none" stroke="#ffb800" stroke-opacity=".7" stroke-width="1.5"/>
+<rect x="34" y="110" width="118" height="30" rx="8" fill="#ffb800" fill-opacity=".2"/>
+<rect x="50" y="120" width="92" height="10" rx="5" fill="#eaeaf0" fill-opacity=".85"/>
+<rect x="232" y="120" width="38" height="10" rx="5" fill="#ffb800"/>
+<rect x="34" y="148" width="252" height="30" rx="8" fill="none" stroke="#ff3b5c" stroke-opacity=".7" stroke-width="1.5"/>
+<rect x="34" y="148" width="46" height="30" rx="8" fill="#ff3b5c" fill-opacity=".25"/>
+<rect x="50" y="158" width="74" height="10" rx="5" fill="#eaeaf0" fill-opacity=".85"/>
+<rect x="228" y="158" width="42" height="10" rx="5" fill="#ff3b5c"/>
+</svg>

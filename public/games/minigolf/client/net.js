@@ -15,6 +15,8 @@ export class Net {
     this.retry = 0;
     this.wanted = false;
     this.timer = 0;
+    // salida a propósito desde el portal (botón Menú): se avisa al servidor para no dejar un "fantasma" en la sala
+    window.GameIt?.onLeave?.(() => this.wanted && this.close());
   }
 
   get session() {

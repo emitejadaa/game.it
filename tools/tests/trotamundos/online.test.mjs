@@ -1,4 +1,4 @@
-// Pruebas de la lógica pura del cliente online de Trotamundos (online-logica.js, online-textos.js)  ·  npm test
+// Pruebas de la lógica pura del cliente online de Trotamundos (online-logica.js, online-textos.js)  ·  npm run test:trotamundos
 // Sin navegador ni red: las pantallas del online se prueban en un Chromium aparte. Los datos de ejemplo salen del
 // módulo real del servidor (server/games/trotamundos.js) para que el contrato de tm no se desacople.
 import test from 'node:test';

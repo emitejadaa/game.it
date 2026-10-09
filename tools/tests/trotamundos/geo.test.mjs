@@ -1,4 +1,4 @@
-// Pruebas de public/games/trotamundos/shared/geo.js  ·  npm test
+// Pruebas de public/games/trotamundos/shared/geo.js  ·  npm run test:trotamundos
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {

@@ -1,4 +1,4 @@
-// Pruebas de los datos de Trotamundos y de la lógica pura de tools/trotamundos-datos.mjs  ·  npm test
+// Pruebas de los datos de Trotamundos y de la lógica pura de tools/trotamundos-datos.mjs  ·  npm run test:trotamundos
 // Sin red ni navegador: valida los archivos finales de public/games/trotamundos/datos/ y las funciones de la herramienta.
 import test from 'node:test';
 import assert from 'node:assert/strict';

@@ -1,0 +1,19 @@
+{
+  "id": "sumo",
+  "title": { "es": "Sumo", "en": "Sumo" },
+  "description": {
+    "es": "Discos sobre una plataforma que se achica: empujá, hacé un empujón en el momento justo y sacá a todos afuera. Online con gente y bots, sala privada o sin conexión.",
+    "en": "Discs on a shrinking platform: shove, time your dash and knock everyone off. Online with people and bots, private room or offline."
+  },
+  "categories": ["arcade", "accion", "online", "multijugador", "casual"],
+  "tags": ["sumo", "discos", "empujar", "plataforma", "ring", "push", "shove", "knockout", "party", "io", "arena", "bots", "neon"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 10, "bots": true, "story": false },
+  "order": 34
+}

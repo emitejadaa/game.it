@@ -1,0 +1,170 @@
+/* Silueta: la silueta del país en neón dentro de una tarjeta, y filas de intentos con distancia, flecha y cercanía. */
+.sl-card {
+  position: relative;
+  width: min(100%, 340px);
+  height: clamp(140px, calc(100dvh - 500px), 300px);
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    linear-gradient(var(--gi-line, rgba(255, 255, 255, 0.15)) 1px, transparent 1px) 0 0 / 34px 34px,
+    linear-gradient(90deg, var(--gi-line, rgba(255, 255, 255, 0.15)) 1px, transparent 1px) 0 0 / 34px 34px,
+    var(--dg-surface);
+  background-position: center;
+}
+.sl-card::before {
+  /* velo para que la grilla quede apenas insinuada */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(closest-side, transparent 40%, var(--dg-surface) 130%);
+  opacity: 0.8;
+  pointer-events: none;
+}
+.sl-svg {
+  /* absoluto para que el alto sea el de la tarjeta (con alto automático el SVG se agranda por su proporción) */
+  position: absolute;
+  inset: 14px;
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  display: block;
+  overflow: visible;
+}
+.sl-shape {
+  fill: color-mix(in oklab, var(--gi-accent, #00f0ff) 78%, transparent);
+  stroke: var(--gi-accent, #00f0ff);
+  stroke-width: 0.9;
+  stroke-linejoin: round;
+  fill-rule: evenodd;
+  animation: sl-in 700ms var(--dg-ease) both;
+}
+:root[data-gi-glow='on'] .sl-svg {
+  filter: drop-shadow(0 0 5px color-mix(in oklab, var(--gi-accent, #00f0ff) 70%, transparent));
+}
+@keyframes sl-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    transform-origin: 50px 50px;
+  }
+}
+:root[data-gi-motion='reduced'] .sl-shape {
+  animation-duration: 1ms !important;
+}
+.sl-name {
+  width: min(100%, 340px);
+  flex: none;
+  padding: 5px 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--dg-ok);
+  color: var(--dg-ink);
+}
+.sl-name.lost {
+  background: var(--gi-fg, #eaeaf0);
+  color: var(--gi-bg, #07070a);
+}
+.sl-name[hidden] {
+  display: none;
+}
+.sl-count {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gi-mute, #6f6f80);
+}
+
+/* filas de intentos */
+.sl-guess {
+  position: relative;
+  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr) auto 22px 34px;
+  min-height: 38px;
+  padding-bottom: 3px;
+  font-size: 11px;
+}
+.sl-guess .sl-n {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.15;
+}
+.sl-guess .sl-km {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--gi-mute, #6f6f80);
+}
+.sl-guess .sl-ar {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: var(--gi-accent, #00f0ff);
+}
+.sl-guess .sl-ar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sl-guess .sl-pc {
+  text-align: right;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.sl-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: calc(var(--p) * 1%);
+  background: var(--gi-accent, #00f0ff);
+  transform-origin: left;
+  animation: sl-grow 600ms var(--dg-ease) both;
+}
+@keyframes sl-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+:root[data-gi-motion='reduced'] .sl-bar {
+  animation-duration: 1ms !important;
+}
+.sl-guess.best {
+  border-color: var(--gi-accent, #00f0ff);
+}
+.sl-guess.best .sl-n::after {
+  content: ' ★';
+  color: var(--gi-accent, #00f0ff);
+}
+.sl-guess.right .sl-km,
+.sl-guess.right .sl-ar,
+.sl-guess.right .sl-pc {
+  color: var(--dg-ink);
+}
+.sl-guess.right .sl-bar {
+  background: var(--dg-ink);
+  opacity: 0.35;
+}
+.sl-guess.empty {
+  color: transparent;
+}
+.sl-guess.wrong {
+  border-color: var(--gi-line, rgba(255, 255, 255, 0.15));
+}
+.sl-guess.best {
+  border-color: var(--gi-accent, #00f0ff);
+}

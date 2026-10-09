@@ -1,0 +1,186 @@
+/* Tibio: lista de intentos con barras de cercanía y campo fijo abajo. */
+.tb-status,
+.tb-last,
+.tb-list,
+.tb-controls {
+  width: min(100%, 420px);
+  flex: none;
+}
+.tb-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gi-mute, #6f6f80);
+}
+.tb-best b {
+  color: var(--gi-fg, #eaeaf0);
+  letter-spacing: 0.04em;
+}
+
+/* barra proporcional (escala logarítmica): el color depende del puesto */
+.tb-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.tb-fill i {
+  display: block;
+  height: 100%;
+  background: var(--tb-c);
+  opacity: 0.28;
+  border-radius: inherit;
+  transition: width 520ms var(--dg-ease);
+}
+.tb-near {
+  --tb-c: var(--dg-ok);
+}
+.tb-mid {
+  --tb-c: var(--dg-near);
+}
+.tb-far {
+  --tb-c: var(--gi-red, #ff3b5c);
+}
+
+.tb-last {
+  position: relative;
+  padding: 10px 14px;
+  border: 1.5px solid var(--tb-c);
+  border-radius: 12px;
+  background: var(--dg-surface);
+  animation: dg-rise 380ms var(--dg-ease) both;
+}
+.tb-last[hidden] {
+  display: none;
+}
+.tb-last .tb-fill i {
+  opacity: 0.22;
+}
+:root[data-gi-glow='on'] .tb-last {
+  box-shadow: 0 0 18px -6px var(--tb-c);
+}
+.tb-lw {
+  position: relative;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.tb-lr {
+  position: relative;
+  margin-top: 2px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--tb-c);
+}
+.tb-last.win {
+  background: var(--dg-ok);
+  color: var(--dg-ink);
+}
+.tb-last.win .tb-lr {
+  color: var(--dg-ink);
+}
+
+.tb-list {
+  display: grid;
+  gap: 5px;
+}
+.tb-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+  border-radius: 8px;
+  font-size: 14px;
+}
+.tb-row.new {
+  animation: dg-rise 380ms var(--dg-ease) both;
+}
+.tb-word,
+.tb-row b {
+  position: relative;
+}
+.tb-word {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tb-word small {
+  color: var(--gi-amber, #ffb800);
+}
+.tb-row b {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--tb-c);
+}
+.tb-row.win {
+  border-color: var(--dg-ok);
+}
+.tb-row.win .tb-fill i {
+  opacity: 0.9;
+}
+.tb-row.win,
+.tb-row.win b {
+  color: var(--dg-ink);
+  font-weight: 700;
+}
+.tb-empty {
+  text-align: center;
+  padding: 18px 8px;
+}
+
+/* campo y botones: quedan pegados abajo aunque la lista sea larga */
+.tb-controls {
+  position: sticky;
+  bottom: -8px;
+  z-index: 3;
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px 0;
+  background: linear-gradient(to bottom, transparent, var(--gi-bg, #07070a) 14px);
+}
+.tb-controls.off {
+  opacity: 0.45;
+}
+.tb-entry {
+  display: flex;
+  gap: 8px;
+}
+.tb-actions {
+  display: flex;
+  gap: 8px;
+}
+.tb-small {
+  flex: 1;
+  min-height: 32px;
+  height: 32px;
+  font-size: 12px;
+  padding: 0 10px;
+}
+.tb-small.arm {
+  border-color: var(--gi-red, #ff3b5c);
+  color: var(--gi-red, #ff3b5c);
+}
+.tb-small:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* rótulos del histograma más largos que un dígito ("101-200") */
+.dg-hrow {
+  grid-template-columns: 52px 1fr;
+}
+.dg-hrow span {
+  white-space: nowrap;
+  text-align: right;
+}

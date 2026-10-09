@@ -1,0 +1,19 @@
+{
+  "id": "caida",
+  "title": { "es": "Caída Libre", "en": "Free Fall" },
+  "description": {
+    "es": "Bloques que caen en modo battle royale: limpiá líneas para mandarles basura a los demás y quedá último en pie. Online con hasta 16 jugadores y bots, sala privada, maratón o contra la compu.",
+    "en": "Falling blocks as a battle royale: clear lines to send garbage to everyone else and be the last one standing. Online with up to 16 players and bots, private room, marathon or versus the CPU."
+  },
+  "categories": ["arcade", "puzzle", "online", "multijugador", "casual"],
+  "tags": ["bloques", "blocks", "caida", "falling", "puzzle", "battle", "royale", "lineas", "lines", "basura", "garbage", "arena", "bots", "neon"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["keyboard", "touch"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 16, "bots": true, "story": false },
+  "order": 37
+}

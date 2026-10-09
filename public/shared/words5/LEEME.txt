@@ -1,0 +1,9 @@
+Palabras de 5 letras de Quinteto y Cuarteto.
+
+allowed-*.txt   Palabras válidas como intento: las de 5 letras de los diccionarios de Mecha Corta
+                (an-array-of-spanish-words y an-array-of-english-words, licencia MIT, ver
+                public/games/mecha/dict/LICENSE.txt). Se regeneran con: node tools/daily/words5.mjs
+answers-*.json  Palabras posibles del día: selección propia de palabras comunes, elegidas con ayuda de listas de
+                frecuencia de subtítulos (hermitdave/FrequencyWords, basadas en OpenSubtitles, CC BY-SA 4.0;
+                esas listas no se incluyen, solo se usaron para saber qué palabras son comunes).
+                Para sumar palabras, agregarlas AL FINAL de la lista: si no, cambian los desafíos de los días siguientes.

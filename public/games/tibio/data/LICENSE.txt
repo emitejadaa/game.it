@@ -1,0 +1,24 @@
+Datos de Tibio / Tibio data
+===========================
+
+vectors-es.bin, vectors-en.bin, words-es.txt, words-en.txt, meta-*.json
+
+Son DATOS DERIVADOS de los vectores de palabras fastText "common crawl" (cc.es.300.vec y cc.en.300.vec):
+
+  E. Grave, P. Bojanowski, P. Gupta, A. Joulin, T. Mikolov.
+  "Learning Word Vectors for 157 Languages". Proceedings of LREC 2018.
+  https://fasttext.cc/docs/en/crawl-vectors.html
+
+Los vectores originales son de Facebook AI Research (Meta) y se publican bajo la licencia
+Creative Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0): https://creativecommons.org/licenses/by-sa/3.0/
+
+Cambios hechos: se tomaron las ~60.000 palabras más frecuentes de cada idioma, se conservaron las que están en el
+diccionario de Mecha Corta (minúsculas, solo letras, 3 o más letras), se centraron y normalizaron los vectores, se quitaron
+sus 3 primeros componentes principales, se redujeron de 300 a 96 dimensiones con PCA y se cuantizaron a enteros de 8 bits.
+El proceso está en tools/daily/tibio-build.py.
+
+Como derivados, estos archivos se distribuyen bajo la misma licencia, CC BY-SA 3.0, con la atribución de arriba.
+This applies only to the data files listed above; the game code is under the repository license.
+
+secrets-es.json, secrets-en.json
+Listas de palabras elegidas a mano para este juego (palabras comunes). Se ofrecen con la licencia del repositorio.

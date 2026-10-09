@@ -1,0 +1,319 @@
+/* Vínculos: fichas, bandas de colores por nivel y vidas. */
+
+/* Paleta por nivel (1 = más fácil … 4 = más difícil): --vn-N es el fondo y --vn-iN la tinta que se lee encima. */
+:root {
+  --vn-1: #f2c94c;
+  --vn-i1: #1c1604;
+  --vn-2: #7bd96a;
+  --vn-i2: #0c1a08;
+  --vn-3: #54aef5;
+  --vn-i3: #06121f;
+  --vn-4: #b78cff;
+  --vn-i4: #150c26;
+}
+:root[data-gi-theme='light'] {
+  --vn-1: #f0bf2f;
+  --vn-i1: #241a02;
+  --vn-2: #67c254;
+  --vn-i2: #0b1a07;
+  --vn-3: #5aa9ee;
+  --vn-i3: #07182b;
+  --vn-4: #a883ee;
+  --vn-i4: #1a0f33;
+}
+/* alto contraste: amarillo / naranja / azul / gris claro u oscuro, más la marca de forma de cada nivel */
+:root[data-hc='1'] {
+  --vn-1: #ffe14d;
+  --vn-i1: #151100;
+  --vn-2: #ff8a2b;
+  --vn-i2: #170b00;
+  --vn-3: #3d8bff;
+  --vn-i3: #020d1f;
+  --vn-4: #e4e4f2;
+  --vn-i4: #101018;
+}
+:root[data-hc='1'][data-gi-theme='light'] {
+  --vn-1: #e6b800;
+  --vn-i1: #1c1500;
+  --vn-2: #e0701a;
+  --vn-i2: #1a0c00;
+  --vn-3: #2f6fe0;
+  --vn-i3: #ffffff;
+  --vn-4: #2c2c44;
+  --vn-i4: #ffffff;
+}
+.l1 {
+  --c: var(--vn-1);
+  --i: var(--vn-i1);
+}
+.l2 {
+  --c: var(--vn-2);
+  --i: var(--vn-i2);
+}
+.l3 {
+  --c: var(--vn-3);
+  --i: var(--vn-i3);
+}
+.l4 {
+  --c: var(--vn-4);
+  --i: var(--vn-i4);
+}
+
+.vn {
+  --k: 1;
+  width: min(100%, 520px);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (min-width: 520px) {
+  .vn {
+    --k: 1.15;
+  }
+}
+
+/* ---- vidas ---- */
+.vn-lives {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gi-mute, #6f6f80);
+}
+.vn-dots {
+  display: inline-flex;
+  gap: 7px;
+}
+.vn-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--gi-accent, #00f0ff);
+  border: 1.5px solid var(--gi-accent, #00f0ff);
+  transition: background 0.25s var(--dg-ease), border-color 0.25s var(--dg-ease), opacity 0.25s;
+}
+:root[data-gi-glow='on'] .vn-dot:not(.off) {
+  box-shadow: 0 0 8px -1px var(--gi-accent, #00f0ff);
+}
+.vn-dot.off {
+  background: transparent;
+  border-color: var(--gi-mute, #6f6f80);
+  opacity: 0.55;
+}
+.vn-dot.pop {
+  animation: vn-pop 460ms var(--dg-ease);
+}
+
+/* ---- bandas de grupos encontrados ---- */
+.vn-bands {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vn-bands:empty {
+  display: none;
+}
+.vn-band {
+  min-height: 64px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-align: center;
+  background: var(--c);
+  color: var(--i);
+}
+.vn-band.in {
+  animation: vn-in 520ms var(--dg-ease) both;
+}
+/* grupos que revelamos al quedarte sin errores: se ven con un borde punteado */
+.vn-band.missed {
+  outline: 2px dashed color-mix(in oklab, var(--i) 50%, transparent);
+  outline-offset: -6px;
+}
+:root[data-gi-glow='on'] .vn-band {
+  box-shadow: 0 0 18px -8px var(--c);
+}
+.vn-bhead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.vn-mark {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  fill: currentColor;
+}
+.vn-bwords {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+/* ---- grilla de fichas ---- */
+.vn-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.vn-tile {
+  min-height: 64px;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+  border-radius: 10px;
+  background: var(--dg-surface);
+  color: var(--gi-fg, #eaeaf0);
+  /* --fs lo calcula logic.js una sola vez según la palabra más larga de la ficha */
+  font-size: calc(var(--fs, 14) * var(--k) * 1px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: uppercase;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  transition: background 0.18s var(--dg-ease), border-color 0.18s var(--dg-ease), box-shadow 0.18s var(--dg-ease), color 0.18s;
+}
+@media (min-width: 520px) {
+  .vn-tile {
+    min-height: 72px;
+  }
+}
+.vn-tile:focus-visible {
+  outline-offset: -3px;
+}
+.vn-tile:hover {
+  border-color: var(--gi-mute, #6f6f80);
+}
+.vn-tile.sel {
+  border-color: var(--gi-accent, #00f0ff);
+  background: color-mix(in oklab, var(--gi-accent, #00f0ff) 26%, var(--dg-surface));
+  box-shadow: inset 0 0 0 1px var(--gi-accent, #00f0ff);
+}
+:root[data-gi-glow='on'] .vn-tile.sel {
+  box-shadow: inset 0 0 0 1px var(--gi-accent, #00f0ff), 0 0 16px -4px var(--gi-accent, #00f0ff);
+}
+.vn-tile.hit {
+  border-color: var(--gi-accent, #00f0ff);
+  animation: vn-hit 440ms var(--dg-ease) both;
+}
+.vn-tile.shake {
+  animation: vn-shake 460ms var(--dg-ease);
+}
+
+/* ---- botones ---- */
+.vn-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.vn-btn {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--gi-line, rgba(255, 255, 255, 0.15));
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gi-fg, #eaeaf0);
+  background: transparent;
+  transition: transform 0.25s var(--dg-ease), opacity 0.2s, border-color 0.2s;
+}
+.vn-btn:hover:not(:disabled) {
+  border-color: var(--gi-accent, #00f0ff);
+}
+.vn-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.vn-btn.main {
+  border-color: var(--gi-accent, #00f0ff);
+  background: var(--gi-accent, #00f0ff);
+  color: var(--gi-bg, #07070a);
+}
+:root[data-gi-glow='on'] .vn-btn.main:not(:disabled) {
+  box-shadow: 0 0 18px -6px var(--gi-accent, #00f0ff);
+}
+.vn-btn[hidden] {
+  display: none;
+}
+.vn-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- ayuda ---- */
+.vn-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+.vn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--c);
+  color: var(--i);
+}
+
+/* ---- animaciones ---- */
+@keyframes vn-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+}
+@keyframes vn-hit {
+  40% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(0.94);
+    opacity: 0.35;
+  }
+}
+@keyframes vn-shake {
+  15%,
+  55% {
+    transform: translateX(-6px);
+  }
+  35%,
+  75% {
+    transform: translateX(6px);
+  }
+}
+@keyframes vn-pop {
+  35% {
+    transform: scale(1.7);
+  }
+}
+:root[data-gi-motion='reduced'] .vn-band,
+:root[data-gi-motion='reduced'] .vn-tile,
+:root[data-gi-motion='reduced'] .vn-dot {
+  animation-duration: 1ms !important;
+}
