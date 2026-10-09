@@ -1,5 +1,5 @@
 /* game.it — service worker: carga instantánea en visitas repetidas y juegos cacheados al jugarlos. */
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CACHE = `gameit-${VERSION}`;
 
 self.addEventListener('install', () => self.skipWaiting());

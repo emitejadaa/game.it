@@ -65,7 +65,7 @@ documentados de Google (ni desde el juego ni para generar datos); no se copia c�
 `public/games/trotamundos/datos/` (JSON, se cargan por `fetch` relativo; el servidor online lee los mismos archivos del disco):
 
 - `famosos.json`: `[{ "id": "f-001", "lat": -34.6037, "lng": -58.3816, "cc": "AR", "n": { "es": "Obelisco", "en": "Obelisk of Buenos Aires" }, "h": 90 }]`
-  (`h` = rumbo inicial, opcional). Unos 150 del mundo y unos 70 de Argentina y Latinoamérica.
+  (`h` = rumbo inicial, opcional). 172 en total, con foto oficial de Google: 107 del resto del mundo y 65 de Argentina y Latinoamérica (Argentina 26).
 - `mundo.json`: `[{ "id": "m-0001", "lat": …, "lng": …, "cc": "FR", "h": 120, "p": "Lyon" }]` (`h` y `p` = lugar poblado cercano, opcionales).
   Todos los países con cobertura, con más densidad en Argentina y Latinoamérica.
 - `paises.json`: `{ "v": 1, "generado": "AAAA-MM-DD", "metodo": "…", "paises": { "AR": { "cont": "sudamerica", "latam": 1, "d": 3900, "n": 190, "f": 12 } }, "regiones": { "mundo": {…}, "latam": { "d": 9000 }, "europa": { "d": 5200 } } }`
@@ -76,7 +76,7 @@ documentados de Google (ni desde el juego ni para generar datos); no se copia c�
 **Cómo se generan** (`tools/trotamundos-datos.mjs`): puntos candidatos sobre rutas y cerca de ciudades de países con cobertura
 (Natural Earth: países, rutas y lugares poblados, todo dominio público) → se validan **cargando el embed en un Chromium**
 (Playwright) como lo haría una persona: tiene que haber imagen y la foto tiene que ser oficial (© Google). Poco volumen
-(≤ 3.000 cargas en total, concurrencia ≤ 3, sin cargar las imágenes), con caché para poder retomar, y si Google responde con un
+(≤ 5.000 cargas en total, 30 por minuto como máximo, concurrencia ≤ 3, sin cargar las imágenes), con caché para poder retomar, y si Google responde con un
 bloqueo o un desafío, **se frena** (no se esquiva). Los sitios famosos se revisan además mirando que la tarjeta diga el nombre
 esperado y mirando capturas. Ampliar el conjunto con más lugares validados es una tarea de mantenimiento aparte.
 
@@ -139,14 +139,38 @@ Sin pistas y sin desafío diario.
 Rama `juego/trotamundos`: modo de un jugador, datos y online hechos y probados (`npm run test:trotamundos`, `npm run check`, `npm run build`, y
 recorridos con Chromium y varios navegadores contra el servidor, con el visor real de Google).
 
-- **Datos de hoy** (`datos/paises.json`, v 1, 2026-10-07): 1.057 lugares al azar en 68 países (Argentina 159; Brasil, México,
-  Chile, Colombia, Perú y Uruguay entre 43 y 50; Europa 312, Asia 138, Norteamérica 124, África 42, Oceanía 32) y 51 sitios
-  famosos con foto oficial de Google (35 de Argentina y Latinoamérica). Se usaron unas 2.950 de las 3.000 cargas del embed que se
-  fijaron como tope para validar.
-- **Límites conocidos:** África y Oceanía tienen pocos lugares (la herramienta tomaba "sin aciertos" como "sin cobertura" y
-  los candidatos salían de centros de pueblos; conviene probar puntos sobre calles de las capitales); los famosos quedaron
-  muy sudamericanos porque en Europa y Asia la panorámica más cercana a los monumentos suele ser de un usuario, que se descarta.
-  Ampliar pide más cargas del embed: es una decisión aparte (ver `tools/trotamundos-datos.mjs --help`).
+- **Datos de hoy** (`datos/paises.json`, v 2, 2026-10-09): 1.723 lugares al azar en 80 países (paises.json tiene 85 entradas: 5 solo con famosos) y 172 sitios famosos con foto oficial de
+  Google, revisados a ojo con hojas de contactos (exteriores donde se entiende dónde estás). Lugares por región: Sudamérica 562,
+  Europa 518, Asia 271, Norteamérica 166, África 123, Oceanía 83. Por país: Argentina 225; Brasil, Chile y México 64; Colombia, Perú y
+  Uruguay 63; Australia 55; Estados Unidos 43; Japón 35; Canadá, Alemania, España, Francia, Italia y Sudáfrica 33; Reino Unido,
+  Indonesia, India, Noruega, Polonia, Rusia, Suecia y Turquía 31; Finlandia, Malasia y Tailandia 30; Filipinas 29; Nueva Zelanda 28;
+  Ucrania 21 (poca cobertura oficial); el resto, entre 5 y 14. Famosos por región: Sudamérica 58 (Argentina 26; Argentina y
+  Latinoamérica 65), Europa 32, Asia 27, Norteamérica 27, Oceanía 15, África 13; el 66 % queda fuera de Sudamérica. Cuando la foto
+  oficial no está justo en el sitio se usa una a menos de 250 m y el desplazamiento queda en `dm` (metros; solo si son 30 o más).
+- **Cargas del embed:** el tope total pasó de 3.000 a 5.000 por decisión expresa de quien dirige el proyecto; se usaron 4.998
+  (2.952 de antes, 2.030 de esta ampliación y 16 de la revisión: 1.132 en lugares al azar, 535 sondas y 335 capturas de famosos y 28 de auditoría).
+  Ritmo de 30 cargas empezadas por minuto como máximo (en el registro, a lo sumo 33 terminadas en cualquier minuto: las 30 más las 3
+  que estaban en vuelo; antes hubo hasta 74) y freno tras 8 fallas blandas seguidas. No hubo bloqueos de Google, ni frenos, ni un solo
+  tiempo agotado o error de red en toda la tanda.
+- **Cómo se ampliaron:** los candidatos al azar se pegan a la calle real más cercana (teselas vectoriales de OpenFreeMap con datos
+  de OpenStreetMap): las rutas de Natural Earth están generalizadas y en África fallaron las 32 que se probaron. Con calles, de los
+  puntos que respondieron fueron oficiales el 61 % de los de pueblos y ciudades (865) y el 49 % de los de ruta (267; en 213 de 480
+  no había una calle a 400 m y no se gastó carga). Por país: Australia 94 %, Nueva Zelanda 92 %, India y Sudáfrica 81 %, Turquía 67 %,
+  Indonesia 63 %, Perú 54 %, Uruguay 53 %, Rusia 46 %, Ucrania 27 %. Los famosos se prueban desde el punto de calle más cercano y desde
+  otros, hasta 6, de 45 a 210 m: el 63 % de las sondas dio foto oficial a menos de 250 m, y tras la revisión visual entró el 37 % de
+  las capturas nuevas (124 de 335). Se descarta sola toda foto que, al recargar el punto, el visor reemplaza por una de usuario
+  (15 de 335 capturas).
+- **Auditoría:** de 28 lugares nuevos al azar recargados con imágenes, 27 siguen siendo oficiales (© Google) y uno mostraba una foto de
+  "HTJ 360" y se sacó; en la tanda anterior fueron 36 de 36. En los famosos, 15 de 335 capturas (4,5 %) cambiaron a una foto de usuario
+  al recargar. Es posible que alrededor de un 2 a 4 % de los lugares al azar sin auditar pase lo mismo; no se pudo medir sin más cargas.
+- **Límites conocidos:** sin ninguna foto oficial en lo medido: Tanzania (0 de 16), Madagascar, Mozambique, Zimbabue, Marruecos y
+  Egipto (0 de 14 cada uno; los famosos de Guiza sí andan), y con 3 intentos cada uno (1 en isla Norfolk) Zambia, Malaui, Etiopía, Argelia, Costa de Marfil,
+  Camerún, Mauricio, Fiyi, Samoa, Tonga, Vanuatu, Palaos, Papúa Nueva Guinea, Micronesia, Islas Marshall, Guam, Polinesia Francesa, Nueva
+  Caledonia e isla Norfolk (en varias solo hay fotos de usuarios). Poca cobertura oficial: Uganda 1 de 19, Túnez 9 de 53, Botsuana 7 de 31.
+  Samoa Americana (3 de 3) y las Marianas del Norte (2 de 3) dan fotos oficiales pero son demasiado chicas para llegar a 5 lugares:
+  quedan afuera. La meta de 1.800 lugares no se alcanzó (1.723): con 5.000 cargas no alcanzó, y quedaron 2 sin usar por margen.
+  Tres famosos ya publicados salieron por repetir un sitio cercano: f-343 (Dique de Puerto Madero, a menos de 60 m de f-254), f-344 (Cabildo,
+  a 211 m de Plaza de Mayo) y f-345 (Plaza San Martín, Retiro, a 126 m de f-250); sus ids no se reutilizan.
 - **Otros límites:** las coordenadas viajan al navegador (se pueden ver con las herramientas del navegador), el embed sin
   clave no es una API documentada de Google, y desde afuera del iframe no se puede saber si una ubicación no tiene
   imágenes (de ahí el botón "¿No carga?"). Si el anfitrión online se desconecta, sigue siendo anfitrión hasta que vence la

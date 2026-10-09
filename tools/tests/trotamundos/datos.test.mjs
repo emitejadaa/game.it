@@ -6,8 +6,10 @@ import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   ccDe, puntoEnAnillo, puntoEnPoligono, poligonosDe, crearPais, puntoEnPais, paisDe, diagonalKm, escalaPais, escalaAmbito,
-  minKmPais, densificar, respetaDistancia, espaciar, lugarMasCercano, generarCandidatos, esAtribucionOficial, panoDeEnlace,
+  minKmPais, densificar, respetaDistancia, espaciar, lugarMasCercano, generarCandidatos, generarCandidatosCalles, esAtribucionOficial, panoDeEnlace,
   leerVisor, coincideNombre, motivoFamoso, claveDe, aceptarMundo, rumboHaciaSitio, construirPaises, serializarPaises, DATOS, CACHE, MAX_BYTES, VERSION_DATOS,
+  MAX_CARGAS, RITMO_MAX_POR_MIN, FALLAS_BLANDAS_MAX, MAX_SITIO_KM, crearLimitador, crearFreno, teselaDe, lngLatDeTesela, decodificarMVT, lineasDeGeom,
+  callesDeTesela, puntoEnCalle, sondasFamoso, elegirSonda, asignarIds, decidirVersion,
 } from '../../trotamundos-datos.mjs';
 import { FAMOSOS, PAISES_CORE, PAISES_PRUEBA, LATAM } from '../../trotamundos-semillas.mjs';
 import { distanceKm, validCoord, WORLD_D, REGIONS, rngFrom, inScope, scopeScale } from '../../../public/games/trotamundos/shared/geo.js';
@@ -216,6 +218,218 @@ test('construirPaises y serializarPaises: n, f, latam, cont y regiones', () => {
   assert.throws(() => construirPaises({ famosos: [{ id: 'f-9', lat: 0, lng: 0, cc: 'ZZ' }], mundo: [], geo, generado: 'x' }), /ZZ/);
 });
 
+test('presupuesto y frenos: tope de 5.000 cargas, 30 por minuto y 8 fallas blandas seguidas', () => {
+  assert.equal(MAX_CARGAS, 5000);
+  assert.equal(RITMO_MAX_POR_MIN, 30);
+  assert.equal(FALLAS_BLANDAS_MAX, 8);
+  assert.equal(MAX_SITIO_KM, 0.25);
+});
+
+test('crearLimitador: nunca más de N cargas empezadas en una ventana, y se libera al pasar el tiempo', () => {
+  let t = 1000;
+  const lim = crearLimitador(30, 60000, () => t);
+  for (let i = 0; i < 30; i++) {
+    assert.equal(lim.espera(), 0, `la carga ${i + 1} entra`);
+    lim.marcar();
+    t += 100; // 30 cargas en 3 s: un pico de 600 por minuto
+  }
+  const falta = lim.espera();
+  assert.ok(falta > 56000 && falta <= 60000, `la 31.ª tiene que esperar casi un minuto (${falta} ms)`);
+  t += falta;
+  assert.equal(lim.espera(), 0, 'pasó el minuto de la primera');
+  lim.marcar();
+  // simulación: 3 trabajadores que cargan lo más rápido que pueden durante 10 minutos; en cualquier ventana de 60 s hay 30 o menos
+  t = 0;
+  const lim2 = crearLimitador(30, 60000, () => t);
+  const inicios = [];
+  while (t < 600000) {
+    const w = lim2.espera();
+    if (w > 0) t += w;
+    else {
+      lim2.marcar();
+      inicios.push(t);
+      t += 700; // cada carga tarda 0,7 s en llegar a la siguiente
+    }
+  }
+  for (let i = 0; i + 30 < inicios.length; i++) assert.ok(inicios[i + 30] - inicios[i] >= 60000, `ventana ${i}: 31 cargas en menos de un minuto`);
+  assert.ok(inicios.length >= 280 && inicios.length <= 310, `unas 300 cargas en 10 minutos (${inicios.length})`);
+});
+
+test('crearFreno: frena a las 8 fallas blandas seguidas y una buena lectura reinicia la cuenta', () => {
+  const f = crearFreno(FALLAS_BLANDAS_MAX);
+  for (let i = 0; i < 7; i++) assert.equal(f.falla(), false);
+  assert.equal(f.seguidas, 7);
+  f.ok();
+  assert.equal(f.seguidas, 0);
+  for (let i = 0; i < 7; i++) assert.equal(f.falla(), false);
+  assert.equal(f.falla(), true, 'la 8.ª seguida frena');
+});
+
+// ------------------------------------------------------------------ calles (teselas vectoriales)
+/** Arma a mano una tesela MVT mínima con una capa "transportation" y las líneas dadas (para probar el lector sin red). */
+function teselaDePrueba(lineas, extent = 4096) {
+  const varint = (n) => {
+    const out = [];
+    n = Math.floor(n);
+    while (n > 127) {
+      out.push((n % 128) | 128);
+      n = Math.floor(n / 128);
+    }
+    out.push(n);
+    return out;
+  };
+  const campo = (f, t, bytes) => [...varint(f * 8 + t), ...bytes];
+  const len = (f, bytes) => campo(f, 2, [...varint(bytes.length), ...bytes]);
+  const str = (f, txt) => len(f, [...Buffer.from(txt)]);
+  const zz = (n) => (n << 1) ^ (n >> 31);
+  const claves = ['class', 'subclass', 'brunnel'];
+  const valores = [];
+  const vi = (v) => {
+    if (!valores.includes(v)) valores.push(v);
+    return valores.indexOf(v);
+  };
+  const feats = lineas.map((l) => {
+    const geom = [(1 << 3) | 1, zz(l.pts[0][0]), zz(l.pts[0][1]), ((l.pts.length - 1) << 3) | 2];
+    for (let i = 1; i < l.pts.length; i++) geom.push(zz(l.pts[i][0] - l.pts[i - 1][0]), zz(l.pts[i][1] - l.pts[i - 1][1]));
+    const tags = [];
+    [l.c, l.s, l.b].forEach((v, k) => {
+      if (v) tags.push(k, vi(v));
+    });
+    return len(2, [...len(2, tags.flatMap((x) => varint(x))), ...campo(3, 0, varint(l.tipo ?? 2)), ...len(4, geom.flatMap((x) => varint(x)))]);
+  });
+  const cuerpo = [...str(1, 'transportation'), ...feats.flat(), ...claves.flatMap((k) => str(3, k)), ...valores.flatMap((v) => len(4, str(1, v))), ...campo(5, 0, varint(extent)), ...campo(15, 0, [2])];
+  return Buffer.from(len(3, cuerpo));
+}
+
+test('teselaDe y lngLatDeTesela: ida y vuelta en el zoom 14', () => {
+  const { x, y } = teselaDe(-26.2041, 28.0473, 14);
+  assert.deepEqual([x, y], [9468, 9428]);
+  const [lng0, lat0] = lngLatDeTesela(14, x, y, 0, 0);
+  const [lng1, lat1] = lngLatDeTesela(14, x, y, 4096, 4096);
+  assert.ok(lng0 <= 28.0473 && 28.0473 <= lng1 && lat1 <= -26.2041 && -26.2041 <= lat0, 'la tesela contiene el punto');
+  near(distanceKm(lat0, lng0, lat1, lng1), 3.4, 0.4, 'diagonal de una tesela z14 a 26° S');
+  assert.deepEqual(Object.values(teselaDe(0, 0, 1)), [1, 1]);
+});
+
+test('decodificarMVT / callesDeTesela: lee líneas, filtra túneles, senderos y accesos, y baja a lng/lat', () => {
+  const buf = teselaDePrueba([
+    { c: 'primary', pts: [[0, 2048], [4096, 2048]] },
+    { c: 'minor', pts: [[100, 100], [200, 300], [400, 300]] },
+    { c: 'primary', b: 'tunnel', pts: [[0, 0], [10, 10]] },
+    { c: 'path', s: 'footway', pts: [[0, 0], [10, 10]] },
+    { c: 'path', s: 'pedestrian', pts: [[500, 500], [900, 500]] },
+    { c: 'service', s: 'driveway', pts: [[0, 0], [10, 10]] },
+    { c: 'rail', pts: [[0, 0], [10, 10]] },
+    { c: 'service', s: 'alley', pts: [[1000, 1000], [1200, 1000]] },
+    { c: 'primary', tipo: 3, pts: [[0, 0], [10, 10]] },
+  ]);
+  const capas = decodificarMVT(buf);
+  assert.equal(capas.transportation.extent, 4096);
+  assert.equal(capas.transportation.features.length, 9);
+  assert.deepEqual(capas.transportation.features[0].props, { class: 'primary' });
+  assert.deepEqual(lineasDeGeom(capas.transportation.features[1].geom), [[[100, 100], [200, 300], [400, 300]]]);
+  const calles = callesDeTesela(buf, 14, 9468, 9428);
+  assert.deepEqual(calles.map((c) => c.c), ['primary', 'minor', 'pedestrian', 'service'], 'sin túnel, sendero, acceso, riel ni polígono');
+  const [lng0, lat0] = lngLatDeTesela(14, 9468, 9428, 0, 2048);
+  near(calles[0].p[0][0], lng0, 1e-6, 'lng');
+  near(calles[0].p[0][1], lat0, 1e-6, 'lat');
+  assert.equal(calles[0].p.length, 2);
+  assert.equal(decodificarMVT(buf, 'otra').transportation, undefined);
+});
+
+test('puntoEnCalle: se pega a la calle más cercana, prefiere las grandes y no inventa nada lejos', () => {
+  const calles = [
+    { c: 'primary', p: [[-58.4, -34.6], [-58.3, -34.6]] }, // este-oeste a lat -34.6
+    { c: 'service', p: [[-58.35, -34.6004], [-58.35, -34.61]] }, // calle de servicio casi pegada
+  ];
+  const a = puntoEnCalle(-34.6003, -58.36, calles, { radioM: 200 });
+  assert.equal(a.c, 'primary');
+  near(a.lat, -34.6, 1e-6, 'lat sobre la primaria');
+  near(a.lng, -58.36, 1e-6, 'lng');
+  assert.ok(a.distM >= 30 && a.distM <= 40, `a ${a.distM} m`);
+  assert.ok(a.h === 90 || a.h === 270 || a.h === 89 || a.h === 91 || Math.abs(a.h - 90) < 2, `rumbo ${a.h}`);
+  assert.equal(puntoEnCalle(-34.7, -58.36, calles, { radioM: 200 }), null, 'a más de 200 m de todo');
+  assert.equal(puntoEnCalle(-34.6, -58.36, [], { radioM: 200 }), null);
+  const mismo = () => puntoEnCalle(-34.6003, -58.35, calles, { radioM: 300, rng: rngFrom('x') });
+  assert.deepEqual(mismo(), mismo(), 'con la misma semilla, el mismo punto');
+});
+
+test('sondasFamoso: primero la calle más cercana, después puntos de 45 a 210 m en direcciones distintas, sin repetir zonas', () => {
+  const sitio = { lat: -34.6037, lng: -58.3816 };
+  const k = 111320 * Math.cos((sitio.lat * Math.PI) / 180);
+  const m = (dx, dy) => [sitio.lng + dx / k, sitio.lat + dy / 110574];
+  const calles = [
+    { c: 'primary', p: [m(-250, 30), m(250, 30)] }, // calle E-O a 30 m al norte
+    { c: 'secondary', p: [m(120, -250), m(120, 250)] }, // calle N-S a 120 m al este
+    { c: 'minor', p: [m(-90, -250), m(-90, 250)] }, // calle N-S a 90 m al oeste
+    { c: 'minor', p: [m(-250, -150), m(250, -150)] }, // calle E-O a 150 m al sur
+  ];
+  const l = sondasFamoso(sitio, calles, { n: 6 });
+  assert.ok(l.length >= 4 && l.length <= 6);
+  assert.ok(l[0].dist <= 35, `la primera es la calle más cercana (${l[0].dist} m)`);
+  for (const p of l.slice(1)) assert.ok(p.dist >= 45 && p.dist <= 210, `sonda a ${p.dist} m`);
+  for (let i = 0; i < l.length; i++) for (let j = i + 1; j < l.length; j++) assert.ok(distanceKm(l[i].lat, l[i].lng, l[j].lat, l[j].lng) >= 0.04, 'a 40 m o más entre sí');
+  // con un punto ya probado (la primera tanda probó el sitio mismo), no se vuelve a esa zona
+  const sig = sondasFamoso(sitio, calles, { n: 3, probados: [{ lat: sitio.lat, lng: sitio.lng }] });
+  assert.ok(sig.every((p) => p.dist >= 45), 'nada a menos de 45 m del sitio ya probado');
+  // sin calles cerca, se prueba el sitio mismo
+  assert.deepEqual(sondasFamoso(sitio, [], { n: 3 }), [{ lat: sitio.lat, lng: sitio.lng, dist: 0, c: 'sitio' }]);
+});
+
+test('generarCandidatosCalles: los más poblados primero, espaciados y reproducibles', () => {
+  const pueblos = [];
+  for (let i = 0; i < 60; i++) pueblos.push({ lat: -30 + (i % 10) * 0.2, lng: -60 + Math.floor(i / 10) * 0.2, tipo: i < 4 ? 'c' : 'g', pop: i < 4 ? (i + 1) * 1000 : 0 });
+  const hacer = () => generarCandidatosCalles({ pueblos, cant: 20, minKm: 5, rng: rngFrom('c'), recorte: null });
+  const a = hacer();
+  assert.deepEqual(a, hacer());
+  assert.ok(a.length > 0 && a.length <= 20);
+  assert.ok(a.every((x) => x[2] === 's'));
+  assert.equal(espaciar(a.map(([lat, lng]) => ({ lat, lng })), 5).length, a.length, 'a 5 km o más');
+  const [lat, lng] = a[0];
+  assert.equal(`${lat},${lng}`, `${pueblos[3].lat},${pueblos[3].lng}`, 'primero el más poblado');
+  const sin = generarCandidatosCalles({ pueblos, cant: 50, minKm: 5, rng: rngFrom('c'), recorte: [-60, -30, -59.9, -29.9] });
+  assert.ok(sin.every(([la, ln]) => ln >= -60 && ln <= -59.9 && la >= -30 && la <= -29.9), 'solo dentro del recorte');
+});
+
+test('elegirSonda: foto oficial a menos de 250 m y no descartada; con revisión exige la aprobación a ojo', () => {
+  const r = (pid, extra = {}) => ({ t: 'fp', estado: 'ok', oficial: true, distSitio: 0.1, pano: { pid }, ...extra });
+  const sondas = [r('a', { oficial: false }), r('b', { distSitio: 0.3 }), r('c'), r('d')];
+  assert.equal(elegirSonda(sondas)?.pano.pid, 'c');
+  assert.equal(elegirSonda(sondas, {}, { no: { c: 'interior' } })?.pano.pid, 'd');
+  assert.equal(elegirSonda(sondas, {}, { ok: ['d'], no: { c: 'interior' } }, { exigirRevision: true })?.pano.pid, 'd');
+  assert.equal(elegirSonda(sondas, {}, {}, { exigirRevision: true }), null, 'sin revisión no entra');
+  assert.equal(elegirSonda(sondas, { max: 0.5 })?.pano.pid, 'b');
+  assert.equal(elegirSonda([]), null);
+});
+
+test('asignarIds: conserva los ids de lo que sigue y nunca reutiliza el de uno que se sacó', () => {
+  const previo = new Map([['1,1', 'm-0001'], ['2,2', 'm-0002'], ['3,3', 'm-0003']]);
+  // se saca el m-0003 (el más alto) y entran dos lugares nuevos: no pueden heredar m-0003
+  const r = asignarIds([{ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, { lat: 9, lng: 9 }, { lat: 8, lng: 8 }], previo, 3);
+  assert.deepEqual(r.ids, ['m-0001', 'm-0002', 'm-0004', 'm-0005']);
+  assert.equal(r.max, 5);
+  // sin historial, igual sigue desde el más alto de los que se conservan
+  assert.deepEqual(asignarIds([{ lat: 2, lng: 2 }, { lat: 7, lng: 7 }], previo, 0).ids, ['m-0002', 'm-0003']);
+  // un id no se asigna dos veces aunque dos lugares caigan en la misma posición
+  assert.deepEqual(asignarIds([{ lat: 1, lng: 1 }, { lat: 1, lng: 1 }], previo, 3).ids, ['m-0001', 'm-0004']);
+});
+
+test('decidirVersion: sube solo si cambió el contenido; si no, queda la versión y la fecha de antes', () => {
+  const fam = [{ id: 'f-001', lat: 1, lng: 2, cc: 'AR', n: { es: 'a', en: 'a' } }];
+  const mun = [{ id: 'm-0001', lat: 3, lng: 4, cc: 'AR' }];
+  const meta = (extra = {}) => ({ v: 9, generado: '2026-11-01', paises: { AR: { n: 1, f: 1 } }, regiones: { mundo: { d: 1 } }, ...extra });
+  const prevMeta = { v: 2, generado: '2026-10-09', paises: { AR: { n: 1, f: 1 } }, regiones: { mundo: { d: 1 } } };
+  const sin = decidirVersion({ prevMeta, prevFam: fam, prevMundo: mun, famosos: fam, mundo: mun, meta: meta() });
+  assert.deepEqual(sin, { v: 2, generado: '2026-10-09', igual: true });
+  const con = decidirVersion({ prevMeta, prevFam: fam, prevMundo: mun, famosos: fam, mundo: [...mun, { id: 'm-0002', lat: 5, lng: 6, cc: 'AR' }], meta: meta() });
+  assert.deepEqual(con, { v: 3, generado: '2026-11-01', igual: false });
+  const metodo = decidirVersion({ prevMeta, prevFam: fam, prevMundo: mun, famosos: fam, mundo: mun, meta: meta({ metodo: 'otro texto', ids: { f: 5, m: 5 } }) });
+  assert.equal(metodo.igual, true, 'el texto del método o los ids no cuentan como cambio');
+  assert.equal(decidirVersion({ prevMeta: null, prevFam: [], prevMundo: [], famosos: fam, mundo: mun, meta: meta() }).v, VERSION_DATOS, 'primera vez: la versión mínima');
+  assert.equal(decidirVersion({ prevMeta: { ...prevMeta, v: 1 }, prevFam: fam, prevMundo: mun, famosos: fam, mundo: [], meta: meta() }).v, VERSION_DATOS, 'de la v 1 a la v 2');
+  assert.equal(decidirVersion({ prevMeta, prevFam: fam, prevMundo: mun, famosos: [], mundo: mun, meta: meta(), forzar: '7' }).v, 7);
+});
+
 test('semillas: sin países repetidos, latam coherente y famosos bien armados', () => {
   const ccs = [...PAISES_CORE.map((p) => p[0]), ...PAISES_PRUEBA];
   assert.equal(new Set(ccs).size, ccs.length, 'países repetidos en la lista');
@@ -247,7 +461,7 @@ test('datos/: existen los cuatro archivos y todo pesa menos de 400 KB', { skip: 
 
 test('paises.json: versión, fecha, método, países y regiones', { skip: !hayDatos }, () => {
   const p = leer('paises.json');
-  assert.equal(p.v, VERSION_DATOS);
+  assert.ok(Number.isInteger(p.v) && p.v >= VERSION_DATOS, `v ${p.v} (mínimo ${VERSION_DATOS})`);
   assert.match(p.generado, /^\d{4}-\d{2}-\d{2}$/);
   assert.ok(typeof p.metodo === 'string' && p.metodo.length > 50);
   for (const [cc, e] of Object.entries(p.paises)) {
@@ -258,6 +472,10 @@ test('paises.json: versión, fecha, método, países y regiones', { skip: !hayDa
     assert.ok(Number.isInteger(e.n) && e.n >= 0 && Number.isInteger(e.f) && e.f >= 0, `${cc}: n/f`);
     assert.ok(e.n + e.f > 0, `${cc}: sin datos`);
   }
+  for (const [cc, e] of Object.entries(p.paises)) assert.ok(e.k === 5 || e.k === 15, `${cc}: k (distancia mínima entre lugares) ${e.k}`);
+  for (const cc of ['AR', 'BR', 'US', 'CA', 'AU', 'RU', 'IN', 'ID', 'FR', 'ZA', 'JP']) assert.equal(p.paises[cc]?.k, 15, `${cc} es un país grande: 15 km`);
+  for (const cc of ['LU', 'SG', 'MT']) if (p.paises[cc]) assert.equal(p.paises[cc].k, 5, `${cc} es un país chico: 5 km`);
+  assert.ok(p.ids && Number.isInteger(p.ids.m) && Number.isInteger(p.ids.f), 'ids: el id más alto que se usó de cada prefijo');
   assert.equal(p.regiones.mundo.d, WORLD_D);
   assert.ok(p.regiones.latam.d >= 250 && p.regiones.latam.d <= WORLD_D);
   for (const c of REGIONS) if (p.regiones[c]) assert.ok(p.regiones[c].d >= 250 && p.regiones[c].d <= WORLD_D, c);
@@ -288,14 +506,23 @@ test('famosos.json: esquema, ids únicos, países conocidos, nombres es/en y coh
   }
   for (const [cc, e] of Object.entries(p.paises)) assert.equal(e.f, cuenta[cc] || 0, `${cc}: f de paises.json (${e.f}) ≠ famosos (${cuenta[cc] || 0})`);
   const latam = f.filter((x) => p.paises[x.cc].latam).length;
-  // solo entran famosos con imagen oficial (© Google): son menos, ampliarlos pide más cargas del visor (ver --help)
-  assert.ok(f.length >= 40, `famosos: ${f.length} (mínimo 40)`);
-  assert.ok(latam >= 25, `famosos de Argentina y Latinoamérica: ${latam} (mínimo 25)`);
-  assert.ok((cuenta.AR || 0) >= 15, `famosos de Argentina: ${cuenta.AR || 0} (mínimo 15)`);
+  const region = (c) => f.filter((x) => p.paises[x.cc].cont === c).length;
+  // solo entran famosos con foto oficial (© Google) a menos de 250 m del sitio, revisados a ojo (ver --help)
+  assert.ok(f.length >= 130, `famosos: ${f.length} (mínimo 130)`);
+  assert.ok(latam >= 55, `famosos de Argentina y Latinoamérica: ${latam} (mínimo 55)`);
+  assert.ok((cuenta.AR || 0) >= 20, `famosos de Argentina: ${cuenta.AR || 0} (mínimo 20)`);
+  const minimos = { europa: 25, asia: 20, norteamerica: 20, africa: 12, oceania: 8 };
+  for (const [c, n] of Object.entries(minimos)) assert.ok(region(c) >= n, `famosos de ${c}: ${region(c)} (mínimo ${n})`);
+  assert.ok(f.length - region('sudamerica') >= f.length * 0.6, `fuera de Sudamérica: ${f.length - region('sudamerica')} de ${f.length} (al menos el 60 %)`);
   const conts = new Set(f.map((x) => p.paises[x.cc].cont));
   for (const c of REGIONS) assert.ok(conts.has(c), `ningún famoso en ${c}`);
-  // dos famosos no pueden ser el mismo lugar
+  for (const x of f) assert.ok(x.dm === undefined || (Number.isInteger(x.dm) && x.dm >= 30 && x.dm <= MAX_SITIO_KM * 1000), `${x.id}: desplazamiento (dm) ${x.dm}`);
+  // dos famosos no pueden ser el mismo lugar ni quedar a menos de 60 m
   for (let i = 0; i < f.length; i++) for (let j = i + 1; j < f.length; j++) assert.ok(f[i].lat !== f[j].lat || f[i].lng !== f[j].lng, `${f[i].id} y ${f[j].id} en el mismo punto`);
+  for (let i = 0; i < f.length; i++) for (let j = i + 1; j < f.length; j++) assert.ok(distanceKm(f[i].lat, f[i].lng, f[j].lat, f[j].lng) >= 0.06, `${f[i].id} y ${f[j].id} a menos de 60 m`);
+  // los ids de la lista de semillas siguen el orden (f-001 es la primera fila) y paises.json guarda el más alto que se usó
+  assert.ok(p.ids.f >= FAMOSOS.length, `ids.f ${p.ids.f} < ${FAMOSOS.length} sitios en la lista`);
+  assert.ok(f.every((x) => Number(x.id.slice(2)) <= p.ids.f));
 });
 
 test('mundo.json: esquema, ids únicos, países conocidos, distancias mínimas y metas', { skip: !hayDatos }, () => {
@@ -315,20 +542,28 @@ test('mundo.json: esquema, ids únicos, países conocidos, distancias mínimas y
     (por[x.cc] ||= []).push(x);
   }
   for (const [cc, e] of Object.entries(p.paises)) assert.equal(e.n, (por[cc] || []).length, `${cc}: n de paises.json ≠ lugares de mundo.json`);
-  // mínimo 15 km entre dos lugares del mismo país (5 km en países chicos)
+  // mínimo de distancia entre dos lugares del mismo país: 15 km en los grandes y 5 km en los chicos (el "k" de paises.json, que se prueba acá)
   for (const [cc, lista] of Object.entries(por)) {
+    const k = p.paises[cc].k;
     let min = Infinity;
     for (let i = 0; i < lista.length; i++) for (let j = i + 1; j < lista.length; j++) min = Math.min(min, distanceKm(lista[i].lat, lista[i].lng, lista[j].lat, lista[j].lng));
-    assert.ok(min >= 5, `${cc}: dos lugares a ${min.toFixed(1)} km`);
+    assert.ok(min >= k, `${cc}: dos lugares a ${min.toFixed(1)} km (mínimo ${k})`);
   }
+  const grandes = Object.entries(por).filter(([cc]) => p.paises[cc].k === 15);
+  assert.ok(grandes.length >= 55 && grandes.every(([, l]) => l.length >= 1), `países grandes (15 km): ${grandes.length}`);
+  assert.ok(grandes.some(([, l]) => l.length >= 100), 'al menos un país grande con mucha densidad, donde la regla de 15 km se nota');
   const n = (cc) => (por[cc] || []).length;
+  const region = (c) => m.filter((x) => p.paises[x.cc].cont === c).length;
   const paises = Object.keys(por).length;
-  // meta: 1200 lugares; con el tope de 3.000 cargas del visor se llegó a menos (ver el informe). Piso duro: 1000.
-  if (m.length < 1200) console.warn(`aviso: mundo.json tiene ${m.length} lugares (la meta es 1200; ampliar con "validar")`);
-  assert.ok(m.length >= 1000, `lugares: ${m.length} (mínimo 1000)`);
-  assert.ok(paises >= 60, `países con lugares: ${paises} (mínimo 60)`);
-  assert.ok(n('AR') >= 150, `Argentina: ${n('AR')} (mínimo 150)`);
-  for (const cc of ['BR', 'MX', 'CL', 'CO', 'PE', 'UY']) assert.ok(n(cc) >= 40, `${cc}: ${n(cc)} (mínimo 40)`);
+  // metas de la ampliación de oct. 2026 (ver docs/trotamundos.md, "7. Estado"); piso duro: lo que se logró con las 5.000 cargas del visor
+  if (m.length < 1800) console.warn(`aviso: mundo.json tiene ${m.length} lugares (la meta es 1800; ampliar con "validar")`);
+  assert.ok(m.length >= 1700, `lugares: ${m.length} (mínimo 1700)`);
+  assert.ok(paises >= 70, `países con lugares: ${paises} (mínimo 70)`);
+  assert.ok(n('AR') >= 220, `Argentina: ${n('AR')} (mínimo 220)`);
+  for (const cc of ['BR', 'MX', 'CL', 'CO', 'PE', 'UY']) assert.ok(n(cc) >= 60, `${cc}: ${n(cc)} (mínimo 60)`);
+  for (const cc of ['US', 'CA', 'AU', 'ZA', 'JP', 'RU', 'IN', 'ID', 'TR']) assert.ok(n(cc) >= 30, `${cc}: ${n(cc)} (mínimo 30)`);
+  assert.ok(region('africa') >= 120, `África: ${region('africa')} (mínimo 120)`);
+  assert.ok(region('oceania') >= 80, `Oceanía: ${region('oceania')} (mínimo 80)`);
   const resto = Object.entries(por).filter(([cc]) => !['AR', 'BR', 'MX', 'CL', 'CO', 'PE', 'UY'].includes(cc));
   const media = resto.reduce((s, [, l]) => s + l.length, 0) / resto.length;
   assert.ok(media >= 8, `promedio en el resto de los países: ${media.toFixed(1)} (mínimo 8)`);
@@ -344,12 +579,19 @@ test('motivoFamoso: solo entra un famoso validado, con imagen oficial (© Google
   assert.equal(motivoFamoso({ ...ok, distSitio: 3 }, { max: 5 }), null);
 });
 
-test('famosos.json: todos tienen imagen oficial en la validación (si está el caché de la herramienta)', { skip: !hayDatos || !existsSync(join(CACHE, 'validacion.jsonl')) }, () => {
-  const ult = new Map();
+test('famosos.json: cada uno tiene una lectura oficial a menos de 250 m del sitio en la validación (si está el caché de la herramienta)', { skip: !hayDatos || !existsSync(join(CACHE, 'validacion.jsonl')) }, () => {
+  const lecturas = new Map();
   for (const l of readFileSync(join(CACHE, 'validacion.jsonl'), 'utf8').split('\n')) {
     if (!l.trim()) continue;
     const r = JSON.parse(l);
-    if (r.t === 'f') ult.set(r.id, r);
+    if (r.t === 'f' || r.t === 'fp') lecturas.set(r.id, [...(lecturas.get(r.id) || []), r]);
   }
-  for (const x of leer('famosos.json')) assert.equal(ult.get(x.id)?.oficial, true, `${x.id} (${x.n.en}): la panorámica no es oficial`);
+  const r5 = (v) => Math.round(v * 1e5) / 1e5;
+  for (const x of leer('famosos.json')) {
+    const r = (lecturas.get(x.id) || []).find((q) => q.pano && r5(q.pano.lat) === x.lat && r5(q.pano.lng) === x.lng);
+    assert.ok(r, `${x.id} (${x.n.en}): no hay una lectura del visor con esa panorámica`);
+    assert.equal(r.oficial, true, `${x.id} (${x.n.en}): la panorámica no es oficial`);
+    assert.equal(motivoFamoso(r), null, `${x.id} (${x.n.en}): ${motivoFamoso(r)}`);
+    if (x.dm !== undefined) assert.equal(x.dm, Math.round((r.distSitio ?? r.dist) * 1000), `${x.id}: dm no coincide con la distancia medida`);
+  }
 });
