@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Fuego y Agua · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+
+    <!-- HUD -->
+    <div class="hud" id="hud" hidden>
+      <div class="pill">
+        <b id="h-name"></b>
+        <span class="time" id="h-time">0:00</span>
+        <span class="gems"><i class="gem red"></i><b id="h-red">0</b><i class="gem blue"></i><b id="h-blue">0</b></span>
+      </div>
+      <button class="pause" id="b-pause" aria-label="pausa"><i></i><i></i></button>
+    </div>
+
+    <!-- controles táctiles -->
+    <div class="pad" id="pad" hidden>
+      <div class="cluster left" id="pl">
+        <button class="key" data-k="l" aria-label="izquierda">◀</button>
+        <button class="key" data-k="r" aria-label="derecha">▶</button>
+        <button class="key jump" data-k="u" aria-label="saltar">▲</button>
+      </div>
+      <div class="cluster right" id="pr">
+        <button class="key swap" id="b-swap" aria-label="cambiar"><canvas width="64" height="64" id="swap-c"></canvas></button>
+        <button class="key" data-k="l" aria-label="izquierda">◀</button>
+        <button class="key" data-k="r" aria-label="derecha">▶</button>
+        <button class="key jump" data-k="u" aria-label="saltar">▲</button>
+      </div>
+    </div>
+
+    <!-- inicio -->
+    <section class="screen on" id="s-home">
+      <div class="card home">
+        <h1 class="logo"><span class="f" data-t="fire"></span><small data-t="and"></small><span class="w" data-t="water"></span></h1>
+        <p class="sub" data-t="tagline"></p>
+        <button class="btn gold" id="b-play"><span data-t="play"></span><small id="b-play-sub"></small></button>
+        <button class="btn stone" id="b-levels"><span data-t="levels"></span></button>
+        <div class="row2" id="touch-mode">
+          <button class="btn stone small" data-mode="one"><span data-t="mode1"></span></button>
+          <button class="btn stone small" data-mode="two"><span data-t="mode2"></span></button>
+        </div>
+        <button class="link" id="b-help" data-t="how"></button>
+      </div>
+    </section>
+
+    <!-- niveles -->
+    <section class="screen" id="s-levels">
+      <div class="card wide">
+        <h2 data-t="levels"></h2>
+        <div class="grid" id="lv-grid"></div>
+        <button class="link" data-go="home" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- cómo se juega -->
+    <section class="screen dim" id="s-help">
+      <div class="card wide">
+        <h2 data-t="how"></h2>
+        <ol class="how" id="how"></ol>
+        <button class="btn gold" id="help-ok"><span data-t="gotIt"></span></button>
+      </div>
+    </section>
+
+    <!-- pausa -->
+    <section class="screen dim" id="s-pause">
+      <div class="card">
+        <h2 data-t="paused"></h2>
+        <button class="btn gold" id="p-resume"><span data-t="resume"></span></button>
+        <button class="btn stone" id="p-restart"><span data-t="restart"></span><kbd>R</kbd></button>
+        <button class="btn stone" id="p-levels"><span data-t="levels"></span></button>
+        <button class="link" id="p-help" data-t="how"></button>
+      </div>
+    </section>
+
+    <!-- ganó -->
+    <section class="screen dim" id="s-win">
+      <div class="card">
+        <p class="kicker" id="w-kicker"></p>
+        <h2 data-t="won"></h2>
+        <div class="grade" id="w-grade">A</div>
+        <ul class="stats" id="w-stats"></ul>
+        <button class="btn gold" id="w-next"><span data-t="next"></span></button>
+        <div class="row2">
+          <button class="btn stone" id="w-again"><span data-t="again"></span></button>
+          <button class="btn stone" id="w-levels"><span data-t="levels"></span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- perdió -->
+    <section class="screen dim" id="s-fail">
+      <div class="card">
+        <h2 id="f-title"></h2>
+        <p class="sub" id="f-sub"></p>
+        <button class="btn gold" id="f-retry"><span data-t="retry"></span><kbd>R</kbd></button>
+        <button class="btn stone" id="f-levels"><span data-t="levels"></span></button>
+      </div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

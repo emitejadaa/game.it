@@ -16,5 +16,5 @@
   "input": ["mouse", "touch", "keyboard"],
   "features": { "online": true, "multiplayer": true, "maxPlayers": 6, "cpu": false, "story": false, "daily": true },
   "daily": { "epoch": "2026-10-30" },
-  "order": 66
+  "order": 70
 }
