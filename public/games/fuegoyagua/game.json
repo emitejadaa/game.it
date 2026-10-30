@@ -1,0 +1,19 @@
+{
+  "id": "fuegoyagua",
+  "title": { "es": "Fuego y Agua", "en": "Fire & Water" },
+  "description": {
+    "es": "Plataformas de a dos en un templo: Llama camina sobre la lava y Gota sobre el agua, pero cada uno se apaga en lo del otro. Botones, palancas, plataformas, cajas y gemas de cada color hasta llegar cada uno a su puerta. De a uno o de a dos en la misma pantalla.",
+    "en": "Two-player temple platformer: Flame walks on lava and Drop on water, but each one is put out by the other's. Buttons, levers, platforms, boxes and colored gems until each reaches their door. Play solo or two on the same screen."
+  },
+  "categories": ["aventura", "puzzle", "multijugador"],
+  "tags": ["fuego", "agua", "fire", "water", "templo", "temple", "plataformas", "platformer", "cooperativo", "co-op", "dos jugadores", "two players", "gemas", "gems", "puzzle"],
+  "thumbnail": "thumb.webp",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "landscape",
+  "input": ["keyboard", "touch", "gamepad"],
+  "features": { "online": false, "multiplayer": true, "localPlayers": 2, "maxPlayers": 2, "story": false },
+  "order": 69
+}

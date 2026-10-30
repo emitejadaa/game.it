@@ -1,0 +1,19 @@
+{
+  "id": "hamburgueseria",
+  "title": { "es": "Hamburguesería", "en": "Burger Shop" },
+  "description": {
+    "es": "Atendé una hamburguesería: cociná la carne en la parrilla dándola vuelta en el momento justo (jugosa, a punto o bien cocida) y armá cada hamburguesa en el orden de la comanda, bien centrada. Clientes con su favorita, propinas, rangos con ingredientes nuevos y mejoras.",
+    "en": "Run a burger joint: cook patties on the grill and flip them at the right moment (rare, medium or well done), then stack every burger in ticket order, nice and centered. Customers with favorite orders, tips, ranks with new toppings and upgrades."
+  },
+  "categories": ["casual", "estrategia"],
+  "tags": ["hamburguesa", "burger", "hamburgueseria", "parrilla", "grill", "cocina", "cooking", "restaurante", "restaurant", "atender", "clientes", "customers", "propinas", "tips", "gestion"],
+  "thumbnail": "thumb.webp",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": false, "multiplayer": false, "maxPlayers": 1, "story": false },
+  "order": 68
+}

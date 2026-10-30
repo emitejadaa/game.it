@@ -855,6 +855,52 @@ terminado a alguien el servidor **rehace uno por uno los trasvases** que mandó 
 lo mide el servidor (con un piso de 0,3 s por trasvase) y no se acepta nada antes de la largada. Si el último que falta pierde la conexión
 (recarga la página) se lo espera 20 s (`rejoinMs` de `_race.js`, apagado por defecto) antes de cerrar la carrera.
 
+### Cocina (base común): Pizzería, Heladería y Hamburguesería
+
+Juegos de atender un local con estaciones, todos sobre un armazón común (`public/shared/cocina/`). `core.js` (puro) tiene los 48
+vecinos con su cara armada con semilla, quién viene cada día (los nuevos se suman de a uno o dos y los habituales vuelven), la espera
+razonable de cada pedido, la propina (crece con el puntaje y suma un extra con 100), la experiencia y los rangos, y el guardado.
+`kit.js` tiene las mediciones que comparten las estaciones: una grilla que se pinta para medir cobertura y derrame, lo parejo que
+quedó algo repartido, cuánto se parece una pila al pedido (subsecuencia común más larga) y el punto de cocción. `shell.js` pone lo
+común: el salón donde los clientes entran, hacen fila, piden en el mostrador y esperan sentados; las comandas colgadas arriba; las
+pestañas de las estaciones (con un globito cuando algo está listo); el reloj del día; la entrega con el puntaje de cada estación más
+la espera, la propina y la cara del cliente; el resumen del día, el rango nuevo con lo que se abre, la **tienda** (comunes a los tres:
+sillas para que esperen más tranquilos, frasco de propinas y cartel que trae un cliente más; y mejoras propias de cada local), la
+**libreta de clientes** con el favorito de cada uno, la pausa y el guardado. Se adapta a pantallas horizontales y verticales, y el
+primer día un tutorial va marcando cada paso.
+
+- **Pizzería** (`public/games/pizzeria/`): en el **armado** la salsa y el queso se pintan arrastrando el dedo (cuenta cuánto cubren
+  y cuánto se pasa al borde) y cada ingrediente (12, que se abren por rango) va entero, por mitades o por cuartos, en la cantidad de
+  la comanda y bien repartido; el **horno** tiene un dial por pizza (pasado el punto se quema) y en el **corte** se arrastran cortes
+  que tienen que pasar por el centro y dejar porciones parejas (4, 6 u 8). Mejoras: horno más grande, timbre del horno, cortador
+  con guía y cucharón grande.
+- **Heladería** (`public/games/heladeria/`): se elige el vaso, se ponen las mezclas (10, de frutillas a bocaditos de dulce de leche)
+  y se mantiene apretado el jarabe hasta la línea; en el **licuado** cada vaso tiene su medidor de grueso, normal o suave (pasado el
+  punto se aguachenta); en el **decorado** la crema se mantiene hasta la altura pedida, las salsas se trazan con el dedo, las granas
+  se espolvorean y lo de arriba (cereza, oblea…) va a la izquierda, al medio o a la derecha. Mejoras: licuadora extra, timbre de
+  licuadora, bomba con freno y plantilla de decorado.
+- **Hamburguesería** (`public/games/hamburgueseria/`): en la **parrilla** los medallones se ponen, se dan vuelta tocándolos y se
+  llevan a la bandeja; cada lado se cocina por su cuenta y se puntúa contra el punto pedido (jugosa, a punto o bien cocida). En el
+  **armado** los ingredientes (14) caen desde arriba y se apilan: cuenta el orden de la pila contra la comanda y que cada capa quede
+  centrada sobre el pan. Mejoras: parrilla grande, termómetro con alarma y espátula guía.
+
+Las reglas de cada local están en su `shared/rules.js` (puras) y las pruebas (`tests/cocina.test.mjs` y una por local) comprueban el
+puntaje de cada estación con productos perfectos, flojos y quemados, que los pedidos solo usen lo abierto en el rango y que el plan
+del día traiga solo clientes ya abiertos, en orden y sin repetir.
+
+### Fuego y Agua (plataformas de a dos)
+
+Plataformas cooperativo en un templo (`public/games/fuegoyagua/`): Llama y Gota tienen que llegar cada uno a su puerta. La lava apaga a
+Gota, el agua apaga a Llama y el barro verde, a los dos; hay gemas de cada color, botones que se mantienen apretados, palancas,
+plataformas y compuertas que se mueven y cajas para empujar. La simulación (`shared/sim.js`, pura y de paso fijo 1/120 s) usa
+baldosas con rampas a 45° y es determinista: los 10 niveles (`shared/levels.js`, generados con `tools/fuegoyagua-niveles.py`) tienen
+una solución escrita en `shared/solutions.js` que un piloto automático (`shared/pilot.js`) ejecuta en las pruebas para comprobar que
+cada uno se gana con todas las gemas y dentro del tiempo; el mismo piloto juega la demo de la pantalla de inicio. Cada nivel da una
+nota (A con todas las gemas y a tiempo, B con una de las dos, C sin ninguna) y se guarda la mejor. Con teclado se juega **de a dos**
+en la misma compu (flechas y WASD) y con mandos uno cada uno; en pantallas táctiles hay modo **de a uno** (botón para cambiar de
+personaje) y **de a dos** en el mismo celular o tablet, con los controles de cada uno en su lado. La cámara muestra el nivel entero si
+entra a buen tamaño y, si no, sigue a los dos (o al que se está moviendo).
+
 ## Juegos diarios
 
 Un desafío nuevo por día, igual para todos y a la misma hora: **cambia a las 00:00 de Argentina** (UTC−3 fijo). Cada juego

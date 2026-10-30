@@ -1,0 +1,19 @@
+{
+  "id": "pizzeria",
+  "title": { "es": "Pizzería", "en": "Pizzeria" },
+  "description": {
+    "es": "Atendé la pizzería del barrio: tomá los pedidos, pintá la salsa y el queso, poné cada ingrediente en su lugar, horneala al punto y cortala en porciones parejas. Clientes con su favorita, propinas, rangos con ingredientes nuevos y mejoras para el local.",
+    "en": "Run the neighborhood pizzeria: take orders, paint on sauce and cheese, put every topping in its place, bake it just right and cut even slices. Customers with favorite orders, tips, ranks with new toppings and shop upgrades."
+  },
+  "categories": ["casual", "estrategia"],
+  "tags": ["pizza", "pizzeria", "cocina", "cooking", "restaurante", "restaurant", "atender", "clientes", "customers", "propinas", "tips", "horno", "oven", "gestion", "time management"],
+  "thumbnail": "thumb.webp",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": false, "multiplayer": false, "maxPlayers": 1, "story": false },
+  "order": 66
+}
