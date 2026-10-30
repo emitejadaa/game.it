@@ -9,9 +9,10 @@ const STATE_MIN_MS = 45; // como mucho ~22 estados por segundo por jugador
  * Opcionales: `partial(s)` guarda lo último que mandó cada jugador (por ejemplo cuánto avanzó) y se suma a su fila si no
  * termina; `listable` + `listInfo(room)` lo muestran en la lista de salas públicas (settings.public); `maxMs` puede ser
  * una función de la sala (partidas con tiempo elegido); `extra(room, api, p, msg, d)` recibe los mensajes propios del
- * juego durante la partida (devuelve false si eran inválidos).
+ * juego durante la partida (devuelve false si eran inválidos); `rejoinMs` (0 = apagado) es cuánto se espera, cuando los que
+ * faltan terminar están todos desconectados, a que alguno vuelva (recargó la página, perdió la señal) antes de cerrar la carrera.
  */
-export function raceGame({ maxPlayers = 4, countdownMs = 4000, maxMs = 10 * 60e3, graceAfterFirstMs = 45e3, defaults = {}, settings, onStart, validateFinish, rank, partial, listable = false, listInfo, extra }) {
+export function raceGame({ maxPlayers = 4, countdownMs = 4000, maxMs = 10 * 60e3, graceAfterFirstMs = 45e3, rejoinMs = 0, defaults = {}, settings, onStart, validateFinish, rank, partial, listable = false, listInfo, extra }) {
   function finish(room, api) {
     const d = room.data;
     if (!d || d.over) return;
@@ -23,8 +24,11 @@ export function raceGame({ maxPlayers = 4, countdownMs = 4000, maxMs = 10 * 60e3
 
   function maybeEnd(room, api) {
     const d = room.data;
-    const alive = api.players().filter((p) => p.connected && !d.results.some((r) => r.id === p.id));
-    if (!alive.length) finish(room, api);
+    if (!d || d.over) return;
+    const left = api.players().filter((p) => !d.results.some((r) => r.id === p.id));
+    if (left.some((p) => p.connected)) return;
+    if (rejoinMs && left.length) api.setTimer('rejoin', rejoinMs, () => finish(room, api));
+    else finish(room, api);
   }
 
   return {
@@ -74,6 +78,9 @@ export function raceGame({ maxPlayers = 4, countdownMs = 4000, maxMs = 10 * 60e3
     },
     onDisconnect(room, api) {
       maybeEnd(room, api);
+    },
+    onReconnect(room, api) {
+      api.clearTimer('rejoin');
     },
   };
 }

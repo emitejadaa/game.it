@@ -1,0 +1,20 @@
+{
+  "id": "chorrito",
+  "title": { "es": "Chorrito", "en": "Pour Sort" },
+  "description": {
+    "es": "Tubos de vidrio con capas de colores: tocá uno, pasá la tanda de arriba a otro y dejá cada tubo de un solo color. Niveles que suben de 3 a 12 colores (todos con solución comprobada), pistas, deshacer, un tubo extra, el chorrito del día y una carrera online donde todos resuelven el mismo nivel.",
+    "en": "Glass tubes with layers of colors: tap one, pour its top run into another and leave every tube holding a single color. Levels growing from 3 to 12 colors (every one checked to be solvable), hints, undo, an extra tube, a daily pour and an online race where everyone solves the same level."
+  },
+  "categories": ["puzzle", "casual", "online", "multijugador", "diarios"],
+  "tags": ["agua", "water", "sort", "water sort", "ordenar", "colores", "colors", "tubos", "tubes", "líquidos", "liquid", "trasvasar", "pour", "lógica", "logic", "relajante", "relaxing", "diario", "daily", "carrera", "race"],
+  "thumbnail": "thumb.webp",
+  "entry": "index.html",
+  "tech": "canvas 2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 6, "cpu": false, "story": false, "daily": true },
+  "daily": { "epoch": "2026-10-30" },
+  "order": 65
+}

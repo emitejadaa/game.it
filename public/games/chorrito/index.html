@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Chorrito · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Caveat:wght@600;700&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="game" id="game">
+      <div class="top" id="top" hidden>
+        <div class="info">
+          <b id="lvl"></b>
+          <span id="moves"></span>
+        </div>
+        <div class="race" id="race" hidden></div>
+        <button class="pause" id="b-pause" aria-label="pausa"><i></i><i></i></button>
+      </div>
+      <canvas id="cv" aria-label="tubos"></canvas>
+      <div class="tools" id="tools" hidden>
+        <button class="tool" id="t-undo" aria-label="deshacer"><svg viewBox="0 0 24 24"><path d="M9 7H15a5 5 0 0 1 0 10H8M9 7l3-3M9 7l3 3" /></svg><small data-t="undo"></small></button>
+        <button class="tool" id="t-restart" aria-label="reiniciar"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4h-4" /></svg><small data-t="restart"></small></button>
+        <button class="tool" id="t-hint" aria-label="pista"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" /></svg><small data-t="hint"></small></button>
+        <button class="tool" id="t-tube" aria-label="tubo extra"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v14a2 2 0 0 0 4 0V3M18 8v6M15 11h6" /></svg><small data-t="tube"></small><em id="t-tube-n"></em></button>
+      </div>
+      <div class="toast" id="toast"></div>
+      <div class="confetti" id="confetti" aria-hidden="true"></div>
+    </main>
+
+    <!-- inicio -->
+    <section class="screen on" id="s-home">
+      <div class="panel home">
+        <div class="logo" id="logo" aria-hidden="true"><i></i><i></i><i></i></div>
+        <h1 data-t="title"></h1>
+        <p class="sub" data-t="tagline"></p>
+        <button class="btn sun" id="b-play"><span id="b-play-t"></span><small id="b-play-sub"></small></button>
+        <button class="btn mint" id="b-daily"><span data-t="daily"></span><small id="b-daily-sub"></small></button>
+        <button class="btn coral" id="b-online"><span data-t="online"></span><small data-t="onlineSub"></small></button>
+        <div class="row2">
+          <button class="link" id="b-levels" data-t="levels"></button>
+          <button class="link" id="b-rules" data-t="rulesTitle"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- niveles -->
+    <section class="screen" id="s-levels">
+      <div class="panel wide">
+        <h2 data-t="levels"></h2>
+        <div class="lv-grid" id="lv-grid"></div>
+        <div class="pager"><button class="link" id="lv-prev">‹</button><span id="lv-page"></span><button class="link" id="lv-next">›</button></div>
+        <button class="link" id="lv-back" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- online -->
+    <section class="screen" id="s-online">
+      <div class="panel">
+        <h2 data-t="online"></h2>
+        <p class="sub small" data-t="onlineLong"></p>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" spellcheck="false" />
+        <button class="btn sun" id="on-quick"><span data-t="quick"></span><small data-t="quickSub"></small></button>
+        <button class="btn blue" id="on-create"><span data-t="create"></span><small data-t="createSub"></small></button>
+        <div class="join">
+          <input class="field code" id="on-code" maxlength="5" autocomplete="off" spellcheck="false" placeholder="ABCDE" aria-label="código" />
+          <button class="btn mint" id="on-join"><span data-t="join"></span></button>
+        </div>
+        <p class="status" id="on-status"></p>
+        <button class="link" id="on-back" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- sala -->
+    <section class="screen" id="s-lobby">
+      <div class="panel">
+        <p class="kicker" data-t="room"></p>
+        <button class="code-big" id="lobby-code">-----</button>
+        <p class="hint2" data-t="tapToCopy"></p>
+        <ul class="plist" id="lobby-players"></ul>
+        <div class="opt col"><span class="lbl" data-t="difficulty"></span><div class="seg" id="seg-colors"><button data-v="6" data-t="d6"></button><button data-v="8" data-t="d8"></button><button data-v="10" data-t="d10"></button><button data-v="12" data-t="d12"></button></div></div>
+        <button class="btn sun" id="lobby-start"><span data-t="startRace"></span></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="link" id="lobby-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <!-- resultados de la carrera -->
+    <section class="screen dim" id="s-results">
+      <div class="panel">
+        <h2 id="res-title"></h2>
+        <ol class="rank" id="res-rank"></ol>
+        <button class="btn sun" id="res-again"><span></span></button>
+        <button class="link" id="res-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <!-- cómo se juega -->
+    <section class="screen dim" id="s-rules">
+      <div class="panel wide">
+        <h2 data-t="rulesTitle"></h2>
+        <div class="rules" id="rules-body"></div>
+        <button class="btn sun" id="b-rules-ok"><span data-t="gotIt"></span></button>
+      </div>
+    </section>
+
+    <!-- pausa -->
+    <section class="screen dim" id="s-pause">
+      <div class="panel">
+        <h2 data-t="paused"></h2>
+        <button class="btn sun" id="b-resume"><span data-t="resume"></span></button>
+        <div class="opt"><span class="lbl" data-t="symbols"></span><div class="seg" id="o-symbols"><button data-v="0" data-t="off"></button><button data-v="1" data-t="on"></button></div></div>
+        <button class="btn ghost" id="b-p-rules"><span data-t="rulesTitle"></span></button>
+        <button class="link" id="b-quit" data-t="quit"></button>
+      </div>
+    </section>
+
+    <!-- nivel resuelto -->
+    <section class="screen dim" id="s-win">
+      <div class="panel">
+        <p class="kicker" id="win-kicker"></p>
+        <h2 id="win-title"></h2>
+        <div class="stars" id="win-stars"></div>
+        <div class="stats" id="win-stats"></div>
+        <div class="stats" id="win-day" hidden></div>
+        <p class="next-day" id="win-next" hidden><span data-t="nextDaily"></span> <b id="win-clock">00:00:00</b></p>
+        <button class="btn mint" id="b-share" hidden><span data-t="share"></span></button>
+        <p class="status" id="win-status"></p>
+        <button class="btn sun" id="b-next"><span id="b-next-t"></span></button>
+        <button class="btn ghost" id="b-retry"><span data-t="retry"></span></button>
+        <button class="link" id="b-win-menu" data-t="menu"></button>
+      </div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
