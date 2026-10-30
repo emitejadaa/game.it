@@ -836,6 +836,23 @@ tablas de chances de gol calculadas con semilla fija, el tiro o la zona que mejo
 error de puntería y la suerte del arquero, resuelve con las mismas reglas y manda el resultado para que los dos lo animen igual; si se
 acaba el tiempo (18 s) elige por el que falta, hay revancha (patea primero el otro) y reconexión con la tanda en curso.
 
+### Julay’s Donas (local de donas)
+
+Atendés el local de donas de Julay (`public/games/julays-donas/`), todo dibujado con canvas 2D (personas, donas, local y texturas, sin
+imágenes): en el **mostrador** tomás el pedido, en la **masa** elegís la masa, la estirás con el palote y cortás la forma, en la
+**fritura** das vuelta cada lado en su punto (se sigue cocinando aunque estés en otra estación) y en el **decorado** ponés relleno y
+baño (mantener apretado hasta la raya), hilos en zigzag, toppings espolvoreados y piezas bien repartidas. La comanda dice qué es cada
+cosa (masa, forma, relleno, baño, hilos, topping, piezas) y cada cliente pone nota a la espera, la masa, la fritura y el decorado
+(`orders.js`). La simulación del día (`dia.js`: llegadas, fila, tickets, la freidora que no para) no dibuja nada y la usan las
+estaciones y las pruebas. Veinte clientes del barrio van apareciendo de a poco y el último de cada día es un exigente (cuatro que se
+turnan, y Julay cada 7 días) que endurece las notas. Con las propinas y los logros se compran **mejoras de cocina** que cambian el
+juego (`mejoras.js`: segunda mesa de masa, freidora de seis lugares, termómetro, manga que frena en la raya…) y decoración para el
+local con colores a elección (`local.js`). El personaje se arma en el vestidor (`personas.js`: mujer u hombre, piel, ojos,
+peinados, prendas con estampados, calzado, delantal con una plaquita con el nombre…), la historia se cuenta con una película
+animada (`pelicula.js`), hay tres dificultades (fácil, medio y difícil) y música tranquila sintetizada. Lo que no cambia (el fondo,
+el mostrador, los retratos y las donas ya hechas) se dibuja una vez y se guarda, para mantener 60 fps; la partida se guarda en
+`localStorage` al terminar cada día.
+
 ## Juegos diarios
 
 Un desafío nuevo por día, igual para todos y a la misma hora: **cambia a las 00:00 de Argentina** (UTC−3 fijo). Cada juego

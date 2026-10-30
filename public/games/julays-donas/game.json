@@ -1,0 +1,19 @@
+{
+  "id": "julays-donas",
+  "title": { "es": "Julay’s Donas", "en": "Julay’s Donas" },
+  "description": {
+    "es": "Atendé el local de donas de Julay: tomás los pedidos, armás la masa, freís en su punto y decorás con relleno, baño, hilos y toppings. Cada día llegan clientes nuevos y el último es el más exigente. Con las propinas mejorás la cocina y decorás el local, y armás tu personaje con mucha ropa para elegir.",
+    "en": "Run Julay’s donut shop: take orders, shape the dough, fry to perfection and decorate with filling, icing, drizzle and toppings. New customers arrive every day and the last one is the toughest. Tips upgrade your kitchen and decorate the shop, and you dress up your character with lots of clothes."
+  },
+  "categories": ["casual", "historia", "estrategia"],
+  "tags": ["donas", "donuts", "cocina", "cooking", "restaurante", "pastelería", "bakery", "atender", "manager", "pedidos", "orders", "decorar", "historia", "time management"],
+  "thumbnail": "thumb.svg",
+  "entry": "index.html",
+  "tech": "canvas2d",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "landscape",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": false, "multiplayer": false, "story": true, "save": true },
+  "order": 65
+}
