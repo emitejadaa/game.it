@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Gemas · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Caveat:wght@600;700&display=swap" rel="stylesheet" />
+    <script src="/sdk/gameit.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="game" id="game">
+      <div class="hud" id="hud" hidden>
+        <div class="hud-top">
+          <div class="title"><b id="lvl"></b><small id="lvl-sub"></small></div>
+          <div class="moves" id="moves-box"><b id="moves">0</b><small id="moves-lbl"></small></div>
+          <button class="pause" id="b-pause" aria-label="pausa"><i></i><i></i></button>
+        </div>
+        <div class="score">
+          <b id="score">0</b>
+          <div class="bar" id="bar"><i id="bar-fill"></i><em data-s="0"></em><em data-s="1"></em><em data-s="2"></em></div>
+        </div>
+        <div class="goals" id="goals"></div>
+        <div class="race" id="race" hidden></div>
+      </div>
+      <canvas id="cv" aria-label="tablero"></canvas>
+      <div class="toast" id="toast"></div>
+      <div class="banner" id="banner"></div>
+      <div class="confetti" id="confetti" aria-hidden="true"></div>
+    </main>
+
+    <!-- inicio -->
+    <section class="screen on" id="s-home">
+      <div class="panel home">
+        <div class="logo" aria-hidden="true"><i class="g0"></i><i class="g4"></i><i class="g2"></i></div>
+        <h1 data-t="title"></h1>
+        <p class="sub" data-t="tagline"></p>
+        <button class="btn sun" id="b-play"><span id="b-play-t"></span><small id="b-play-sub"></small></button>
+        <button class="btn mint" id="b-daily"><span data-t="daily"></span><small id="b-daily-sub"></small></button>
+        <div class="row2 btns">
+          <button class="btn blue" id="b-timed"><span data-t="timed"></span><small id="b-timed-sub"></small></button>
+          <button class="btn coral" id="b-online"><span data-t="online"></span><small data-t="onlineSub"></small></button>
+        </div>
+        <div class="row2">
+          <button class="link" id="b-levels" data-t="levels"></button>
+          <button class="link" id="b-rules" data-t="rulesTitle"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- niveles -->
+    <section class="screen" id="s-levels">
+      <div class="panel wide">
+        <h2 data-t="levels"></h2>
+        <div class="lv-grid" id="lv-grid"></div>
+        <div class="pager"><button class="link" id="lv-prev">‹</button><span id="lv-page"></span><button class="link" id="lv-next">›</button></div>
+        <button class="link" id="lv-back" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- objetivo del nivel -->
+    <section class="screen dim" id="s-goal">
+      <div class="panel">
+        <p class="kicker" id="goal-kicker"></p>
+        <h2 id="goal-title"></h2>
+        <div class="goal-big" id="goal-big"></div>
+        <p class="sub small" id="goal-text"></p>
+        <button class="btn sun" id="b-goal-go"><span data-t="go"></span></button>
+        <button class="link" id="b-goal-back" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- online -->
+    <section class="screen" id="s-online">
+      <div class="panel">
+        <h2 data-t="online"></h2>
+        <p class="sub small" data-t="onlineLong"></p>
+        <input class="field" id="on-name" maxlength="16" autocomplete="off" spellcheck="false" />
+        <button class="btn sun" id="on-quick"><span data-t="quick"></span><small data-t="quickSub"></small></button>
+        <button class="btn blue" id="on-create"><span data-t="create"></span><small data-t="createSub"></small></button>
+        <div class="join">
+          <input class="field code" id="on-code" maxlength="5" autocomplete="off" spellcheck="false" placeholder="ABCDE" aria-label="código" />
+          <button class="btn mint" id="on-join"><span data-t="join"></span></button>
+        </div>
+        <p class="status" id="on-status"></p>
+        <button class="link" id="on-back" data-t="back"></button>
+      </div>
+    </section>
+
+    <!-- sala -->
+    <section class="screen" id="s-lobby">
+      <div class="panel">
+        <p class="kicker" data-t="room"></p>
+        <button class="code-big" id="lobby-code">-----</button>
+        <p class="hint2" data-t="tapToCopy"></p>
+        <ul class="plist" id="lobby-players"></ul>
+        <div class="opt col"><span class="lbl" data-t="movesSetting"></span><div class="seg" id="seg-moves"><button data-v="20">20</button><button data-v="30">30</button><button data-v="40">40</button></div></div>
+        <button class="btn sun" id="lobby-start"><span data-t="startRace"></span></button>
+        <p class="status" id="lobby-status"></p>
+        <button class="link" id="lobby-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <!-- resultados online -->
+    <section class="screen dim" id="s-results">
+      <div class="panel">
+        <h2 id="res-title"></h2>
+        <ol class="rank" id="res-rank"></ol>
+        <button class="btn sun" id="res-again"><span></span></button>
+        <button class="link" id="res-leave" data-t="leave"></button>
+      </div>
+    </section>
+
+    <!-- cómo se juega -->
+    <section class="screen dim" id="s-rules">
+      <div class="panel wide">
+        <h2 data-t="rulesTitle"></h2>
+        <div class="rules" id="rules-body"></div>
+        <button class="btn sun" id="b-rules-ok"><span data-t="gotIt"></span></button>
+      </div>
+    </section>
+
+    <!-- pausa -->
+    <section class="screen dim" id="s-pause">
+      <div class="panel">
+        <h2 data-t="paused"></h2>
+        <button class="btn sun" id="b-resume"><span data-t="resume"></span></button>
+        <button class="btn ghost" id="b-restart"><span data-t="restart"></span></button>
+        <button class="btn ghost" id="b-p-rules"><span data-t="rulesTitle"></span></button>
+        <button class="link" id="b-quit" data-t="quit"></button>
+      </div>
+    </section>
+
+    <!-- fin de partida -->
+    <section class="screen dim" id="s-end">
+      <div class="panel">
+        <p class="kicker" id="end-kicker"></p>
+        <h2 id="end-title"></h2>
+        <div class="stars" id="end-stars"></div>
+        <div class="stats" id="end-stats"></div>
+        <div class="stats" id="end-day" hidden></div>
+        <p class="next-day" id="end-next" hidden><span data-t="nextDaily"></span> <b id="end-clock">00:00:00</b></p>
+        <button class="btn mint" id="b-share" hidden><span data-t="share"></span></button>
+        <p class="status" id="end-status"></p>
+        <button class="btn sun" id="b-end-main"><span id="b-end-main-t"></span></button>
+        <button class="btn ghost" id="b-end-alt"><span id="b-end-alt-t"></span></button>
+        <button class="link" id="b-end-menu" data-t="menu"></button>
+      </div>
+    </section>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

@@ -62,8 +62,9 @@ import gomoku from './games/gomoku.js';
 import domino from './games/domino.js';
 import penales from './games/penales.js';
 import chorrito from './games/chorrito.js';
+import gemas from './games/gemas.js';
 
-const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono, padel, naval, estela, sumo, rey, territorio, caida, voleyball, trotamundos, espiral, cruce, micelio, bolos, vuelo, bollito, generala, truco, escoba, sudoku, damas, reversi, bloques, fusion, mancala, memotest, puntos, gomoku, domino, penales, chorrito };
+const GAMES = { minigolf, tictactoe, connect4, drift, doodle, clashball, chess, ameba, serpentina, billar, chispa, mecha, garabato, telefono, padel, naval, estela, sumo, rey, territorio, caida, voleyball, trotamundos, espiral, cruce, micelio, bolos, vuelo, bollito, generala, truco, escoba, sudoku, damas, reversi, bloques, fusion, mancala, memotest, puntos, gomoku, domino, penales, chorrito, gemas };
 /** Módulo de un juego por nombre (solo propios: evita "constructor", "__proto__", etc.). */
 const gameMod = (g) => (typeof g === 'string' && Object.hasOwn(GAMES, g) ? GAMES[g] : null);
 /**

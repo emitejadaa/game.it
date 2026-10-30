@@ -1,0 +1,20 @@
+{
+  "id": "gemas",
+  "title": { "es": "Gemas", "en": "Gem Swap" },
+  "description": {
+    "es": "Intercambiá gemas vecinas para alinear tres o más del mismo color: con cuatro hacés un rayo, con una L o una T una bomba y con cinco un prisma que se lleva un color entero, y las especiales se combinan entre sí. Niveles con objetivos (puntos, juntar colores, romper hielo) que la compu prueba antes, contrarreloj de 90 segundos, las gemas del día y duelos online con las mismas gemas para todos.",
+    "en": "Swap neighbouring gems to line up three or more of a colour: four make a rocket, an L or T a bomb and five a prism that takes a whole colour, and specials combine with each other. Levels with goals (score, collect colours, break the ice) that the computer tries first, a 90-second time attack, daily gems and online duels with the same gems for everyone."
+  },
+  "categories": ["puzzle", "casual", "online", "multijugador", "diarios"],
+  "tags": ["gemas", "gems", "joyas", "jewels", "match 3", "match-3", "tres en línea", "combinar", "swap", "cascadas", "combos", "candy", "bejeweled", "niveles", "levels", "contrarreloj", "diario", "daily", "duelo", "duel"],
+  "thumbnail": "thumb.webp",
+  "entry": "index.html",
+  "tech": "canvas 2d + websocket",
+  "sdk": true,
+  "platforms": ["desktop", "mobile"],
+  "orientation": "any",
+  "input": ["mouse", "touch", "keyboard"],
+  "features": { "online": true, "multiplayer": true, "maxPlayers": 6, "cpu": false, "story": false, "daily": true },
+  "daily": { "epoch": "2026-10-30" },
+  "order": 66
+}
