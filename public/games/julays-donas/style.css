@@ -1,0 +1,242 @@
+/* Julay's Donas — paleta tierra, colores lisos */
+:root {
+  --tinta: #3b2a20;
+  --tinta2: #6b5545;
+  --crema: #f4ead8;
+  --papel: #fbf5ea;
+  --terracota: #c8553d;
+  --mostaza: #d4a017;
+  --oliva: #6a994e;
+  --fondo: #2b211b;
+  --fuente: Fredoka, 'Trebuchet MS', system-ui, sans-serif;
+  /* alto que queda para la tarjeta (pantalla menos márgenes); se achica en pantallas bajas */
+  --alto: calc(100vh - 70px);
+  --alto: calc(100dvh - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: var(--fondo); color: var(--tinta); font-family: var(--fuente); -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
+body { display: grid; place-items: center; }
+#c { display: block; touch-action: none; }
+
+/* ---------- pantallas sobre el canvas ----------
+   Cada pantalla es una tarjeta que nunca pasa el alto de la ventana: arriba y abajo quedan fijos
+   (título y botones) y si algo no entra, scrollea sólo el medio (.cuerpo). Arriba queda libre el
+   lugar de los botones del portal. */
+#ui { position: fixed; inset: 0; z-index: 5; }
+.pantalla { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: calc(56px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+.pantalla.con-fondo { background: rgba(43, 33, 27, 0.45); }
+.pantalla.oscuro { background: rgba(43, 33, 27, 0.62); }
+.tarjeta { width: min(760px, 100%); max-height: 100%; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; background: var(--papel); border: 3px solid var(--tinta); border-radius: 26px; padding: 22px 24px; box-shadow: 0 8px 0 rgba(59, 42, 32, 0.25); display: flex; flex-direction: column; gap: 12px; }
+.tarjeta > * { flex: none; }
+.tarjeta > .cuerpo { flex: 1 1 auto; }
+.cuerpo { min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; display: grid; gap: 12px; align-content: start; }
+.dos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 20px; }
+.col { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.tarjeta.chica { width: min(420px, 100%); text-align: center; }
+.tarjeta h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1; font-weight: 700; text-align: center; }
+.tarjeta h2 { font-size: 26px; font-weight: 700; line-height: 1.1; }
+.tarjeta h3 { font-size: 15px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta2); }
+.bajada { font-size: 17px; text-align: center; color: var(--tinta2); line-height: 1.35; }
+.botones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; padding-bottom: 5px; }
+.botones.columna { flex-direction: column; align-items: stretch; }
+
+.b { font: 700 19px var(--fuente); color: var(--tinta); background: var(--crema); border: 3px solid var(--tinta); border-radius: 14px; padding: 11px 20px; cursor: pointer; box-shadow: 0 5px 0 #c9b79c; transition: transform 0.08s, box-shadow 0.08s; }
+.b:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 #c9b79c; }
+.b.primario { background: var(--terracota); color: var(--crema); box-shadow: 0 5px 0 #8c3a28; }
+.b.primario:active:not(:disabled) { box-shadow: 0 2px 0 #8c3a28; }
+.b:disabled { opacity: 0.55; cursor: default; }
+.b.chico { font-size: 15px; padding: 7px 12px; border-radius: 11px; box-shadow: 0 3px 0 #c9b79c; }
+.b.chico.primario { box-shadow: 0 3px 0 #8c3a28; }
+.chip { font: 600 15px var(--fuente); color: var(--tinta); background: var(--crema); border: 2.5px solid var(--tinta); border-radius: 99px; padding: 6px 12px; cursor: pointer; }
+.chip.on { background: var(--terracota); color: var(--crema); }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* título */
+.titulo { text-align: center; align-items: center; width: min(820px, 100%); flex-direction: row; gap: 26px; }
+.titulo .marca { flex: 1 1 0; min-width: 0; display: grid; gap: 10px; justify-items: center; }
+.titulo .menu { flex: 0 0 300px; display: grid; gap: 14px; justify-items: center; }
+.logo-dona { width: 150px; }
+.titulo .botones { flex-direction: column; align-items: stretch; width: 100%; }
+.dificultad { display: grid; gap: 6px; justify-items: center; }
+.dificultad > span { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta2); }
+.dificultad small { color: var(--tinta2); font-size: 14px; }
+
+/* vestidor: el personaje a la izquierda, las opciones por pestañas a la derecha */
+.vestidor { width: min(940px, 100%); flex-direction: row; gap: 20px; }
+.vestidor .vista { display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; }
+.vestidor .persona { width: auto; height: auto; max-width: 300px; max-height: calc(var(--alto) - 140px); background: #f7efe1; border: 3px solid var(--tinta); border-radius: 20px; }
+.vestidor .ajustes { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.vestidor .ajustes > * { flex: none; }
+.vestidor .ajustes > .cuerpo { flex: 1 1 auto; }
+.nombre { display: grid; gap: 4px; width: 100%; font-weight: 600; }
+.nombre input { font: 600 20px var(--fuente); color: var(--tinta); background: #fff; border: 3px solid var(--tinta); border-radius: 12px; padding: 8px 12px; width: 100%; min-width: 0; }
+.fila { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 8px; align-items: center; }
+.fila > span { font-weight: 600; font-size: 15px; color: var(--tinta2); }
+.opciones { display: flex; flex-wrap: wrap; gap: 6px; padding: 3px; }
+.color { width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--tinta); background: var(--c); cursor: pointer; }
+.color.on { outline: 3px solid var(--terracota); outline-offset: 2px; }
+.nota { font-size: 14px; color: var(--tinta2); }
+
+/* la película de la historia: ocupa todo lo que puede, en 16:9 */
+.pantalla.cine { background: rgba(20, 15, 12, 0.94); }
+.pelicula { display: flex; flex-direction: column; gap: 10px; align-items: center; width: min(100%, calc((var(--alto) - 50px) * 16 / 9)); }
+.pelicula canvas { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; border: 3px solid var(--tinta); background: var(--fondo); cursor: pointer; touch-action: manipulation; }
+.pelicula .controles { width: 100%; display: flex; align-items: center; gap: 12px; }
+.puntos { margin-right: auto; display: flex; gap: 6px; }
+.puntos i { width: 10px; height: 10px; border-radius: 50%; background: #6b5545; }
+.puntos i.on { background: var(--terracota); }
+
+/* inicio y fin del día */
+.dia, .fin { width: min(900px, 100%); }
+.postal { background: #f6e3c8; border: 3px dashed var(--terracota); border-radius: 16px; padding: 12px 16px; transform: rotate(-0.6deg); }
+.postal small { font-weight: 600; color: var(--terracota); }
+.postal p { font-size: 17px; line-height: 1.35; margin: 4px 0; }
+.postal i { display: block; text-align: right; font-weight: 600; }
+.clientes { display: grid; gap: 8px; }
+.cliente { display: flex; align-items: center; gap: 12px; background: #fff8ec; border: 2.5px solid var(--tinta); border-radius: 16px; padding: 6px 12px 6px 6px; }
+.cliente canvas { width: 56px; flex: none; }
+.cliente div { display: grid; min-width: 0; }
+.cliente b { font-size: 18px; }
+.cliente small { color: var(--tinta2); font-size: 14px; }
+.cliente.exigente { border-color: var(--terracota); background: #fbeae2; }
+.ingredientes { display: flex; flex-wrap: wrap; gap: 10px; }
+.ingrediente { display: flex; align-items: center; gap: 6px; background: #fff8ec; border: 2.5px solid var(--tinta); border-radius: 14px; padding: 4px 12px 4px 4px; font-weight: 600; }
+.ingrediente canvas { width: 46px; }
+.resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.resumen div { background: #fff8ec; border: 2.5px solid var(--tinta); border-radius: 16px; padding: 8px; text-align: center; display: grid; }
+.resumen small { color: var(--tinta2); font-size: 13px; }
+.resumen b { font-size: 28px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.resumen canvas, .plata canvas { width: 24px; }
+.logros { display: grid; gap: 6px; }
+.logro { background: #eef3e4; border: 2.5px solid var(--oliva); border-radius: 14px; padding: 8px 12px; display: grid; }
+.logro small { color: var(--tinta2); }
+.resultados { display: grid; gap: 6px; align-content: start; max-height: min(330px, calc(var(--alto) - 190px)); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; padding-right: 4px; }
+.resultado { display: grid; grid-template-columns: 44px 1fr auto auto; gap: 10px; align-items: center; font-size: 17px; }
+.resultado canvas { width: 40px; }
+.resultado b { font-size: 20px; }
+.resultado em { font-style: normal; color: var(--oliva); font-weight: 700; min-width: 42px; text-align: right; }
+
+/* tienda: arriba el título, la plata y «Listo»; abajo el local de muestra y la lista de cosas */
+.tienda { width: min(1100px, 100%); }
+.cabeza { display: flex; align-items: center; gap: 14px; }
+.cabeza h2 { margin-right: auto; }
+.plata { display: flex; align-items: center; gap: 6px; font-size: 24px; font-weight: 700; }
+.tienda .cuerpo { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; overflow: hidden; }
+.tienda .izq { display: grid; gap: 8px; align-content: start; justify-items: center; }
+.tienda .salon { display: block; width: auto; height: auto; max-width: 100%; max-height: calc(var(--alto) - 190px); border: 3px solid var(--tinta); border-radius: 16px; }
+.tienda .der { position: relative; min-height: 120px; }
+/* la lista ocupa el alto del local de muestra y scrollea adentro */
+.items { position: absolute; inset: 0; display: grid; gap: 8px; align-content: start; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; padding-right: 4px; }
+.item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fff8ec; border: 2.5px solid var(--tinta); border-radius: 14px; padding: 8px 10px 8px 14px; cursor: pointer; }
+.item.prueba { border-color: var(--terracota); background: #fbeae2; }
+.item div { display: grid; min-width: 0; }
+.item small { color: var(--tinta2); font-size: 14px; }
+.item .b { flex: none; }
+
+/* ayuda */
+.ayuda { width: min(860px, 100%); }
+.pasos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 22px; }
+.paso { display: grid; gap: 2px; align-content: start; }
+.paso p { line-height: 1.35; color: var(--tinta2); }
+.teclas { font-size: 14px; color: var(--tinta2); text-align: center; }
+
+/* girá el celular */
+.girar { display: none; position: fixed; inset: 0; z-index: 10; background: var(--fondo); color: var(--crema); place-items: center; text-align: center; padding: 24px; }
+.girar div { display: grid; gap: 14px; justify-items: center; }
+.girar p { font-size: 20px; font-weight: 600; }
+@media (orientation: portrait) and (pointer: coarse) {
+  body:not(.igual) .girar { display: grid; }
+}
+
+/* angosto (celular parado con «jugar igual»): una sola columna */
+@media (max-width: 560px) {
+  .dos, .pasos, .tienda .cuerpo { grid-template-columns: minmax(0, 1fr); }
+  .tienda .cuerpo { overflow-y: auto; }
+  .tienda .der { position: static; }
+  .items { position: static; }
+  .vestidor { flex-direction: column; }
+  .titulo { flex-direction: column; }
+  .titulo .menu { flex: none; width: 100%; }
+  .vestidor .persona { max-width: 180px; }
+  .fila { grid-template-columns: 1fr; gap: 4px; }
+  .tarjeta { padding: 16px; border-radius: 20px; }
+}
+
+/* bajo (celular acostado): todo más compacto */
+@media (max-height: 520px) {
+  :root {
+    --alto: calc(100vh - 52px);
+    --alto: calc(100dvh - 52px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+  .pantalla { padding-top: calc(44px + env(safe-area-inset-top)); padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+  .tarjeta { padding: 12px 16px; gap: 8px; border-width: 2.5px; border-radius: 18px; box-shadow: 0 5px 0 rgba(59, 42, 32, 0.25); }
+  .cuerpo, .col, .vestidor .ajustes { gap: 8px; }
+  .tarjeta h1 { font-size: 26px; }
+  .tarjeta h2 { font-size: 20px; }
+  .tarjeta h3 { font-size: 12px; }
+  .bajada { font-size: 14px; }
+  .botones { gap: 8px; padding-bottom: 4px; }
+  .b { font-size: 16px; padding: 7px 16px; border-width: 2.5px; border-radius: 12px; box-shadow: 0 4px 0 #c9b79c; }
+  .b.primario { box-shadow: 0 4px 0 #8c3a28; }
+  .b.chico { font-size: 13px; padding: 5px 10px; }
+  .chip { font-size: 13px; padding: 4px 10px; border-width: 2px; }
+  .tabs { gap: 5px; }
+  .logo-dona { width: 84px; }
+  .titulo .botones { gap: 6px; }
+  .titulo { gap: 16px; }
+  .titulo .menu { flex-basis: 260px; gap: 8px; }
+  .dificultad small { font-size: 12px; }
+  .vestidor { gap: 14px; }
+  .vestidor .persona { max-height: calc(var(--alto) - 96px); border-width: 2.5px; border-radius: 14px; }
+  .nombre { gap: 2px; font-size: 13px; }
+  .nombre input { font-size: 16px; padding: 5px 10px; border-width: 2.5px; border-radius: 10px; }
+  .fila { grid-template-columns: 96px minmax(0, 1fr); gap: 6px; }
+  .fila > span { font-size: 13px; }
+  .opciones { gap: 5px; }
+  .color { width: 26px; height: 26px; border-width: 2.5px; }
+  .color.on { outline-width: 2.5px; }
+  .postal { padding: 8px 12px; border-width: 2.5px; }
+  .postal p { font-size: 14px; }
+  .postal small, .postal i { font-size: 12px; }
+  .clientes { gap: 6px; }
+  .cliente { gap: 8px; padding: 4px 10px 4px 4px; border-width: 2px; border-radius: 12px; }
+  .cliente canvas { width: 40px; }
+  .cliente b { font-size: 15px; }
+  .cliente small { font-size: 12px; }
+  .ingredientes { gap: 6px; }
+  .ingrediente { font-size: 13px; padding: 2px 10px 2px 2px; border-width: 2px; border-radius: 12px; }
+  .ingrediente canvas { width: 34px; }
+  .resumen { gap: 6px; }
+  .resumen div { padding: 4px; border-width: 2px; border-radius: 12px; }
+  .resumen small { font-size: 11px; }
+  .resumen b { font-size: 20px; }
+  .resumen canvas, .plata canvas { width: 18px; }
+  .logro { padding: 4px 10px; border-width: 2px; font-size: 13px; }
+  .logro small { font-size: 11px; }
+  .resultados { gap: 4px; max-height: calc(var(--alto) - 128px); }
+  .resultado { grid-template-columns: 32px 1fr auto auto; gap: 8px; font-size: 14px; }
+  .resultado canvas { width: 30px; }
+  .resultado b { font-size: 16px; }
+  .plata { font-size: 18px; }
+  .tienda .salon { max-height: calc(var(--alto) - 116px); border-width: 2.5px; border-radius: 12px; }
+  .items { gap: 6px; }
+  .item { padding: 4px 6px 4px 10px; border-width: 2px; border-radius: 12px; font-size: 14px; }
+  .item small { font-size: 11px; }
+  .paso { font-size: 14px; }
+  .paso p { font-size: 13px; line-height: 1.3; }
+  .teclas { font-size: 12px; }
+}
+/* celulares acostados muy bajos (iPhone SE y parecidos) */
+@media (max-height: 400px) {
+  .logo-dona { width: 60px; }
+  .tarjeta h1 { font-size: 22px; }
+  .tarjeta h2 { font-size: 18px; }
+  .titulo .bajada { font-size: 13px; }
+  .b { font-size: 15px; padding: 6px 14px; }
+  .fila { grid-template-columns: 74px minmax(0, 1fr); }
+  .chip { padding: 3px 9px; }
+  .color { width: 24px; height: 24px; }
+  .vestidor .persona { max-height: calc(var(--alto) - 88px); }
+  .postal p { font-size: 13px; }
+  .tienda .salon { max-height: calc(var(--alto) - 158px); }
+}

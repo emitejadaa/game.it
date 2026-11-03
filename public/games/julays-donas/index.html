@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#3b2a20" />
+    <title>Julay’s Donas · game.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="/sdk/gameit.js" data-no-theme></script>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div id="ui" hidden></div>
+    <div class="girar" aria-hidden="true">
+      <div>
+        <svg viewBox="0 0 64 64" width="72" height="72"><rect x="20" y="8" width="24" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="4" /><path d="M10 40a24 24 0 0 0 30 14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" /><path d="M36 50l5 4-3 6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <p data-girar>Girá el celular para jugar</p>
+        <button class="b" data-igual>Jugar igual</button>
+      </div>
+    </div>
+    <script>
+      // el cartel de "girá el celular" se puede cerrar
+      document.querySelector('[data-igual]').addEventListener('click', () => document.body.classList.add('igual'));
+      if (window.GameIt && GameIt.prefs && GameIt.prefs.lang === 'en') {
+        document.querySelector('[data-girar]').textContent = 'Rotate your phone to play';
+        document.querySelector('[data-igual]').textContent = 'Play anyway';
+      }
+    </script>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
