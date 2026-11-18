@@ -133,9 +133,14 @@ export function bodyMaterial(texture) {
   });
 }
 
+// en celular (puntero táctil) se baja la calidad de entrada: sin suavizado de bordes y menos píxeles; la resolución además se ajusta sola (autoScale)
+const MOBILE = matchMedia('(pointer: coarse)').matches;
+const MAX_DPR = MOBILE ? 1.25 : 1.75;
+
 export class World {
   constructor(canvas) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !MOBILE, powerPreference: 'high-performance' });
+    this.inset = { x: 0, y: 0 };
     this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace; // sin gestión de color: paridad con el CPU
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(78, 1, 0.05, 90);
@@ -172,10 +177,29 @@ export class World {
   resize() {
     const w = innerWidth;
     const h = innerHeight;
-    const dpr = Math.min(devicePixelRatio || 1, 1.75) * this.pixelScale;
+    const dpr = Math.min(devicePixelRatio || 1, MAX_DPR) * this.pixelScale;
     this.renderer.setPixelRatio(dpr);
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
+    this.applyInset();
+  }
+
+  /**
+   * Corre la imagen para que el centro de la escena caiga en el centro del espacio libre cuando un panel tapa un costado (x) o
+   * el fondo (y) de la pantalla. Es un view offset de la cámara: los rayos (pintar, atrapar) lo respetan solos.
+   */
+  setInset(x, y) {
+    if (this.inset.x === x && this.inset.y === y) return;
+    this.inset = { x, y };
+    this.applyInset();
+  }
+
+  applyInset() {
+    const w = innerWidth;
+    const h = innerHeight;
+    const { x, y } = this.inset;
+    if (x || y) this.camera.setViewOffset(w, h, -x / 2, y / 2, w, h);
+    else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
   }
 

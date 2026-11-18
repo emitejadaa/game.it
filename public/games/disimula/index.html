@@ -19,14 +19,6 @@
       <div id="toasts"></div>
       <div id="big-msg" hidden></div>
       <div id="stun-overlay" hidden></div>
-      <div id="whistle-box" hidden>
-        <small data-t="whistleIn"></small><b id="whistle-count">45</b>
-        <button id="b-whistle" class="pill" data-t="whistleNow"></button>
-      </div>
-      <div id="camo-box" hidden>
-        <small data-t="camoMeter"></small>
-        <div class="meter"><i id="camo-bar"></i></div><b id="camo-val">—</b>
-      </div>
       <div id="seek-actions" hidden>
         <button id="b-mark" class="act" title="E">📍</button>
         <button id="b-zoom" class="act" title="F">🔍</button>
@@ -44,7 +36,18 @@
         <div id="react-bar"></div>
       </div>
       <div id="joystick" hidden><i></i></div>
-      <button id="b-pause" hidden>⏸</button>
+      <!-- columna de arriba a la derecha: pausa + silbido o camuflaje (se apilan sin pisarse) -->
+      <div id="hud-tr">
+        <button id="b-pause" hidden data-tl="paused">⏸</button>
+        <div id="whistle-box" hidden>
+          <small data-t="whistleIn"></small><b id="whistle-count">45</b>
+          <button id="b-whistle" class="pill" data-t="whistleNow"></button>
+        </div>
+        <div id="camo-box" hidden>
+          <small data-t="camoMeter"></small>
+          <div class="meter"><i id="camo-bar"></i></div><b id="camo-val">—</b>
+        </div>
+      </div>
     </div>
 
     <!-- ==================== panel de pintura ==================== -->
@@ -185,9 +188,19 @@
           <div class="stack">
             <button class="big main" id="p-resume" data-t="resume"></button>
             <button class="mid" id="p-quit" data-t="quit"></button>
+            <button class="mid" id="p-exit" data-t="exitGame"></button>
           </div>
         </div>
       </section>
+    </div>
+
+    <!-- cartel de "girá el celular": solo en celular parado; se puede cerrar con "Jugar igual" -->
+    <div id="rotate" role="dialog">
+      <div>
+        <svg viewBox="0 0 64 64" width="72" height="72"><rect x="20" y="8" width="24" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="4" /><path d="M10 40a24 24 0 0 0 30 14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" /><path d="M36 50l5 4-3 6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <p data-t="rotatePhone"></p>
+        <button class="mid" id="rotate-ok" data-t="playAnyway"></button>
+      </div>
     </div>
 
     <script type="module" src="./main.js"></script>

@@ -15,6 +15,5 @@
   "orientation": "landscape",
   "input": ["keyboard", "mouse", "touch"],
   "features": { "online": true, "multiplayer": true, "maxPlayers": 10, "pointerLock": true },
-  "hidden": true,
-  "order": 40
+  "order": 77
 }

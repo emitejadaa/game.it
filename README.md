@@ -964,6 +964,16 @@ niveles) corren con el mismo `shared/` en el servidor y sin conexión. Modos: on
 (pintar y explorar sin tiempo, con el puntaje de camuflaje en vivo). Sonido con `/shared/sfx.js` (silbido 3D posicional) y música
 sintetizada que mete tensión en los últimos 30 segundos.
 
+**Celular y preferencias del portal.** Está pensado para jugarse acostado (`"orientation": "landscape"`); con el celular parado aparece el
+cartel "Girá el celular para jugar" (con "Jugar igual", que además frena la partida local mientras tapa el juego) y el panel de pintura
+pasa a ser una hoja abajo. Con el panel a un costado el joystick no se puede tapar, así que en pantalla táctil "Pintar" muestra el panel y
+"Mover" lo esconde y muestra el joystick. Todo el HUD respeta las zonas seguras (`env(safe-area-inset-*)`, el viewport usa `viewport-fit=cover`) y
+deja libre la barra del portal; arriba a la derecha se apilan pausa, silbido y camuflaje (`#hud-tr`) para que nada se pise. La imagen 3D se
+corre al centro del espacio libre que deja el panel (`World.setInset`, un *view offset* de la cámara: los rayos de pintar y atrapar lo
+respetan solos, así que se pinta donde se ve el personaje). En celular el render arranca sin suavizado de bordes y con la densidad de
+píxeles topeada en 1,25 (la resolución además baja sola si los cuadros se atrasan). Con "reducir movimiento" no hay animaciones ni
+transiciones y las cámaras del menú y de la galería quedan quietas, y el menú de pausa tiene "Salir del juego" (`GameIt.exit()`).
+
 ### Tuercas (karts y motos en 3D)
 
 Carreras de karts y motos en 3D de dibujito (`public/games/tuercas/`, three.js, todo procedural: sin modelos ni imágenes). Los modelos se
