@@ -96,13 +96,14 @@ function buildMapGroup(map) {
   return group;
 }
 
-/** Shader del cuerpo: color = atlas × intensidad × (ambiente + direccional·N·L) + brillo especular. */
+/**
+ * Shader del cuerpo: color = atlas × intensidad × (ambiente + direccional·N·L) + brillo especular.
+ * El brillo y el lustre son atributos por vértice (cada región tiene el suyo): así todo el personaje es UNA malla.
+ */
 export function bodyMaterial(texture) {
   return new THREE.ShaderMaterial({
     uniforms: {
       map: { value: texture },
-      bright: { value: 1 },
-      gloss: { value: 0 },
       glow: { value: 0 },
       time: { value: 0 },
       amb: { value: LIGHT.ambient },
@@ -110,23 +111,24 @@ export function bodyMaterial(texture) {
       L: { value: new THREE.Vector3(...LIGHT.L) },
     },
     vertexShader: `
-      varying vec2 vUv; varying vec3 vN; varying vec3 vW;
+      attribute float aBright; attribute float aGloss;
+      varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying float vBright; varying float vGloss;
       void main() {
         vUv = uv;
-        vN = mat3(modelMatrix) * normal;
-        vec4 w = modelMatrix * vec4(position, 1.0);
-        vW = w.xyz;
-        gl_Position = projectionMatrix * viewMatrix * w;
+        vN = normal;
+        vBright = aBright; vGloss = aGloss;
+        vW = position;
+        gl_Position = projectionMatrix * viewMatrix * vec4(position, 1.0);
       }`,
     fragmentShader: `
-      uniform sampler2D map; uniform float bright, gloss, glow, time, amb, dir; uniform vec3 L;
-      varying vec2 vUv; varying vec3 vN; varying vec3 vW;
+      uniform sampler2D map; uniform float glow, time, amb, dir; uniform vec3 L;
+      varying vec2 vUv; varying vec3 vN; varying vec3 vW; varying float vBright; varying float vGloss;
       void main() {
         vec3 n = normalize(vN);
         float k = amb + dir * max(0.0, dot(n, L));
-        vec3 col = texture2D(map, vUv).rgb * bright * k;
+        vec3 col = texture2D(map, vUv).rgb * vBright * k;
         vec3 V = normalize(cameraPosition - vW);
-        col += gloss * 0.4 * pow(max(dot(reflect(-L, n), V), 0.0), 24.0);
+        col += vGloss * 0.4 * pow(max(dot(reflect(-L, n), V), 0.0), 24.0);
         col = mix(col, vec3(1.0, 0.85, 0.3), glow * (0.55 + 0.45 * sin(time * 5.0)));
         gl_FragColor = vec4(col, 1.0);
       }`,

@@ -952,7 +952,7 @@ cambian de verdad la silueta y la caja de captura. El **camuflaje** (`shared/cam
 se vería detrás y da un puntaje 0–100 (para la práctica, el premio al mejor camuflaje y los bots); nunca decide las capturas de los humanos.
 
 Todo corre en `public/games/disimula/shared/` (puro JS, sin DOM) y lo usan igual el navegador, el servidor y las pruebas:
-`body.js` (esqueleto, atlas, poses y raycast del cuerpo), `maps.js`, `paint.js` (pintura por operaciones chicas + códec paleta ≤ 64 + RLE),
+`body.js` (esqueleto, piel, atlas, poses y rayo del cuerpo), `maps.js`, `paint.js` (pintura por operaciones chicas + códec paleta ≤ 64 + RLE),
 `camo.js`, `bots.js` y `logic.js` (la partida entera: fases de preparación y búsqueda, silbidos, capturas, puntos y resultados). El mismo
 `logic.js` corre en el servidor (`server/games/disimula.js`, `realtime: true`) para el online y en la página para los modos sin conexión.
 **Online** de 2 a 10: el servidor es la autoridad (valida movimientos a 15 Hz, pinturas, poses, silbidos, capturas con distancia ≤ 2,5 m y
@@ -963,6 +963,19 @@ espectador hasta la siguiente. Los **bots** (escondidos que se pintan por proyec
 niveles) corren con el mismo `shared/` en el servidor y sin conexión. Modos: online con amigos, partidas públicas, contra bots y práctica
 (pintar y explorar sin tiempo, con el puntaje de camuflaje en vivo). Sonido con `/shared/sfx.js` (silbido 3D posicional) y música
 sintetizada que mete tensión en los últimos 30 segundos.
+
+**El personaje es una sola pieza.** Cada parte es una superficie de revolución con un perfil suave (`rings` en `body.js`: altura, radios y corrimiento
+hacia adelante, interpolados con una curva que no se pasa de largo), no una cápsula, una esfera o una caja. En cada articulación (cuello, cintura, codo,
+muñeca, rodilla y tobillo) los dos tramos vecinos comparten el mismo anillo y reparten los vértices de las puntas entre sus dos huesos (`skin`), así que al
+doblarse la piel se estira sin grietas ni tubos abiertos; los pies tienen su propio hueso de tobillo y quedan planos en cada pose. En pantalla es **una sola
+malla por personaje** (un draw call, no 15): `bodyMesh` la arma una vez y `skinBody` deforma las posiciones y las normales en CPU (0,19 ms por personaje; la
+respiración se recalcula a ~14 Hz, los que están detrás de la cámara no se recalculan y en celular se usa una malla de la mitad de vértices). El brillo y el
+lustre de cada región son atributos por vértice del mismo shader. El atlas de pintura no cambió (mismos rectángulos, ids, regiones y u/v por parte), así
+que la pintura, los bots y el camuflaje siguen valiendo; el servidor sigue validando capturas con un proxy simple por parte (`shape`), y una prueba exige que
+la piel visible quede a ≤ 3 cm del proxy de su parte. Las seis poses se calcularon para apoyar en el piso a ±3 mm (`rootY` sale de la malla deformada), cambian
+con una transición suave de ~0,3 s, y se les suman (solo en pantalla, nada viaja por la red) la respiración, un ciclo de caminata con rodillas, tobillos,
+brazos, cadera y torso en contrafase, y la sorpresa al ser atrapado. `tests/disimula-body.test.mjs` cubre las articulaciones sin grietas en todas las poses,
+el apoyo en el piso, la cobertura del atlas, la cara sobre los ojos y la continuidad de las transiciones.
 
 **Celular y preferencias del portal.** Está pensado para jugarse acostado (`"orientation": "landscape"`); con el celular parado aparece el
 cartel "Girá el celular para jugar" (con "Jugar igual", que además frena la partida local mientras tapa el juego) y el panel de pintura

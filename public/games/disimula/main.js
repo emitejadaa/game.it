@@ -15,7 +15,7 @@ import { Match } from './shared/logic.js';
 import { Paint, deserializePaint } from './shared/paint.js';
 import { walk } from './shared/geom.js';
 import { getMap, MAP_IDS, raycastColor } from './shared/maps.js';
-import { PARTS as BODY_PARTS } from './shared/body.js';
+import { PARTS as BODY_PARTS, atlasOwner, ATLAS } from './shared/body.js';
 import { camoScore } from './shared/camo.js';
 import { DEFAULTS, WHISTLES, SPEED, EYE, REACTIONS, autoSeekers } from './shared/rules.js';
 import { BOT_NAMES, BOT_COLORS } from './shared/bots.js';
@@ -913,9 +913,10 @@ const paintUI = new PaintUI($('paint-ui'), {
     const hits = ray.intersectObjects(me.avatar.meshes, false);
     if (!hits.length || !hits[0].uv) return null;
     const uv = hits[0].uv;
-    const tx = Math.min(127, Math.max(0, Math.floor(uv.x * 128)));
-    const ty = Math.min(127, Math.max(0, Math.floor((1 - uv.y) * 128)));
-    const part = me.avatar.meshes.indexOf(hits[0].object);
+    const tx = Math.min(ATLAS - 1, Math.max(0, Math.floor(uv.x * ATLAS)));
+    const ty = Math.min(ATLAS - 1, Math.max(0, Math.floor((1 - uv.y) * ATLAS)));
+    // el cuerpo es una sola malla: la parte sale del dueño del texel en el atlas
+    const part = atlasOwner()[ty * ATLAS + tx];
     const rect = part >= 0 ? mePartRect(part) : null;
     if (!rect) return null;
     return { part, tx, ty, u: (tx - rect[0] + 0.5) / rect[2], v: 1 - (ty - rect[1] + 0.5) / rect[3] };
