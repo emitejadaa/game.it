@@ -5,7 +5,7 @@
  * Reglas en shared/rules.js, la compu en shared/bot.js, la mesa (turnos, cantos, puntos) en shared/table.js y el
  * mazo dibujado en /shared/spanish-deck.js.
  */
-import { DECK, TRUCO, teamOf, envido, hasFlor, shuffled, seatOrder } from './shared/rules.js';
+import { DECK, TRUCO, teamOf, envido, hasFlor, shuffled, seatOrder, pieOf } from './shared/rules.js';
 import { Table, PACE } from './shared/table.js';
 import { cardURL } from '/shared/spanish-deck.js';
 import { OnlineRoom, netText, defaultName, share as shareRoom, roomFromUrl } from '/shared/online.js';
@@ -91,7 +91,7 @@ const TXT = {
   c_quiero: { es: '¡Quiero!', en: 'I accept!' },
   c_noquiero: { es: 'No quiero', en: 'I decline' },
   c_mazo: { es: 'Me voy al mazo', en: 'I fold' },
-  c_buenas: { es: 'Son buenas', en: 'You win' },
+  c_buenas: { es: '{p}, son buenas', en: '{p}, you win' },
   c_mejores: { es: '{p} son mejores', en: '{p} beats it' },
   c_tengo: { es: '{p}', en: '{p}' },
   n_truco: { es: 'el truco', en: 'truco' },
@@ -121,6 +121,8 @@ const TXT = {
   st_dealYou: { es: 'Repartís vos…', en: 'You deal…' },
   worth: { es: '{x} · vale {n}', en: '{x} · worth {n}' },
   envHint: { es: 'Envido {p}', en: 'Envido {p}' },
+  envHintMate: { es: 'Envido {p} · tu compañero {q}', en: 'Envido {p} · partner {q}' },
+  envHintPie: { es: 'Envido {p} · lo canta {name}', en: 'Envido {p} · {name} calls it' },
   florHint: { es: 'Tenés flor', en: 'You have flor' },
   manoTag: { es: 'Sos mano', en: 'You lead' },
   mano: { es: 'mano', en: 'lead' },
@@ -139,9 +141,9 @@ const TXT = {
   w_mazoUs: { es: 'Nos fuimos al mazo', en: 'We folded' },
   w_mazoThem: { es: 'Se fueron al mazo', en: 'They folded' },
   w_mazoName: { es: '{name} se fue al mazo', en: '{name} folded' },
+  w_mazoEnv: { es: '1 es por el envido que no se jugó', en: '1 is for the envido nobody played' },
   e_line: { es: 'Envido: {who} +{p}', en: 'Envido: {who} +{p}' },
-  e_vs: { es: '{a} a {b}', en: '{a} to {b}' },
-  e_buenas: { es: '{a}, son buenas', en: '{a}, unbeaten' },
+  e_pts: { es: '{a} {p} · {b} {q}', en: '{a} {p} · {b} {q}' },
   e_no: { es: 'no quiso', en: 'declined' },
   f_line: { es: 'Flor: {who} +{p}', en: 'Flor: {who} +{p}' },
   pt1: { es: 'punto', en: 'point' },
@@ -179,18 +181,18 @@ const RULES = {
 <h3>Qué carta mata a cuál</h3><div class="rank">{rank}</div>
 <p>Si en una baza empatan (es <b>parda</b>), define la siguiente; si la primera la ganó alguien y después hay parda, gana el de la primera. Si todas son pardas, gana el que es mano.</p>
 <h3>El truco</h3>
-<p>En tu turno podés cantar <b>truco</b> (la mano pasa a valer 2). El otro contesta <b>quiero</b>, <b>no quiero</b> (y vos te llevás 1) o lo sube: <b>retruco</b> (3) y <b>vale cuatro</b> (4). Solo puede subir el que quiso el último canto. Si nadie canta, la mano vale 1. Irse al <b>mazo</b> es entregar la mano.</p>
+<p>En tu turno podés cantar <b>truco</b> (la mano pasa a valer 2). El otro contesta <b>quiero</b>, <b>no quiero</b> (y vos te llevás 1) o lo sube: <b>retruco</b> (3) y <b>vale cuatro</b> (4). Solo puede subir el que quiso el último canto. Si nadie canta, la mano vale 1. Irse al <b>mazo</b> es entregar la mano; si todavía se podía cantar el envido (en la primera, antes de que se juegue), el otro se lleva además 1 por el envido: irse sin que nadie cante nada da 2.</p>
 <h3>El envido</h3>
-<p>Antes de tirar tu primera carta podés cantar <b>envido</b> (2), <b>real envido</b> (3) o <b>falta envido</b> (lo que le falta al que va ganando para terminar). Se pueden encadenar: envido, envido, real, falta. Tus puntos: dos cartas del mismo palo suman 20 más sus valores (las figuras valen 0); si no tenés dos del mismo palo, vale la más alta. Gana el que tiene más; si empatan, el que es mano. Si te cantan truco en la primera, todavía podés contestar con envido: <b>el envido está primero</b>.</p>
+<p>Antes de tirar tu primera carta podés cantar <b>envido</b> (2), <b>real envido</b> (3) o <b>falta envido</b> (lo que le falta al que va ganando para terminar). Se pueden encadenar: envido, envido, real, falta. Tus puntos: dos cartas del mismo palo suman 20 más sus valores (las figuras valen 0); si no tenés dos del mismo palo, vale la más alta. Gana el que tiene más; si empatan, el que es mano. Si te cantan truco en la primera, todavía podés contestar con envido: <b>el envido está primero</b>. De a cuatro, el envido lo cantan y lo contestan solo los <b>pies</b>, el último de cada pareja en tirar (el que repartió y el compañero del mano); el pie sabe cuántos tiene su compañero, como si le hiciera la seña.</p>
 <p><b>Con flor</b>: tres cartas del mismo palo se cantan solas, valen 3 y anulan el envido; si los dos equipos tienen flor, el de la mejor se lleva 3 por cada flor (al menos 6).</p>
 <p>Se juega a 15 o a 30 puntos (los primeros 15 son las <b>malas</b> y los otros, las <b>buenas</b>). Los porotos se anotan con fósforos: cada cuadradito cerrado son cinco.</p>`,
   en: `<p>Played with the 40-card <b>Spanish deck</b> (no eights or nines). Everyone gets <b>three cards</b> and the hand is played in up to <b>three tricks</b>: everybody plays a card and the highest wins. Win two tricks to win the hand.</p>
 <h3>Which card beats which</h3><div class="rank">{rank}</div>
 <p>A tied trick (<b>parda</b>) is decided by the next one; if someone won the first trick and a later one ties, the first winner takes it. If all are tied, the leading player wins.</p>
 <h3>Truco</h3>
-<p>On your turn you can call <b>truco</b> (the hand is worth 2). The other side answers <b>accept</b>, <b>decline</b> (you get 1) or raises: <b>retruco</b> (3) and <b>vale cuatro</b> (4). Only whoever accepted the last call can raise. If nobody calls, the hand is worth 1. <b>Folding</b> gives the hand away.</p>
+<p>On your turn you can call <b>truco</b> (the hand is worth 2). The other side answers <b>accept</b>, <b>decline</b> (you get 1) or raises: <b>retruco</b> (3) and <b>vale cuatro</b> (4). Only whoever accepted the last call can raise. If nobody calls, the hand is worth 1. <b>Folding</b> gives the hand away; if the envido could still be called (on the first trick, before it is played), the other side also gets 1 for the envido: folding before anyone calls anything gives 2.</p>
 <h3>Envido</h3>
-<p>Before playing your first card you can call <b>envido</b> (2), <b>real envido</b> (3) or <b>falta envido</b> (whatever the leader needs to finish). They chain: envido, envido, real, falta. Your points: two cards of the same suit score 20 plus their values (face cards are 0); otherwise your highest card. Highest wins, ties go to the leading player. If they call truco on the first trick, you can still answer with envido: <b>envido comes first</b>.</p>
+<p>Before playing your first card you can call <b>envido</b> (2), <b>real envido</b> (3) or <b>falta envido</b> (whatever the leader needs to finish). They chain: envido, envido, real, falta. Your points: two cards of the same suit score 20 plus their values (face cards are 0); otherwise your highest card. Highest wins, ties go to the leading player. If they call truco on the first trick, you can still answer with envido: <b>envido comes first</b>. In pairs, only the <b>pies</b> (the last of each pair to play: the dealer and the leader's partner) call and answer the envido; the pie knows their partner's points, as if signalled.</p>
 <p><b>With flor</b>: three cards of the same suit are announced automatically, score 3 and cancel the envido; if both sides have flor, the best one takes 3 per flor (at least 6).</p>
 <p>Games go to 15 or 30 points, tallied with matchsticks: each closed square is five.</p>`,
 };
@@ -542,7 +544,9 @@ function playEvent(e, v) {
       if (e.yes) {
         const [a, b] = e.said;
         later(650, () => bubble(v, a.seat, t('c_tengo', { p: a.pts }), 'pts', t('b_envido'), 2400));
-        later(1450, () => bubble(v, b.seat, b.pts === null ? t('c_buenas') : t('c_mejores', { p: b.pts }), b.pts === null ? 'no' : 'pts', '', 2200));
+        // el segundo dice si son mejores o son buenas, y siempre se ven sus puntos
+        const buenas = b.buenas ?? b.pts === null;
+        later(1450, () => bubble(v, b.seat, t(buenas ? 'c_buenas' : 'c_mejores', { p: b.pts ?? '?' }), buenas ? 'no' : 'pts', '', 2400));
         later(1500, () => {
           flashScore(e.winner);
           (e.winner === mineTeam(v) ? sfx.point : sfx.lose)();
@@ -846,7 +850,13 @@ function renderInfo(v) {
   const hint = $('env-hint');
   if (first && h.env.state === 'open') {
     hint.hidden = false;
-    hint.textContent = v.flor && hasFlor(h.dealt) ? t('florHint') : t('envHint', { p: envido(h.dealt) });
+    const pie = pieOf(teamOf(v.me), h.mano, v.n);
+    const p = envido(h.dealt);
+    // de a cuatro el envido lo canta el pie: él ve los puntos de su compañero (la seña) y el otro sabe quién canta
+    if (v.flor && hasFlor(h.dealt)) hint.textContent = t('florHint');
+    else if (v.n === 4 && pie !== v.me) hint.textContent = t('envHintPie', { p, name: seatName(v, pie) });
+    else if (v.n === 4 && typeof h.partnerEnv === 'number') hint.textContent = t('envHintMate', { p, q: h.partnerEnv });
+    else hint.textContent = t('envHint', { p });
   } else hint.hidden = true;
   $('me-mano').hidden = !(h.mano === v.me && first);
   $('me-mano').textContent = t('manoTag');
@@ -882,7 +892,10 @@ function matchSVG(n, target, size) {
 }
 function renderScore(v) {
   const el = $('score');
-  const size = L.W > 700 ? 18 : 15;
+  // grande y claro cuando hay lugar; en pantallas bajas (celular acostado) queda chico, para no tapar a los de los costados
+  const big = L.W > 700 && L.H > 520;
+  const mid = !big && L.H > 420;
+  const size = big ? 25 : mid ? 20 : L.W > 700 ? 18 : 15;
   const me = mineTeam(v);
   const teams = [me, 1 - me];
   const html = teams
@@ -896,6 +909,8 @@ function renderScore(v) {
   el.dataset.sig = sig;
   el.innerHTML = html;
   el.style.gridTemplateColumns = 'auto auto';
+  el.classList.toggle('big', big);
+  el.classList.toggle('mid', mid);
 }
 function flashScore(team) {
   const el = $('score').querySelector(`[data-team="${team}"]`);
@@ -949,11 +964,17 @@ function showToast(v, e) {
     const x = noquieroWhat(v, e);
     why = v.n === 2 ? (loser === me ? t('w_noYou', { x }) : t('w_noName', { name: other, x })) : loser === me ? t('w_noUs', { x }) : t('w_noThem', { x });
   } else why = v.n === 2 ? (loser === me ? t('w_mazoYou') : t('w_mazoName', { name: other })) : loser === me ? t('w_mazoUs') : t('w_mazoThem');
-  const lines = [`<p>${esc(why)} · <em>+${e.pts}</em></p>`];
+  const lines = [`<p>${esc(why)} · <em>+${e.pts}</em>${e.env ? ` <small>(${esc(t('w_mazoEnv'))})</small>` : ''}</p>`];
   const en = S.handEnv;
   if (en) {
-    const detail = en.yes ? (en.said[1].pts === null ? t('e_buenas', { a: en.said[0].pts }) : t('e_vs', { a: en.said[1].pts, b: en.said[0].pts })) : t('e_no');
-    lines.push(`<p>${esc(t('e_line', { who: teamLabel(v, en.winner), p: en.pts }))} <small>(${esc(detail)})</small></p>`);
+    // cuánto tenía cada uno: primero lo mío (o lo de mi pareja) y después lo del rival
+    let detail = t('e_no');
+    if (en.yes) {
+      const me = mineTeam(v);
+      const ptsOf = (tm) => en.said.find((x) => teamOf(x.seat) === tm)?.pts ?? '?';
+      detail = t('e_pts', { a: teamLabel(v, me), p: ptsOf(me), b: teamLabel(v, 1 - me), q: ptsOf(1 - me) });
+    }
+    lines.push(`<p>${esc(t('e_line', { who: teamLabel(v, en.winner), p: en.pts }))} ${en.yes ? `<b class="env-pts">${esc(detail)}</b>` : `<small>(${esc(detail)})</small>`}</p>`);
   }
   if (S.handFlor) lines.push(`<p>${esc(t('f_line', { who: teamLabel(v, S.handFlor.winner), p: S.handFlor.pts }))}</p>`);
   // las cartas con las que se ganó el envido (o la flor), para que se vea que eran ciertos

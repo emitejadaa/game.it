@@ -128,6 +128,13 @@ export function handWinner(res, manoTeam) {
 export const orderFrom = (start, n) => Array.from({ length: n }, (_, k) => (start + k) % n);
 
 /**
+ * El pie de un equipo: el último de ese equipo en jugar la primera baza. De a cuatro son el que repartió y el
+ * compañero del mano, y solo ellos cantan el envido (mano a mano, cada uno es su propio pie).
+ */
+export const pieOf = (team, mano, n) => orderFrom(mano, n).filter((s) => teamOf(s) === team).pop();
+export const isPie = (seat, mano, n) => pieOf(teamOf(seat), mano, n) === seat;
+
+/**
  * El envido de cada equipo y quién gana: el que tiene más; si empatan, el que está más cerca de la mano.
  * hands: las tres cartas de cada asiento. Devuelve { winner, pts: [mejor de cada equipo], seat: [quién lo tiene] }.
  */

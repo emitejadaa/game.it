@@ -617,12 +617,15 @@ mismos dados en el mismo lugar aunque guarden otros, y se comparte la planilla e
 
 ### Truco (cartas españolas)
 
-El truco argentino con el mazo español de 40 cartas dibujado en SVG (`public/shared/spanish-deck.js`, compartido con los demás juegos de naipes: oros, copas, espadas
-y bastos con las pintas del marco, los anchos grandes y la sota, el caballo y el rey vestidos por palo) sobre una mesa de
-paño, con los porotos anotados con fósforos. Está todo: tres bazas con parda, truco, retruco y vale cuatro (solo sube el
+El truco argentino con el mazo español de 40 cartas dibujado en SVG (`public/shared/spanish-deck.js`, compartido con los demás juegos de naipes) como el naipe clásico
+que se juega en Argentina: colores planos con contorno negro, números negros, oros con su flor, copas rojas, amarillas y
+verdes, espadas celestes, bastos verdes y rojos, el 3 en zigzag, el 4 con la cinta, el 5 en H, las pintas del marco, los
+anchos grandes y la sota, el caballo y el rey de cuerpo entero; sobre una mesa de paño, con los porotos anotados con
+fósforos (el tanteador se agranda cuando hay lugar). Está todo: tres bazas con parda, truco, retruco y vale cuatro (solo sube el
 que quiso el último canto), envido, real envido y falta envido que se encadenan (y "el envido está primero" cuando te
-cantan truco antes de tirar), mazo, flor opcional (se canta sola, anula el envido y se cobra al terminar la primera baza)
-y partidas a 15 o a 30. Las reglas (`shared/rules.js`) son puras; la mesa (`shared/table.js`: turnos, cantos, puntos,
+cantan truco antes de tirar; en parejas lo cantan y lo contestan solo los pies, que ven el envido de su compañero como si
+fuera la seña; querido, siempre se ven los puntos de los dos, también cuando el segundo dice "son buenas"), mazo (en la primera, con el envido sin jugar, le da además 1 al rival: 2 si no se cantó nada), flor
+opcional (se canta sola, anula el envido y se cobra al terminar la primera baza) y partidas a 15 o a 30. Las reglas (`shared/rules.js`) son puras; la mesa (`shared/table.js`: turnos, cantos, puntos,
 tiempo por jugada, ausentes) corre igual en el navegador y en el servidor y a cada jugador le manda solo sus cartas. La
 compu (`shared/bot.js`) decide con lo mismo que ve una persona: reparte muchas veces las cartas que no vio (respetando lo
 que se dijo en el envido y quién cantó flor), juega cada mano hasta el final para estimar la chance de ganarla, le da peso

@@ -1,7 +1,7 @@
 /** Truco: jerarquía de cartas, envido, flor, cantos, bazas, la mesa (turnos, cantos, puntos, tiempos), la compu, el diario y el servidor. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DECK, power, envido, envidoCards, hasFlor, florPts, envidoNext, envidoAccepted, envidoRejected, faltaValue, bazaWinner, handWinner, envidoResult, florResult, trucoValue, trucoRejected, shuffled, seatOrder, isCard } from '../public/games/truco/shared/rules.js';
+import { DECK, power, envido, envidoCards, hasFlor, florPts, envidoNext, envidoAccepted, envidoRejected, faltaValue, bazaWinner, handWinner, envidoResult, florResult, trucoValue, trucoRejected, shuffled, seatOrder, isCard, pieOf, isPie } from '../public/games/truco/shared/rules.js';
 import { decide } from '../public/games/truco/shared/bot.js';
 import { Table, PACE } from '../public/games/truco/shared/table.js';
 import { cardSVG, backSVG } from '../public/shared/spanish-deck.js';
@@ -355,10 +355,10 @@ test('truco: retruco y vale cuatro, lo que vale cada no quiero y el mazo', () =>
   go(C, 0, { t: 'truco' });
   go(C, 1, { t: 'noquiero' });
   assert.deepEqual(C.T.scores, [3, 0]);
-  // mazo sin cantos entrega 1; con retruco querido, 3
+  // mazo sin cantos en la primera entrega 2 (1 por el envido que no se jugó); con retruco querido, 3
   const D = scene([['1e', '2o', '4c'], ['3b', '4o', '6c']]);
   go(D, 0, { t: 'mazo' });
-  assert.deepEqual(D.T.scores, [0, 1]);
+  assert.deepEqual(D.T.scores, [0, 2]);
   const E = scene([['1e', '2o', '4c'], ['3b', '4o', '6c']]);
   go(E, 0, { t: 'truco' });
   go(E, 1, { t: 'truco' });
@@ -386,7 +386,7 @@ test('envido: cadena con real, querido, no querido y falta', () => {
   const er = A.T.h.env.result;
   assert.equal(er.yes, true);
   assert.equal(er.winner, 0);
-  assert.deepEqual(er.said, [{ seat: 0, pts: 33 }, { seat: 1, pts: null }], 'el segundo dice "son buenas"');
+  assert.deepEqual(er.said, [{ seat: 0, pts: 33 }, { seat: 1, pts: 7, buenas: true }], 'el segundo dice "son buenas" y se ven sus puntos');
   assert.equal(A.T.legal(0).envido.length, 0, 'ya se jugó el envido');
   assert.ok(A.T.legal(0).play, 'y sigue la mano');
   // no querido: lo de antes del último canto (o 1 si fue el primero)
@@ -404,7 +404,7 @@ test('envido: cadena con real, querido, no querido y falta', () => {
   go(D, 0, { t: 'envido', kind: 'envido' });
   go(D, 1, { t: 'quiero' });
   assert.deepEqual(D.T.scores, [0, 2]);
-  assert.deepEqual(D.T.h.env.result.said, [{ seat: 0, pts: 7 }, { seat: 1, pts: 33 }], 'el mano dice 7 y el otro lo supera con 33');
+  assert.deepEqual(D.T.h.env.result.said, [{ seat: 0, pts: 7 }, { seat: 1, pts: 33, buenas: false }], 'el mano dice 7 y el otro lo supera con 33');
   // falta envido querida: todo lo que falta (acá, la partida)
   const E = scene(hands);
   go(E, 0, { t: 'envido', kind: 'falta' });
@@ -504,13 +504,13 @@ test('la partida termina al llegar al tanteo, una sola vez y sin pasarse', () =>
   assert.equal(F.T.phase, 'over');
 });
 
-test('de a cuatro: el truco lo contesta el que sigue y las bazas son por equipo', () => {
+test('de a cuatro: el primer truco lo contesta el pie rival (por el envido) y las bazas son por equipo', () => {
   const hands = [['7e', '12c', '5c'], ['3b', '4o', '6c'], ['1o', '2o', '10e'], ['11b', '12b', '4e']];
   const S = scene(hands);
   const { T } = S;
   go(S, 0, { t: 'truco' });
-  assert.equal(T.actor(), 1, 'contesta el que sigue (un rival)');
-  go(S, 1, { t: 'quiero' });
+  assert.equal(T.actor(), 3, 'contesta el pie del otro equipo, que todavía puede cantar el envido');
+  go(S, 3, { t: 'quiero' });
   // baza 0: 0 juega 7e, 1 juega 3b, 2 juega 1o, 3 juega 4e → gana el 7e (equipo 0)
   go(S, 0, { t: 'play', card: '7e' });
   go(S, 1, { t: 'play', card: '3b' });
@@ -532,6 +532,119 @@ test('de a cuatro: el truco lo contesta el que sigue y las bazas son por equipo'
   assert.equal(bz.length, 2);
   assert.deepEqual([bz[1].team, bz[1].seat], [0, 2], 'el 2 de oros del compañero mata al 12 de copas');
   assert.deepEqual(T.scores, [2, 0], 'dos bazas del equipo con el truco querido: 2 puntos');
+});
+
+test('pies: el último de cada equipo en la primera (de a cuatro, el que repartió y el compañero del mano)', () => {
+  assert.deepEqual([pieOf(0, 0, 4), pieOf(1, 0, 4)], [2, 3]);
+  assert.deepEqual([pieOf(0, 1, 4), pieOf(1, 1, 4)], [0, 3], 'mano el 1: reparte el 0, que es el pie de su equipo');
+  assert.deepEqual([pieOf(0, 3, 4), pieOf(1, 3, 4)], [2, 1]);
+  assert.deepEqual([pieOf(0, 0, 2), pieOf(1, 0, 2)], [0, 1], 'mano a mano, cada uno es su pie');
+  assert.ok(isPie(2, 0, 4) && isPie(3, 0, 4) && !isPie(0, 0, 4) && !isPie(1, 0, 4));
+});
+
+test('mazo: en la primera, con el envido sin jugar, el otro se lleva 1 más; después, lo que vale la mano', () => {
+  const hands = [['7e', '6e', '1o'], ['7c', '5b', '4o']];
+  // el mano se va sin tirar: 2
+  const A = scene(hands);
+  go(A, 0, { t: 'mazo' });
+  assert.deepEqual(A.T.scores, [0, 2]);
+  const ev = lastEv(A.T, 'hand');
+  assert.deepEqual([ev.pts, ev.env, ev.why], [2, 1, 'mazo'], 'el resumen dice que 1 es del envido');
+  // el pie se va después de que tiró el mano, sin tirar él: también 2
+  const B = scene(hands);
+  go(B, 0, { t: 'play', card: '1o' });
+  go(B, 1, { t: 'mazo' });
+  assert.deepEqual(B.T.scores, [2, 0]);
+  // en la segunda baza ya no hay envido: 1
+  const C = scene(hands);
+  go(C, 0, { t: 'play', card: '7e' });
+  go(C, 1, { t: 'play', card: '4o' });
+  go(C, C.T.actor(), { t: 'mazo' });
+  assert.deepEqual(C.T.scores, [0, 1]);
+  assert.equal(lastEv(C.T, 'hand').env, 0);
+  // con el envido ya jugado, el mazo en la primera entrega solo la mano
+  const D = scene(hands);
+  go(D, 0, { t: 'envido', kind: 'envido' });
+  go(D, 1, { t: 'noquiero' });
+  assert.deepEqual(D.T.scores, [1, 0]);
+  go(D, 0, { t: 'mazo' });
+  assert.deepEqual(D.T.scores, [1, 1]);
+  // con el truco querido (ya no se puede cantar el envido): lo que vale el truco, sin el punto del envido
+  const E = scene(hands);
+  go(E, 0, { t: 'truco' });
+  go(E, 1, { t: 'quiero' });
+  go(E, 0, { t: 'mazo' });
+  assert.deepEqual(E.T.scores, [0, 2]);
+  // con flor en la mesa no hay envido que perder: la flor se cobra y el mazo vale 1
+  const F = scene([['7e', '6e', '1e'], ['7c', '5b', '4o']], { flor: true });
+  go(F, 0, { t: 'play', card: '1e' });
+  go(F, 1, { t: 'mazo' });
+  assert.deepEqual(F.T.scores, [3 + 1, 0], 'flor 3 y mazo 1');
+  // de a cuatro: el mano se va antes de tirar y el envido de su pareja no se jugó: 2
+  const G = scene([['7e', '12c', '5c'], ['3b', '4o', '6c'], ['1o', '2o', '10e'], ['11b', '12b', '4e']]);
+  go(G, 0, { t: 'mazo' });
+  assert.deepEqual(G.T.scores, [0, 2]);
+});
+
+test('de a cuatro: el envido lo cantan y lo contestan solo los pies', () => {
+  const hands = [['7e', '6e', '1o'], ['7c', '5c', '4o'], ['3b', '2b', '11o'], ['12e', '6b', '4c']];
+  const S = scene(hands);
+  const { T } = S;
+  // mano 0, reparte el 3: los pies son el 2 (compañero del mano) y el 3
+  assert.equal(T.actor(), 0);
+  assert.deepEqual(T.legal(0).envido, [], 'el mano no canta el envido');
+  assert.ok(!T.act(0, { t: 'envido', kind: 'envido' }));
+  go(S, 0, { t: 'play', card: '1o' });
+  assert.deepEqual(T.legal(1).envido, [], 'el que sigue tampoco (no es pie)');
+  go(S, 1, { t: 'play', card: '4o' });
+  assert.equal(T.legal(2).envido.length, 3, 'el compañero del mano es pie');
+  go(S, 2, { t: 'play', card: '11o' });
+  assert.equal(T.legal(3).envido.length, 3, 'el que repartió es pie');
+  go(S, 3, { t: 'envido', kind: 'envido' });
+  assert.equal(T.actor(), 2, 'lo contesta el pie del otro equipo (aunque ya tiró)');
+  go(S, 2, { t: 'envido', kind: 'real' });
+  assert.equal(T.actor(), 3);
+  go(S, 3, { t: 'quiero' });
+  // el 0 tiene 33 (7 y 6 de espadas) y gana su pareja: envido 2 + real 3
+  assert.deepEqual(T.scores, [5, 0]);
+  // la seña: mientras se puede cantar, cada uno ve los puntos de su compañero (y nada mientras no hay envido)
+  const V = scene(hands);
+  assert.equal(V.T.view(2).hand.partnerEnv, 33);
+  assert.equal(V.T.view(3).hand.partnerEnv, envido(hands[1]));
+  assert.equal(scene([['7e', '6e', '1o'], ['7c', '5b', '4o']]).T.view(1).hand.partnerEnv, null, 'mano a mano no hay seña');
+});
+
+test('de a cuatro: contra el primer truco, el pie rival canta el envido y después se sigue con el truco', () => {
+  const hands = [['7e', '6e', '1o'], ['7c', '5c', '4o'], ['3b', '2b', '11o'], ['12e', '6b', '4c']];
+  const S = scene(hands);
+  const { T } = S;
+  go(S, 0, { t: 'truco' });
+  assert.equal(T.actor(), 3, 'el truco lo contesta el pie rival');
+  assert.equal(T.legal(3).envido.length, 3, 'y puede cantar el envido: está primero');
+  go(S, 3, { t: 'envido', kind: 'envido' });
+  assert.equal(T.actor(), 2, 'el envido lo contesta el pie del equipo del truco');
+  go(S, 2, { t: 'quiero' });
+  assert.deepEqual(T.scores, [2, 0]);
+  assert.equal(T.h.pending.kind, 'truco');
+  assert.equal(T.actor(), 3, 'vuelve el truco al pie que lo tenía que contestar');
+  go(S, 3, { t: 'quiero' });
+  // después de la primera baza, el truco lo contesta el que sigue
+  const R = scene(hands);
+  go(R, 0, { t: 'play', card: '7e' });
+  go(R, 1, { t: 'play', card: '7c' });
+  go(R, 2, { t: 'play', card: '11o' });
+  go(R, 3, { t: 'play', card: '4c' });
+  assert.equal(R.T.actor(), 0);
+  go(R, 0, { t: 'truco' });
+  assert.equal(R.T.actor(), 1);
+  // si el pie rival ya tiró en la primera, contesta el que sigue
+  const Q = scene(hands);
+  go(Q, 0, { t: 'play', card: '1o' });
+  go(Q, 1, { t: 'play', card: '4o' });
+  go(Q, 2, { t: 'play', card: '11o' });
+  go(Q, 3, { t: 'truco' });
+  assert.equal(Q.T.actor(), 0, 'el pie del otro equipo (2) ya tiró: contesta el que sigue');
+  assert.deepEqual(Q.T.legal(0).envido, []);
 });
 
 test('tiempo: si se le acaba el turno juega la compu por él y el ausente juega solo hasta que vuelve', () => {
@@ -667,7 +780,10 @@ test('cartas: las 40 y el dorso se dibujan (SVG válido, distinto cada una)', ()
   assert.equal(new Set(svgs).size, 40);
   for (const s of svgs) assert.ok(s.startsWith('<svg') && s.endsWith('</svg>') && s.includes('viewBox'));
   assert.ok(backSVG().startsWith('<svg'));
-  assert.ok(cardSVG('1e').includes('url(#gs)'), 'el ancho de espadas lleva la espada grande');
+  // cada espada tiene una hoja: el ancho una sola (la grande) y del 2 al 7, tantas como el número
+  const blades = (c) => cardSVG(c).split('fill="#36aee4"').length - 1;
+  for (const n of [1, 2, 3, 4, 5, 6, 7]) assert.equal(blades(`${n}e`), n, `${n} de espadas`);
+  assert.equal(blades('1e'), 1);
 });
 
 test('servidor: valida los ajustes, pide dos personas, reparte sin mostrar las cartas ajenas y completa con la compu', async () => {

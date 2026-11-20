@@ -11,7 +11,7 @@
  * `dealFn(hand)` (opcional) da el mazo de cada mano en vez de mezclar con `rng`: en el truco del día todos reciben
  * las mismas cartas.
  */
-import { DECK, TRUCO, teamOf, shuffled, bazaWinner, handWinner, envidoNext, envidoAccepted, envidoRejected, envidoResult, envidoCards, florResult, hasFlor, trucoValue, trucoRejected } from './rules.js';
+import { DECK, TRUCO, teamOf, shuffled, bazaWinner, handWinner, envido, envidoNext, envidoAccepted, envidoRejected, envidoResult, envidoCards, florResult, hasFlor, trucoValue, trucoRejected, pieOf, isPie } from './rules.js';
 import { decide } from './bot.js';
 
 /** Pausas (ms) para que se pueda seguir lo que pasa. */
@@ -99,7 +99,8 @@ export class Table {
     const h = this.h;
     const tm = teamOf(seat);
     const first = h.bazas.length === 1 && !h.bazas[0].plays.some((p) => p.seat === seat);
-    const envOpen = h.env.state === 'open' && first;
+    // de a cuatro el envido lo cantan solo los pies (el que repartió y el compañero del mano)
+    const envOpen = h.env.state === 'open' && first && isPie(seat, h.mano, this.n);
     const p = h.pending;
     if (p?.kind === 'truco')
       // el envido está primero: contra el primer truco, si todavía no tiró en la primera
@@ -184,11 +185,31 @@ export class Table {
       h.pending = { kind: 'truco', level, by: seat, to: p.by };
     } else {
       level = h.truco.level + 1;
-      h.pending = { kind: 'truco', level, by: seat, to: (seat + 1) % this.n };
+      h.pending = { kind: 'truco', level, by: seat, to: this.trucoTo(seat, level) };
     }
     h.calls.push({ seat, what: TRUCO[level] });
     this.push({ k: 'call', seat, what: TRUCO[level], raise: p?.kind === 'truco' });
     this.proceed();
+  }
+
+  /**
+   * Quién contesta un truco nuevo: el que sigue; pero si es el primer truco y el pie del otro equipo todavía puede
+   * cantar el envido (el envido está primero), lo contesta él.
+   */
+  trucoTo(seat, level) {
+    const h = this.h;
+    const pie = pieOf(1 - teamOf(seat), h.mano, this.n);
+    if (level === 1 && h.env.state === 'open' && h.bazas.length === 1 && !h.bazas[0].plays.some((p) => p.seat === pie)) return pie;
+    return (seat + 1) % this.n;
+  }
+
+  /** ¿El equipo `team` todavía podía cantar el envido? (primera baza, sin envido jugado ni truco querido, su pie sin tirar) */
+  envidoPending(team) {
+    const h = this.h;
+    if (h.env.state !== 'open' || h.bazas.length !== 1 || h.truco.level > 0) return false;
+    if (this.opts.flor && florResult(h.dealt, h.mano)) return false; // la flor anula el envido
+    const pie = pieOf(team, h.mano, this.n);
+    return !h.bazas[0].plays.some((p) => p.seat === pie);
   }
 
   callEnvido(seat, kind) {
@@ -196,9 +217,9 @@ export class Table {
     const p = h.pending;
     if (p?.kind === 'envido') h.pending = { kind: 'envido', chain: [...p.chain, kind], by: seat, to: p.by, resume: p.resume };
     else {
-      // en su turno, o contra el truco (el truco queda esperando la respuesta)
+      // en su turno, o contra el truco (el truco queda esperando la respuesta); lo contesta el pie del otro equipo
       const resume = p?.kind === 'truco' ? p : null;
-      h.pending = { kind: 'envido', chain: [kind], by: seat, to: resume ? resume.by : (seat + 1) % this.n, resume };
+      h.pending = { kind: 'envido', chain: [kind], by: seat, to: pieOf(1 - teamOf(seat), h.mano, this.n), resume };
     }
     h.calls.push({ seat, what: kind });
     this.push({ k: 'call', seat, what: kind, chain: h.pending.chain.slice() });
@@ -234,21 +255,27 @@ export class Table {
     }
     const r = envidoResult(h.dealt, h.mano);
     const pts = envidoAccepted(p.chain, this.scores, target);
-    // lo que dice cada equipo: primero el más cercano a la mano; el otro dice sus puntos solo si son mejores
+    // lo que dice cada equipo: primero el más cercano a la mano y después el otro, que dice "son mejores" o "son
+    // buenas"; los puntos de los dos se muestran siempre, para que se vea cuánto tenía cada uno
     const order = [0, 1].sort((a, b) => ((r.seat[a] - h.mano + this.n) % this.n) - ((r.seat[b] - h.mano + this.n) % this.n));
     const said = [{ seat: r.seat[order[0]], pts: r.pts[order[0]] }];
-    said.push({ seat: r.seat[order[1]], pts: r.winner === order[1] ? r.pts[order[1]] : null });
+    said.push({ seat: r.seat[order[1]], pts: r.pts[order[1]], buenas: r.winner !== order[1] });
     h.env.result = { yes: true, winner: r.winner, pts, said, seat: r.seat[r.winner] };
     this.push({ k: 'envido', yes: true, winner: r.winner, pts, said });
     if (this.award(r.winner, pts)) return;
     this.hold(PACE.ENV);
   }
 
+  /**
+   * Irse al mazo entrega lo que vale la mano; si el envido todavía se podía cantar (en la primera, antes de que se
+   * juegue), el otro equipo se lleva además 1 por el envido: 2 si no se cantó nada.
+   */
   mazo(seat) {
     const h = this.h;
+    const env = this.envidoPending(teamOf(seat)) ? 1 : 0;
     h.calls.push({ seat, what: 'mazo' });
     this.push({ k: 'mazo', seat });
-    this.endHand(1 - teamOf(seat), trucoValue(h.truco.level), 'mazo');
+    this.endHand(1 - teamOf(seat), trucoValue(h.truco.level) + env, 'mazo', env);
   }
 
   /** La flor se canta sola la primera vez que el que la tiene debe jugar o contestar en la primera baza. */
@@ -276,7 +303,7 @@ export class Table {
     return this.award(r.winner, r.pts);
   }
 
-  endHand(team, pts, why) {
+  endHand(team, pts, why, env = 0) {
     const h = this.h;
     h.over = true;
     h.pending = null;
@@ -284,14 +311,14 @@ export class Table {
     const show = [];
     const er = h.env.result;
     if (er?.yes) show.push({ seat: er.seat, cards: envidoCards(h.dealt[er.seat]) });
-    h.end = { team, pts, why, show };
+    h.end = { team, pts, why, show, env };
     // cuánto canta cada equipo (lo ve cualquiera en la mesa; la compu lo usa para no comerse los amagues)
     this.stats.hands++;
     for (const tm of [0, 1]) {
       if (h.calls.some((c) => teamOf(c.seat) === tm && c.what === 'truco')) this.stats.truco[tm]++;
       if (h.calls.some((c) => teamOf(c.seat) === tm && ['envido', 'real', 'falta'].includes(c.what))) this.stats.envido[tm]++;
     }
-    this.push({ k: 'hand', team, pts, why, show, truco: h.truco.level });
+    this.push({ k: 'hand', team, pts, why, show, truco: h.truco.level, env });
     if (this.award(team, pts)) return;
     this.mano = (h.mano + 1) % this.n;
     this.handNum++;
@@ -445,6 +472,8 @@ export class Table {
         over: h.over,
         mine: h.cards[i].slice(),
         dealt: h.dealt[i].slice(),
+        // la seña del envido: de a cuatro, mientras se puede cantar, cada uno sabe los puntos de su compañero
+        partnerEnv: this.n === 4 && h.bazas.length === 1 && h.env.state === 'open' ? envido(h.dealt[(i + 2) % 4]) : null,
         bazas: h.bazas.map((b) => ({ lead: b.lead, plays: b.plays.map((x) => ({ ...x })), res: b.res, win: b.win })),
         pending: p ? { kind: p.kind, level: p.level ?? 0, chain: p.chain ? p.chain.slice() : null, by: p.by, to: p.to, resume: !!p.resume } : null,
         truco: { ...h.truco },

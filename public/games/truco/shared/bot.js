@@ -1,8 +1,8 @@
 /**
  * Truco — la compu. Decide solo con lo que ve su asiento (la misma vista que recibe una persona): sus cartas, las
- * jugadas, los cantos y los puntos que se dijeron. Para estimar cuánto gana reparte muchas veces las cartas que no
- * vio entre los demás (respetando lo que se sabe: el envido declarado, quién tiene flor) y juega cada mano hasta el
- * final con una política simple. Los cantos de los rivales pesan: el que canta truco suele tener con qué.
+ * jugadas, los cantos, los puntos que se dijeron y, de a cuatro, la seña del envido del compañero. Para estimar cuánto
+ * gana reparte muchas veces las cartas que no vio entre los demás (respetando lo que se sabe: el envido declarado,
+ * quién tiene flor) y juega cada mano hasta el final con una política simple. Los cantos de los rivales pesan: el que canta truco suele tener con qué.
  *
  * Niveles: 1 fácil (pocas cuentas, se equivoca, casi no miente), 2 normal y 3 difícil (más cuentas, lee los cantos y
  * miente mejor).
@@ -39,6 +39,8 @@ function know(v) {
         cap = Math.max(cap, s.pts);
       }
   }
+  // de a cuatro, la seña del compañero: sus puntos de envido
+  if (n === 4 && typeof h.partnerEnv === 'number' && exact[(v.me + 2) % 4] === undefined) exact[(v.me + 2) % 4] = h.partnerEnv;
   // quién cantó qué en esta mano (para leer a los rivales)
   const truco = new Set(), env = new Set();
   for (const c of h.calls || []) {
@@ -235,7 +237,7 @@ const noisy = (p, P, rng) => Math.max(0, Math.min(1, p + (rng() * 2 - 1) * P.noi
 
 /** ¿Canto envido (y cuál)? */
 function envidoCall(v, K, rng, P, kinds) {
-  const mine = envido(v.hand.dealt);
+  const mine = Math.max(envido(v.hand.dealt), v.hand.partnerEnv ?? 0);
   const pe = noisy(envidoOdds(v, K, rng, P), P, rng);
   const my = v.scores[K.team], op = v.scores[1 - K.team];
   const falta = faltaValue(v.scores, v.target);
