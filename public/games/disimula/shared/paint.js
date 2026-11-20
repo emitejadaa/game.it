@@ -141,7 +141,7 @@ export class Paint {
     if (startPart < 0) return true; // fuera del cuerpo: no hace nada (pero no es inválido)
     const part = PARTS[startPart];
     const [rx, ry, rw, rh] = part.rect;
-    const wrap = part.shape !== 'box';
+    const wrap = true; // todas las partes son superficies de revolución (los pies también): la u envuelve y no hay costura atrás
     const stamp = (cx, cy) => {
       const r = Math.ceil(radius);
       for (let dy = -r; dy <= r; dy++) {

@@ -1,5 +1,13 @@
 /* Disimulá — estética arcade moderna. Deja libres los 56 px de arriba (barra del portal). */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* el viewport usa viewport-fit=cover: todo respeta las zonas seguras (notch, barra de gestos) y deja libre la barra del portal */
+:root {
+  --top: calc(60px + env(safe-area-inset-top, 0px));
+  --padl: max(12px, env(safe-area-inset-left, 0px));
+  --padr: max(12px, env(safe-area-inset-right, 0px));
+  --padb: max(12px, env(safe-area-inset-bottom, 0px));
+  --panel-w: 212px;
+}
 [hidden] { display: none !important; }
 html, body { height: 100%; overflow: hidden; }
 body {
@@ -11,13 +19,13 @@ body {
 }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-input { font: inherit; color: inherit; }
+input { font: inherit; color: inherit; -webkit-user-select: text; user-select: text; }
 
 /* ---------- pantallas ---------- */
 #screens { position: fixed; inset: 0; pointer-events: none; z-index: 20; }
 .screen {
   position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
-  padding: 64px 12px 16px; overflow-y: auto; pointer-events: auto;
+  padding: calc(var(--top) + 4px) var(--padr) var(--padb) var(--padl); overflow-y: auto; pointer-events: auto;
 }
 .screen.on { display: flex; }
 .card {
@@ -32,7 +40,6 @@ input { font: inherit; color: inherit; }
   max-height: 100%;
   overflow-y: auto;
 }
-html[data-gi-motion="reduced"] .card { animation: none; }
 .card.wide { width: min(640px, 100%); }
 @keyframes cardIn { from { transform: translateY(26px) scale(.96); opacity: 0; } }
 h1 { font-size: 44px; font-weight: 900; letter-spacing: .04em; }
@@ -133,15 +140,17 @@ input:focus { border-color: var(--gi-accent, #0ff); }
 #hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 #hud > * { pointer-events: auto; }
 #phase-timer {
-  position: absolute; top: 62px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: var(--top); left: 50%; transform: translateX(-50%); max-width: 60vw;
   display: grid; justify-items: center; text-align: center; pointer-events: none;
 }
 #phase-timer b { font-size: 34px; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,.7); font-variant-numeric: tabular-nums; }
 #phase-timer.low b { color: #ff5a5f; animation: pulse 1s infinite; }
-#phase-timer span { font-size: 12px; color: var(--gi-mute, #bbb); text-shadow: 0 1px 6px rgba(0,0,0,.8); }
+#phase-timer span { font-size: 12px; color: color-mix(in srgb, var(--gi-fg, #fff) 85%, transparent); text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.7); }
 @keyframes pulse { 50% { transform: scale(1.12); } }
-#round-chip { position: absolute; top: 62px; left: 12px; font-size: 12px; color: var(--gi-mute); background: rgba(0,0,0,.4); padding: 4px 10px; border-radius: 999px; pointer-events: none; }
-#team-list { position: absolute; top: 92px; left: 12px; display: grid; gap: 4px; pointer-events: none; max-width: 180px; }
+#round-chip { position: absolute; top: var(--top); left: var(--padl); font-size: 12px; color: var(--gi-mute); background: rgba(0,0,0,.4); padding: 4px 10px; border-radius: 999px; pointer-events: none; }
+#team-list { position: absolute; top: calc(var(--top) + 30px); left: var(--padl); display: grid; gap: 4px; pointer-events: none; max-width: 180px; }
+/* con el panel de pintura a la izquierda, el chip y la lista de equipos se corren para no quedar debajo */
+body.has-panel #round-chip, body.has-panel #team-list { left: calc(var(--padl) + var(--panel-w) + 8px); }
 #team-list .tp { display: flex; align-items: center; gap: 6px; font-size: 12px; background: rgba(0,0,0,.42); border-radius: 999px; padding: 3px 9px 3px 4px; width: fit-content; }
 #team-list .tp i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 #team-list .tp.out { opacity: .45; text-decoration: line-through; }
@@ -153,15 +162,15 @@ input:focus { border-color: var(--gi-accent, #0ff); }
 #crosshair i:nth-child(3) { top: 10px; left: 0; height: 2px; width: 6px; }
 #crosshair i:nth-child(4) { top: 10px; right: 0; height: 2px; width: 6px; }
 #crosshair.hot i { background: var(--gi-amber, #ffd166); }
-#toasts { position: absolute; top: 112px; left: 50%; transform: translateX(-50%); display: grid; gap: 6px; justify-items: center; pointer-events: none; }
+#toasts { position: absolute; top: calc(var(--top) + 52px); left: 50%; transform: translateX(-50%); display: grid; gap: 6px; justify-items: center; pointer-events: none; max-width: calc(100% - var(--padl) - var(--padr)); }
 .toast {
   background: rgba(0,0,0,.65); border: 1px solid var(--gi-line, rgba(255,255,255,.2));
-  padding: 7px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 700;
+  padding: 7px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 700; text-align: center;
   animation: toastIn .3s cubic-bezier(.2,1.6,.4,1);
 }
 @keyframes toastIn { from { transform: translateY(-14px) scale(.9); opacity: 0; } }
 #big-msg {
-  position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%);
+  position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); width: max-content; max-width: calc(100% - 24px);
   font-size: clamp(26px, 6vw, 52px); font-weight: 900; letter-spacing: .05em; text-align: center;
   text-shadow: 0 4px 0 rgba(0,0,0,.45), 0 10px 36px rgba(0,0,0,.6); pointer-events: none;
   animation: bigIn .5s cubic-bezier(.2, 1.5, .4, 1);
@@ -170,30 +179,36 @@ input:focus { border-color: var(--gi-accent, #0ff); }
 #stun-overlay { position: absolute; inset: 0; backdrop-filter: blur(7px); background: rgba(90, 70, 160, .18); pointer-events: none; animation: stunIn .2s; }
 html[data-gi-motion="reduced"] #stun-overlay { backdrop-filter: none; background: rgba(40, 30, 80, .55); }
 @keyframes stunIn { from { opacity: 0; } }
+/* columna de arriba a la derecha: pausa, y debajo el silbido (escondidos) o el camuflaje (preparación). Se apilan, no se pisan. */
+#hud-tr { position: absolute; top: var(--top); right: var(--padr); display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
+#hud-tr > * { pointer-events: auto; }
+#b-pause { font-size: 16px; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.5); border: 1px solid var(--gi-line, rgba(255,255,255,.15)); }
 #whistle-box {
-  position: absolute; right: 12px; top: 64px; display: grid; justify-items: center; gap: 4px;
+  display: grid; justify-items: center; gap: 4px;
   background: rgba(0,0,0,.5); padding: 10px 14px; border-radius: 16px; border: 1px solid var(--gi-line, rgba(255,255,255,.14));
 }
 #whistle-box small { font-size: 10.5px; color: var(--gi-mute); }
 #whistle-box b { font-size: 24px; font-variant-numeric: tabular-nums; }
 #camo-box {
-  position: absolute; right: 12px; top: 64px; display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px;
   background: rgba(0,0,0,.5); padding: 9px 14px; border-radius: 999px; border: 1px solid var(--gi-line, rgba(255,255,255,.14));
 }
 #camo-box small { font-size: 11px; color: var(--gi-mute); }
 .meter { width: 110px; height: 10px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; }
 .meter i { display: block; height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg, #ff5a5f, #ffd166, #6ee7a0); transition: width .4s; }
 #camo-box b { font-size: 16px; min-width: 30px; text-align: right; }
-#seek-actions { position: absolute; right: 12px; bottom: 16px; display: grid; gap: 10px; }
+#seek-actions { position: absolute; right: var(--padr); bottom: var(--padb); display: grid; gap: 10px; }
 .act {
   width: 54px; height: 54px; border-radius: 50%; font-size: 22px;
   background: rgba(0,0,0,.55); border: 1px solid var(--gi-line, rgba(255,255,255,.2));
 }
 .act:active { transform: scale(.9); }
-#prep-actions { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 8px; z-index: 12; }
+/* los botones de preparación se centran en el espacio libre (a la derecha del panel de pintura) */
+#prep-actions { position: absolute; left: 50%; bottom: var(--padb); transform: translateX(-50%); width: max-content; max-width: calc(100% - var(--padl) - var(--padr)); display: flex; gap: 8px; z-index: 12; }
+body.has-panel #prep-actions { left: calc(50% + var(--panel-w) / 2); }
 #prep-actions .pill.on { background: var(--gi-accent, #0ff); color: #06060a; }
 #spect-bar {
-  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  position: absolute; left: 50%; bottom: var(--padb); transform: translateX(-50%);
   display: flex; gap: 8px; align-items: center; background: rgba(0,0,0,.5); padding: 8px 12px; border-radius: 999px;
 }
 #spect-bar #sp-name { font-weight: 800; font-size: 14px; min-width: 90px; text-align: center; }
@@ -201,15 +216,14 @@ html[data-gi-motion="reduced"] #stun-overlay { backdrop-filter: none; background
 #react-bar button { font-size: 18px; padding: 2px 4px; border-radius: 8px; }
 #react-bar button:active { transform: scale(1.3); }
 #joystick {
-  position: absolute; left: 18px; bottom: 18px; width: 110px; height: 110px; border-radius: 50%;
+  position: absolute; left: var(--padl); bottom: var(--padb); width: 110px; height: 110px; border-radius: 50%;
   background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18);
 }
 #joystick i { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.3); transform: translate(-50%, -50%); }
-#b-pause { position: absolute; right: 12px; bottom: 86px; font-size: 16px; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.5); border: 1px solid var(--gi-line, rgba(255,255,255,.15)); z-index: 11; }
 
 /* ---------- panel de pintura ---------- */
 #paint-ui {
-  position: fixed; z-index: 11; left: 10px; top: 64px; bottom: 12px; width: 212px;
+  position: fixed; z-index: 11; left: var(--padl); top: calc(var(--top) + 4px); bottom: var(--padb); width: var(--panel-w);
   background: color-mix(in srgb, var(--gi-bg, #0a0a10) 78%, #000);
   border: 1px solid var(--gi-line, rgba(255,255,255,.14)); border-radius: 16px;
   padding: 10px; overflow-y: auto; display: grid; gap: 9px; align-content: start;
@@ -248,9 +262,62 @@ html[data-gi-motion="reduced"] #stun-overlay { backdrop-filter: none; background
 #region-pick button { font-size: 10px; padding: 4px 7px; border-radius: 8px; background: color-mix(in srgb, var(--gi-fg,#fff) 7%, transparent); }
 #region-pick button.on { background: var(--gi-amber, #fc6); color: #111; }
 
+/* ---------- adaptación a pantallas chicas ---------- */
 @media (max-width: 760px) {
-  #paint-ui { width: 174px; top: 60px; font-size: 13px; }
+  :root { --panel-w: 174px; }
+  #paint-ui { font-size: 13px; }
   #phase-timer b { font-size: 26px; }
   #team-list { display: none; }
   .card { padding: 16px 14px; }
+}
+/* celular acostado: poca altura, todo más compacto */
+@media (max-height: 500px) {
+  h1 { font-size: 34px; }
+  h2 { font-size: 19px; margin-bottom: 6px; }
+  .tag { margin: 4px 0 12px; }
+  .card { padding: 14px 16px; border-radius: 16px; }
+  .big { padding: 10px 16px; font-size: 16px; }
+  .mid { padding: 9px 12px; }
+  .stack { gap: 8px; }
+  #phase-timer b { font-size: 24px; }
+  #phase-timer span { font-size: 11px; }
+  #big-msg { top: 42%; font-size: clamp(22px, 5.2vw, 38px); }
+  .act { width: 48px; height: 48px; }
+}
+@media (max-width: 640px) {
+  #camo-box small { display: none; }
+  .meter { width: 84px; }
+}
+/* celular parado (o ventana angosta): el panel de pintura pasa a ser una hoja abajo, sobre los botones de preparación */
+@media (max-width: 600px) and (orientation: portrait) {
+  :root { --sheet-h: min(42vh, 330px); }
+  #paint-ui { left: var(--padl); right: var(--padr); top: auto; width: auto; height: var(--sheet-h); bottom: calc(var(--padb) + 44px); }
+  body.has-panel #round-chip, body.has-panel #team-list { left: var(--padl); }
+  body.has-panel #prep-actions { left: 50%; }
+  body.has-panel #ph-label { display: none; }
+  #prep-actions { gap: 6px; }
+  #prep-actions .pill { padding: 6px 10px; font-size: 11.5px; }
+  #round-chip, #hud-tr { top: calc(var(--top) + 80px); }
+  #toasts { top: calc(var(--top) + 130px); }
+  body.has-prep #joystick { bottom: calc(var(--padb) + 48px); }
+  body.has-spect #joystick { bottom: calc(var(--padb) + 96px); }
+  #spect-bar { flex-wrap: wrap; justify-content: center; width: calc(100% - var(--padl) - var(--padr)); border-radius: 18px; }
+  #react-bar { width: 100%; justify-content: center; }
+}
+
+/* ---------- cartel "girá el celular" (solo celular parado; "Jugar igual" lo cierra) ---------- */
+#rotate { display: none; position: fixed; inset: 0; z-index: 60; background: var(--gi-bg, #0a0a10); color: var(--gi-fg, #eaeaf0); place-items: center; text-align: center; padding: 24px; }
+#rotate > div { display: grid; gap: 14px; justify-items: center; }
+#rotate p { font-size: 20px; font-weight: 700; }
+#rotate .mid { flex: none; padding: 11px 22px; }
+#rotate svg { animation: tilt 2.4s ease-in-out infinite; }
+@keyframes tilt { 0%, 20% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+@media (orientation: portrait) and (pointer: coarse) {
+  body:not(.igual) #rotate { display: grid; }
+}
+
+/* "reducir movimiento" (preferencia del portal): sin animaciones ni transiciones */
+html[data-gi-motion="reduced"] *, html[data-gi-motion="reduced"] *::before, html[data-gi-motion="reduced"] *::after {
+  animation: none !important;
+  transition: none !important;
 }

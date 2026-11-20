@@ -155,6 +155,9 @@ export const TXT = {
   paused: { es: 'PAUSA', en: 'PAUSED' },
   resume: { es: 'SEGUIR', en: 'RESUME' },
   quit: { es: 'SALIR AL MENÚ', en: 'QUIT TO MENU' },
+  exitGame: { es: 'SALIR DEL JUEGO', en: 'EXIT GAME' },
+  rotatePhone: { es: 'Girá el celular para jugar', en: 'Rotate your phone to play' },
+  playAnyway: { es: 'Jugar igual', en: 'Play anyway' },
   pausedOnline: { es: 'La partida sigue online: apurate a volver', en: 'The match keeps going online: hurry back' },
   // ayuda
   helpBody: {
@@ -210,6 +213,7 @@ export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => `&#${c.char
 export function applyTexts(root = document) {
   root.querySelectorAll('[data-t]').forEach((n) => (n.textContent = t(n.dataset.t)));
   root.querySelectorAll('[data-tph]').forEach((n) => (n.placeholder = t(n.dataset.tph)));
+  root.querySelectorAll('[data-tl]').forEach((n) => n.setAttribute('aria-label', t(n.dataset.tl)));
 }
 
 export const fmtTime = (ms) => {

@@ -15,7 +15,7 @@ import { Match } from './shared/logic.js';
 import { Paint, deserializePaint } from './shared/paint.js';
 import { walk } from './shared/geom.js';
 import { getMap, MAP_IDS, raycastColor } from './shared/maps.js';
-import { PARTS as BODY_PARTS } from './shared/body.js';
+import { PARTS as BODY_PARTS, atlasOwner, ATLAS } from './shared/body.js';
 import { camoScore } from './shared/camo.js';
 import { DEFAULTS, WHISTLES, SPEED, EYE, REACTIONS, autoSeekers } from './shared/rules.js';
 import { BOT_NAMES, BOT_COLORS } from './shared/bots.js';
@@ -577,14 +577,20 @@ class GameClient {
     const practice = this.mode === 'practice';
 
     const paintOpen = (prep || practice) && hiding;
-    $('paint-ui').hidden = !paintOpen;
+    // en celular el panel de pintura ocupa media pantalla y taparía el joystick: en "Mover" se esconde y aparece el joystick
+    const panelShown = paintOpen && !(input.touch && !this.paintMode);
+    $('paint-ui').hidden = !panelShown;
     HUD.prepActs.hidden = !paintOpen;
     HUD.camo.hidden = !(practice || (prep && hiding));
     HUD.whistle.hidden = !(seek && hiding && !this.you.caught);
     HUD.seekActs.hidden = !(seek && seeking);
     HUD.cross.hidden = !(seek && seeking);
     HUD.spect.hidden = !spect || this.phase === 'reveal' || this.phase === 'over';
-    HUD.joy.hidden = !input.touch || !(paintOpen || (seek && seeking) || (spect && this.spectFree));
+    HUD.joy.hidden = !input.touch || !((paintOpen && !panelShown) || (seek && seeking) || (spect && this.spectFree));
+    document.body.classList.toggle('has-panel', panelShown);
+    document.body.classList.toggle('has-prep', paintOpen);
+    document.body.classList.toggle('has-spect', !HUD.spect.hidden);
+    syncInset();
 
     if (seek && seeking) {
       input.mode = 'fps';
@@ -831,7 +837,7 @@ class GameClient {
     const e = m.gallery[idx];
     if (!e) return;
     const cam = world.camera;
-    const ang = (nowPerf / 2600) % (Math.PI * 2);
+    const ang = G.prefs.reducedMotion ? 0.8 : (nowPerf / 2600) % (Math.PI * 2); // con "reducir movimiento" la cámara no gira
     const r = 2.6;
     cam.position.set(e.pos[0] + Math.sin(ang) * r, e.pos[1] + 1.75, e.pos[2] + Math.cos(ang) * r);
     cam.lookAt(e.pos[0], e.pos[1] + 0.8, e.pos[2]);
@@ -874,12 +880,23 @@ class GameClient {
     $('paint-ui').hidden = true;
     HUD.stun.hidden = true;
     HUD.big.hidden = true;
+    document.body.classList.remove('has-panel', 'has-prep', 'has-spect');
+    syncInset();
     music(null);
     input.mode = 'none';
     input.unlock();
   }
 }
 const r2 = (v) => Math.round(v * 100) / 100;
+
+/** Corre la imagen 3D al centro del espacio libre: con el panel de pintura a un costado (o abajo, en vertical) el personaje no queda tapado. */
+function syncInset() {
+  const el = $('paint-ui');
+  if (el.hidden) return world.setInset(0, 0);
+  const r = el.getBoundingClientRect();
+  if (r.width > innerWidth * 0.6) world.setInset(0, innerHeight - r.top); // hoja de abajo (vertical)
+  else world.setInset(r.right, 0); // panel a la izquierda
+}
 
 // ---------------------------------------------------------------- pintura propia
 const ownPaint = new Paint();
@@ -896,9 +913,10 @@ const paintUI = new PaintUI($('paint-ui'), {
     const hits = ray.intersectObjects(me.avatar.meshes, false);
     if (!hits.length || !hits[0].uv) return null;
     const uv = hits[0].uv;
-    const tx = Math.min(127, Math.max(0, Math.floor(uv.x * 128)));
-    const ty = Math.min(127, Math.max(0, Math.floor((1 - uv.y) * 128)));
-    const part = me.avatar.meshes.indexOf(hits[0].object);
+    const tx = Math.min(ATLAS - 1, Math.max(0, Math.floor(uv.x * ATLAS)));
+    const ty = Math.min(ATLAS - 1, Math.max(0, Math.floor((1 - uv.y) * ATLAS)));
+    // el cuerpo es una sola malla: la parte sale del dueño del texel en el atlas
+    const part = atlasOwner()[ty * ATLAS + tx];
     const rect = part >= 0 ? mePartRect(part) : null;
     if (!rect) return null;
     return { part, tx, ty, u: (tx - rect[0] + 0.5) / rect[2], v: 1 - (ty - rect[1] + 0.5) / rect[3] };
@@ -1099,9 +1117,26 @@ $('p-resume').onclick = () => {
   client?.applyMode();
 };
 $('p-quit').onclick = () => quitToMenu();
+// regla de la plataforma: el botón de salir del menú de pausa del juego vuelve al menú del portal
+$('p-exit').onclick = () => G.exit();
 $('b-pause').onclick = () => openPause();
 G.onPause(() => client && client.mode !== 'online' && session?.pause?.());
-G.onResume(() => client && client.mode !== 'online' && !anyScreen() && session?.resume?.());
+G.onResume(() => client && client.mode !== 'online' && !anyScreen() && !rotating() && session?.resume?.());
+
+// celular parado: el cartel "Girá el celular" tapa el juego (CSS); una partida local se frena mientras está a la vista.
+// Online no se puede frenar (la partida sigue en el servidor), igual que con la pausa del portal.
+const portraitTouch = matchMedia('(orientation: portrait) and (pointer: coarse)');
+const rotating = () => portraitTouch.matches && !document.body.classList.contains('igual');
+function syncRotate() {
+  if (!client || client.mode === 'online' || !session?.pause) return;
+  if (rotating()) session.pause();
+  else if (!anyScreen() && !G.paused) session.resume();
+}
+portraitTouch.addEventListener('change', syncRotate);
+$('rotate-ok').onclick = () => {
+  document.body.classList.add('igual');
+  syncRotate();
+};
 
 function quitToMenu() {
   if (client) {
@@ -1518,7 +1553,7 @@ function frame(now) {
   if (client) {
     client.frame(dt, now);
   } else if (menuOn) {
-    menuT += dt;
+    if (!G.prefs.reducedMotion) menuT += dt;
     const cam = world.camera;
     cam.position.set(-6.2 + Math.sin(menuT * 0.12) * 4.2, 1.7 + Math.sin(menuT * 0.07) * 0.3, 3.6 + Math.cos(menuT * 0.1) * 1.6);
     cam.lookAt(-5.6, 1.1, 0.2);
@@ -1536,7 +1571,10 @@ G.onPrefs(() => {
   $('home-title').textContent = t('title');
   if (!client && anyScreen()) applyTexts();
 }, true);
-addEventListener('resize', () => world.resize());
+addEventListener('resize', () => {
+  world.resize();
+  syncInset();
+});
 addEventListener('keydown', (e) => {
   if (e.code === 'Tab' && client) e.preventDefault();
 });
